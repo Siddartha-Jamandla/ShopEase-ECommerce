@@ -1,0 +1,158 @@
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+    background: var(--dark);
+
+    color: #d1d5db;
+}
+
+
+/* =====================================================
+   FOOTER GRID
+===================================================== */
+
+.footer-grid {
+    display: grid;
+
+    grid-template-columns:
+        2fr
+        1fr
+        1fr
+        1fr;
+
+    gap: 50px;
+
+    padding-top: 70px;
+    padding-bottom: 60px;
+}
+
+
+/* =====================================================
+   FOOTER BRAND
+===================================================== */
+
+.footer-logo {
+    color: var(--white);
+
+    margin-bottom: 20px;
+}
+
+.footer-brand > p {
+    max-width: 300px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+
+    line-height: 1.8;
+
+    margin-bottom: 22px;
+}
+
+
+/* =====================================================
+   SOCIAL LINKS
+===================================================== */
+
+.social-links {
+    display: flex;
+
+    gap: 9px;
+}
+
+.social-links a {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    background: #1f2937;
+
+    color: #d1d5db;
+
+    border-radius: 50%;
+
+    font-size: 13px;
+
+    transition: 0.3s;
+}
+
+.social-links a:hover {
+    background: var(--primary);
+
+    color: var(--white);
+}
+
+
+/* =====================================================
+   FOOTER COLUMNS
+===================================================== */
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+
+    gap: 11px;
+}
+
+.footer-column h3 {
+    color: var(--white);
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+}
+
+.footer-column a {
+    color: #9ca3af;
+
+    font-size: 12px;
+
+    transition: 0.3s;
+}
+
+.footer-column a:hover {
+    color: var(--primary);
+}
+
+
+/* =====================================================
+   FOOTER BOTTOM
+===================================================== */
+
+.footer-bottom {
+    border-top: 1px solid #374151;
+}
+
+.footer-bottom-content {
+    min-height: 65px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.footer-bottom p {
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+.payment-icons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #9ca3af;
+
+    font-size: 24px;
+}

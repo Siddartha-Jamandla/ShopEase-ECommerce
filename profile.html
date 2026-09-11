@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Profile | ShopEase</title>
+
+
+    <!-- Google Font -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- Existing CSS -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/footer.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+
+    <style>
+
+        /* =========================================
+           PROFILE PAGE
+        ========================================= */
+
+        .profile-page {
+
+            min-height: 70vh;
+
+            padding: 50px 0 80px;
+
+            background: #f8fafc;
+
+        }
+
+
+        .profile-header {
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .profile-header h1 {
+
+            margin: 0 0 8px;
+
+            color: #0f172a;
+
+            font-size: 32px;
+
+        }
+
+
+        .profile-header p {
+
+            margin: 0;
+
+            color: #64748b;
+
+        }
+
+
+        /* =========================================
+           PROFILE LAYOUT
+        ========================================= */
+
+        .profile-layout {
+
+            display: grid;
+
+            grid-template-columns: 280px 1fr;
+
+            gap: 25px;
+
+            align-items: start;
+
+        }
+
+
+        /* =========================================
+           SIDEBAR
+        ========================================= */
+
+        .profile-sidebar {
+
+            background: #ffffff;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+        }
+
+
+        .profile-user {
+
+            padding: 25px 20px;
+
+            text-align: center;
+
+            border-bottom: 1px solid #e2e8f0;
+
+        }
+
+
+        .profile-avatar {
+
+            width: 82px;
+
+            height: 82px;
+
+            margin: 0 auto 15px;
+
+            border-radius: 50%;
+
+            background: #fff7ed;
+
+            color: #f59e0b;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 32px;
+
+            font-weight: 800;
+
+        }
+
+
+        .profile-user h2 {
+
+            margin: 0 0 5px;
+
+            color: #0f172a;
+
+            font-size: 18px;
+
+        }
+
+
+        .profile-user p {
+
+            margin: 0;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+            word-break: break-word;
+
+        }
+
+
+        .profile-nav {
+
+            padding: 10px;
+
+        }
+
+
+        .profile-nav a,
+        .profile-nav button {
+
+            width: 100%;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 13px 14px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: transparent;
+
+            color: #475569;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            text-decoration: none;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+
+        }
+
+
+        .profile-nav a:hover,
+        .profile-nav a.active {
+
+            background: #fff7ed;
+
+            color: #d97706;
+
+        }
+
+
+        .profile-nav button:hover {
+
+            background: #fef2f2;
+
+            color: #dc2626;
+
+        }
+
+
+        .profile-nav i {
+
+            width: 20px;
+
+            text-align: center;
+
+        }
+
+
+        /* =========================================
+           PROFILE CONTENT
+        ========================================= */
+
+        .profile-content {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 22px;
+
+        }
+
+
+        .profile-card {
+
+            background: #ffffff;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 14px;
+
+            overflow: hidden;
+
+        }
+
+
+        .profile-card-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 20px 24px;
+
+            border-bottom: 1px solid #e2e8f0;
+
+        }
+
+
+        .profile-card-header h2 {
+
+            margin: 0;
+
+            color: #0f172a;
+
+            font-size: 18px;
+
+        }
+
+
+        .profile-card-header p {
+
+            margin: 5px 0 0;
+
+            color: #64748b;
+
+            font-size: 13px;
+
+        }
+
+
+        .profile-card-body {
+
+            padding: 24px;
+
+        }
+
+
+        /* =========================================
+           FORM
+        ========================================= */
+
+        .profile-form {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 20px;
+
+        }
+
+
+        .profile-form-group {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+
+        }
+
+
+        .profile-form-group.full {
+
+            grid-column: 1 / -1;
+
+        }
+
+
+        .profile-form-group label {
+
+            color: #334155;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+        }
+
+
+        .profile-form-group input {
+
+            width: 100%;
+
+            height: 46px;
+
+            padding: 0 13px;
+
+            border: 1px solid #cbd5e1;
+
+            border-radius: 8px;
+
+            background: #ffffff;
+
+            color: #0f172a;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            outline: none;
+
+            transition: 0.2s ease;
+
+            box-sizing: border-box;
+
+        }
+
+
+        .profile-form-group input:focus {
+
+            border-color: #f59e0b;
+
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+
+        }
+
+
+        .profile-form-group input:disabled {
+
+            background: #f8fafc;
+
+            color: #64748b;
+
+            cursor: not-allowed;
+
+        }
+
+
+        .profile-help {
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+        }
+
+
+        .profile-save-row {
+
+            margin-top: 20px;
+
+            display: flex;
+
+            justify-content: flex-end;
+
+        }
+
+
+        /* =========================================
+           QUICK LINKS
+        ========================================= */
+
+        .quick-links {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 15px;
+
+        }
+
+
+        .quick-link {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 18px;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 10px;
+
+            color: inherit;
+
+            text-decoration: none;
+
+            transition: 0.2s ease;
+
+        }
+
+
+        .quick-link:hover {
+
+            border-color: #f59e0b;
+
+            transform: translateY(-2px);
+
+        }
+
+
+        .quick-link-icon {
+
+            width: 45px;
+
+            height: 45px;
+
+            flex-shrink: 0;
+
+            border-radius: 10px;
+
+            background: #fff7ed;
+
+            color: #f59e0b;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 18px;
+
+        }
+
+
+        .quick-link h3 {
+
+            margin: 0 0 4px;
+
+            color: #0f172a;
+
+            font-size: 14px;
+
+        }
+
+
+        .quick-link p {
+
+            margin: 0;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+        }
+
+
+        /* =========================================
+           NOT LOGGED IN
+        ========================================= */
+
+        .profile-login-message {
+
+            display: none;
+
+            text-align: center;
+
+            background: #ffffff;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 14px;
+
+            padding: 70px 20px;
+
+        }
+
+
+        .profile-login-icon {
+
+            width: 80px;
+
+            height: 80px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            background: #fff7ed;
+
+            color: #f59e0b;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 32px;
+
+        }
+
+
+        .profile-login-message h2 {
+
+            margin: 0 0 10px;
+
+            color: #0f172a;
+
+            font-size: 24px;
+
+        }
+
+
+        .profile-login-message p {
+
+            max-width: 500px;
+
+            margin: 0 auto 25px;
+
+            color: #64748b;
+
+            line-height: 1.7;
+
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 900px) {
+
+            .profile-layout {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .profile-sidebar {
+
+                display: grid;
+
+                grid-template-columns: 220px 1fr;
+
+            }
+
+
+            .profile-user {
+
+                border-bottom: none;
+
+                border-right: 1px solid #e2e8f0;
+
+            }
+
+        }
+
+
+        @media (max-width: 650px) {
+
+            .profile-page {
+
+                padding: 35px 0 60px;
+
+            }
+
+
+            .profile-header h1 {
+
+                font-size: 27px;
+
+            }
+
+
+            .profile-sidebar {
+
+                display: block;
+
+            }
+
+
+            .profile-user {
+
+                border-right: none;
+
+                border-bottom: 1px solid #e2e8f0;
+
+            }
+
+
+            .profile-form {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .profile-form-group.full {
+
+                grid-column: auto;
+
+            }
+
+
+            .quick-links {
+
+                grid-template-columns: 1fr;
+
+            }
+
+
+            .profile-card-header,
+            .profile-card-body {
+
+                padding: 18px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         TOP BAR
+    ========================================== -->
+
+    <div class="top-bar">
+
+        <div class="container top-bar-content">
+
+            <span>
+
+                <i class="fa-solid fa-truck"></i>
+
+                Free shipping on orders above ₹999
+
+            </span>
+
+
+            <span>
+
+                <i class="fa-solid fa-phone"></i>
+
+                Support: +91 98765 43210
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         NAVBAR
+    ========================================== -->
+
+    <header class="navbar">
+
+        <div class="container navbar-container">
+
+
+            <a
+                href="index.html"
+                class="logo"
+            >
+
+                <span class="logo-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </span>
+
+
+                <span>
+
+                    Shop<span class="logo-highlight">Ease</span>
+
+                </span>
+
+            </a>
+
+
+            <nav
+                class="nav-menu"
+                id="navMenu"
+            >
+
+                <a
+                    href="index.html"
+                    class="nav-link"
+                >
+                    Home
+                </a>
+
+
+                <a
+                    href="shop.html"
+                    class="nav-link"
+                >
+                    Shop
+                </a>
+
+
+                <a
+                    href="categories.html"
+                    class="nav-link"
+                >
+                    Categories
+                </a>
+
+
+                <a
+                    href="about.html"
+                    class="nav-link"
+                >
+                    About
+                </a>
+
+
+                <a
+                    href="contact.html"
+                    class="nav-link"
+                >
+                    Contact
+                </a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+
+                <button
+                    type="button"
+                    class="nav-action"
+                    id="searchButton"
+                    aria-label="Search"
+                >
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                </button>
+
+
+                <a
+                    href="wishlist.html"
+                    class="nav-action"
+                    aria-label="Wishlist"
+                >
+
+                    <i class="fa-regular fa-heart"></i>
+
+                    <span
+                        class="nav-badge"
+                        id="wishlistBadge"
+                    >
+                        0
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="cart.html"
+                    class="nav-action"
+                    aria-label="Cart"
+                >
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <span
+                        class="nav-badge"
+                        id="cartBadge"
+                    >
+                        0
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="profile.html"
+                    class="nav-action"
+                    aria-label="Account"
+                >
+
+                    <i class="fa-regular fa-user"></i>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                    aria-label="Open menu"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================
+         SEARCH OVERLAY
+    ========================================== -->
+
+    <div
+        class="search-overlay"
+        id="searchOverlay"
+    >
+
+        <div class="search-box">
+
+            <button
+                type="button"
+                class="search-close"
+                id="searchClose"
+                aria-label="Close search"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+            <form id="searchForm">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search products..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="submit"
+                    class="search-submit"
+                >
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         PROFILE PAGE
+    ========================================== -->
+
+    <main class="profile-page">
+
+        <div class="container">
+
+
+            <!-- Page Header -->
+
+            <div class="profile-header">
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    Manage your account information and preferences.
+                </p>
+
+            </div>
+
+
+            <!-- Login Required -->
+
+            <div
+                class="profile-login-message"
+                id="profileLoginMessage"
+            >
+
+                <div class="profile-login-icon">
+
+                    <i class="fa-solid fa-user-lock"></i>
+
+                </div>
+
+
+                <h2>
+                    Login Required
+                </h2>
+
+
+                <p>
+                    Please login to view and manage your profile.
+                </p>
+
+
+                <a
+                    href="login.html"
+                    class="btn btn-primary"
+                >
+
+                    <i class="fa-solid fa-right-to-bracket"></i>
+
+                    Login
+
+                </a>
+
+            </div>
+
+
+            <!-- Profile Layout -->
+
+            <div
+                class="profile-layout"
+                id="profileLayout"
+            >
+
+
+                <!-- Sidebar -->
+
+                <aside class="profile-sidebar">
+
+
+                    <div class="profile-user">
+
+                        <div
+                            class="profile-avatar"
+                            id="profileAvatar"
+                        >
+                            U
+                        </div>
+
+
+                        <h2 id="profileName">
+                            User
+                        </h2>
+
+
+                        <p id="profileEmail">
+                            user@example.com
+                        </p>
+
+                    </div>
+
+
+                    <nav class="profile-nav">
+
+
+                        <a
+                            href="profile.html"
+                            class="active"
+                        >
+
+                            <i class="fa-regular fa-user"></i>
+
+                            My Profile
+
+                        </a>
+
+
+                        <a href="my-orders.html">
+
+                            <i class="fa-solid fa-box"></i>
+
+                            My Orders
+
+                        </a>
+
+
+                        <a href="wishlist.html">
+
+                            <i class="fa-regular fa-heart"></i>
+
+                            Wishlist
+
+                        </a>
+
+
+                        <a href="cart.html">
+
+                            <i class="fa-solid fa-cart-shopping"></i>
+
+                            My Cart
+
+                        </a>
+
+
+                        <button
+                            type="button"
+                            id="logoutButton"
+                        >
+
+                            <i class="fa-solid fa-right-from-bracket"></i>
+
+                            Logout
+
+                        </button>
+
+                    </nav>
+
+                </aside>
+
+
+                <!-- Content -->
+
+                <section class="profile-content">
+
+
+                    <!-- Personal Information -->
+
+                    <div class="profile-card">
+
+                        <div class="profile-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Personal Information
+                                </h2>
+
+                                <p>
+                                    Update your basic account information.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="profile-card-body">
+
+                            <form
+                                class="profile-form"
+                                id="profileForm"
+                            >
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileFirstName">
+                                        First Name
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileFirstName"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileLastName">
+                                        Last Name
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileLastName"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileEmailInput">
+                                        Email Address
+                                    </label>
+
+                                    <input
+                                        type="email"
+                                        id="profileEmailInput"
+                                        disabled
+                                    >
+
+                                    <span class="profile-help">
+                                        Email address cannot be changed in this demo.
+                                    </span>
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profilePhone">
+                                        Phone Number
+                                    </label>
+
+                                    <input
+                                        type="tel"
+                                        id="profilePhone"
+                                        placeholder="Enter phone number"
+                                        maxlength="10"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group full">
+
+                                    <label for="profileAddress">
+                                        Address
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileAddress"
+                                        placeholder="Enter your address"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileCity">
+                                        City
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileCity"
+                                        placeholder="Enter city"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileState">
+                                        State
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileState"
+                                        placeholder="Enter state"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profilePincode">
+                                        Pincode
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profilePincode"
+                                        placeholder="6-digit pincode"
+                                        maxlength="6"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group">
+
+                                    <label for="profileCountry">
+                                        Country
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="profileCountry"
+                                        value="India"
+                                        disabled
+                                    >
+
+                                </div>
+
+                            </form>
+
+
+                            <div class="profile-save-row">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    id="saveProfileButton"
+                                >
+
+                                    <i class="fa-solid fa-floppy-disk"></i>
+
+                                    Save Changes
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Quick Links -->
+
+                    <div class="profile-card">
+
+                        <div class="profile-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Quick Access
+                                </h2>
+
+                                <p>
+                                    Quickly access your shopping activity.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="profile-card-body">
+
+                            <div class="quick-links">
+
+
+                                <a
+                                    href="my-orders.html"
+                                    class="quick-link"
+                                >
+
+                                    <div class="quick-link-icon">
+
+                                        <i class="fa-solid fa-box"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <h3>
+                                            My Orders
+                                        </h3>
+
+                                        <p>
+                                            View your previous orders
+                                        </p>
+
+                                    </div>
+
+                                </a>
+
+
+                                <a
+                                    href="wishlist.html"
+                                    class="quick-link"
+                                >
+
+                                    <div class="quick-link-icon">
+
+                                        <i class="fa-regular fa-heart"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <h3>
+                                            Wishlist
+                                        </h3>
+
+                                        <p>
+                                            View your saved products
+                                        </p>
+
+                                    </div>
+
+                                </a>
+
+
+                                <a
+                                    href="cart.html"
+                                    class="quick-link"
+                                >
+
+                                    <div class="quick-link-icon">
+
+                                        <i class="fa-solid fa-cart-shopping"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <h3>
+                                            Shopping Cart
+                                        </h3>
+
+                                        <p>
+                                            Review items in your cart
+                                        </p>
+
+                                    </div>
+
+                                </a>
+
+
+                                <a
+                                    href="shop.html"
+                                    class="quick-link"
+                                >
+
+                                    <div class="quick-link-icon">
+
+                                        <i class="fa-solid fa-bag-shopping"></i>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <h3>
+                                            Continue Shopping
+                                        </h3>
+
+                                        <p>
+                                            Explore our products
+                                        </p>
+
+                                    </div>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer class="footer">
+
+        <div class="container footer-grid">
+
+
+            <div class="footer-brand">
+
+                <a
+                    href="index.html"
+                    class="logo"
+                >
+
+                    <span class="logo-icon">
+
+                        <i class="fa-solid fa-bag-shopping"></i>
+
+                    </span>
+
+
+                    <span>
+
+                        Shop<span class="logo-highlight">Ease</span>
+
+                    </span>
+
+                </a>
+
+
+                <p>
+                    Your trusted destination for quality fashion,
+                    footwear and accessories.
+                </p>
+
+
+                <div class="footer-social">
+
+                    <a href="#" aria-label="Facebook">
+
+                        <i class="fa-brands fa-facebook-f"></i>
+
+                    </a>
+
+
+                    <a href="#" aria-label="Instagram">
+
+                        <i class="fa-brands fa-instagram"></i>
+
+                    </a>
+
+
+                    <a href="#" aria-label="Twitter">
+
+                        <i class="fa-brands fa-x-twitter"></i>
+
+                    </a>
+
+
+                    <a href="#" aria-label="YouTube">
+
+                        <i class="fa-brands fa-youtube"></i>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Shop
+                </h3>
+
+                <a href="shop.html">
+                    All Products
+                </a>
+
+                <a href="shop.html?category=men">
+                    Men
+                </a>
+
+                <a href="shop.html?category=women">
+                    Women
+                </a>
+
+                <a href="shop.html?category=shoes">
+                    Footwear
+                </a>
+
+                <a href="shop.html?category=accessories">
+                    Accessories
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Customer Service
+                </h3>
+
+                <a href="contact.html">
+                    Contact Us
+                </a>
+
+                <a href="faq.html">
+                    FAQ
+                </a>
+
+                <a href="my-orders.html">
+                    My Orders
+                </a>
+
+                <a href="wishlist.html">
+                    Wishlist
+                </a>
+
+                <a href="profile.html">
+                    My Account
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>
+                    Information
+                </h3>
+
+                <a href="about.html">
+                    About Us
+                </a>
+
+                <a href="privacy-policy.html">
+                    Privacy Policy
+                </a>
+
+                <a href="terms.html">
+                    Terms & Conditions
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <div class="container">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+
+                <div class="payment-icons">
+
+                    <i class="fa-brands fa-cc-visa"></i>
+
+                    <i class="fa-brands fa-cc-mastercard"></i>
+
+                    <i class="fa-brands fa-cc-paypal"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================================
+         TOAST
+    ========================================== -->
+
+    <div
+        class="toast"
+        id="toast"
+    >
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        <span id="toastMessage">
+            Done
+        </span>
+
+    </div>
+
+
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================== -->
+
+    <script src="js/products.js"></script>
+
+    <script src="js/main.js"></script>
+
+
+    <script>
+
+        /* =========================================
+           PROFILE
+        ========================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                loadProfile();
+
+                setupProfileEvents();
+
+            }
+        );
+
+
+        /* =========================================
+           GET USER
+        ========================================== */
+
+        function getProfileUser() {
+
+            try {
+
+                const user =
+                    JSON.parse(
+                        localStorage.getItem("user")
+                    );
+
+                return user || null;
+
+            } catch (error) {
+
+                return null;
+
+            }
+
+        }
+
+
+        /* =========================================
+           LOAD PROFILE
+        ========================================== */
+
+        function loadProfile() {
+
+            const user =
+                getProfileUser();
+
+
+            const profileLayout =
+                document.getElementById(
+                    "profileLayout"
+                );
+
+
+            const loginMessage =
+                document.getElementById(
+                    "profileLoginMessage"
+                );
+
+
+            if (!user) {
+
+                if (profileLayout) {
+
+                    profileLayout.style.display =
+                        "none";
+
+                }
+
+
+                if (loginMessage) {
+
+                    loginMessage.style.display =
+                        "block";
+
+                }
+
+                return;
+
+            }
+
+
+            if (profileLayout) {
+
+                profileLayout.style.display =
+                    "grid";
+
+            }
+
+
+            if (loginMessage) {
+
+                loginMessage.style.display =
+                    "none";
+
+            }
+
+
+            const firstName =
+                user.firstName || "";
+
+
+            const lastName =
+                user.lastName || "";
+
+
+            const fullName =
+                (
+                    firstName +
+                    " " +
+                    lastName
+                ).trim() || "User";
+
+
+            const email =
+                user.email || "No email";
+
+
+            const avatarLetter =
+                fullName
+                    .charAt(0)
+                    .toUpperCase();
+
+
+            document.getElementById(
+                "profileAvatar"
+            ).textContent =
+                avatarLetter;
+
+
+            document.getElementById(
+                "profileName"
+            ).textContent =
+                fullName;
+
+
+            document.getElementById(
+                "profileEmail"
+            ).textContent =
+                email;
+
+
+            document.getElementById(
+                "profileFirstName"
+            ).value =
+                firstName;
+
+
+            document.getElementById(
+                "profileLastName"
+            ).value =
+                lastName;
+
+
+            document.getElementById(
+                "profileEmailInput"
+            ).value =
+                email;
+
+
+            document.getElementById(
+                "profilePhone"
+            ).value =
+                user.phone || "";
+
+
+            document.getElementById(
+                "profileAddress"
+            ).value =
+                user.address || "";
+
+
+            document.getElementById(
+                "profileCity"
+            ).value =
+                user.city || "";
+
+
+            document.getElementById(
+                "profileState"
+            ).value =
+                user.state || "";
+
+
+            document.getElementById(
+                "profilePincode"
+            ).value =
+                user.pincode || "";
+
+        }
+
+
+        /* =========================================
+           PROFILE EVENTS
+        ========================================== */
+
+        function setupProfileEvents() {
+
+            const saveButton =
+                document.getElementById(
+                    "saveProfileButton"
+                );
+
+
+            const logoutButton =
+                document.getElementById(
+                    "logoutButton"
+                );
+
+
+            if (saveButton) {
+
+                saveButton.addEventListener(
+                    "click",
+                    saveProfile
+                );
+
+            }
+
+
+            if (logoutButton) {
+
+                logoutButton.addEventListener(
+                    "click",
+                    logoutProfile
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           SAVE PROFILE
+        ========================================== */
+
+        function saveProfile() {
+
+            const user =
+                getProfileUser();
+
+
+            if (!user) {
+
+                window.location.href =
+                    "login.html";
+
+                return;
+
+            }
+
+
+            const firstName =
+                document.getElementById(
+                    "profileFirstName"
+                ).value.trim();
+
+
+            const lastName =
+                document.getElementById(
+                    "profileLastName"
+                ).value.trim();
+
+
+            const phone =
+                document.getElementById(
+                    "profilePhone"
+                ).value.trim();
+
+
+            const address =
+                document.getElementById(
+                    "profileAddress"
+                ).value.trim();
+
+
+            const city =
+                document.getElementById(
+                    "profileCity"
+                ).value.trim();
+
+
+            const state =
+                document.getElementById(
+                    "profileState"
+                ).value.trim();
+
+
+            const pincode =
+                document.getElementById(
+                    "profilePincode"
+                ).value.trim();
+
+
+            if (!firstName || !lastName) {
+
+                showProfileToast(
+                    "First name and last name are required."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                phone &&
+                !/^[6-9]\d{9}$/.test(phone)
+            ) {
+
+                showProfileToast(
+                    "Enter a valid 10-digit phone number."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                pincode &&
+                !/^\d{6}$/.test(pincode)
+            ) {
+
+                showProfileToast(
+                    "Enter a valid 6-digit pincode."
+                );
+
+                return;
+
+            }
+
+
+            user.firstName =
+                firstName;
+
+
+            user.lastName =
+                lastName;
+
+
+            user.phone =
+                phone;
+
+
+            user.address =
+                address;
+
+
+            user.city =
+                city;
+
+
+            user.state =
+                state;
+
+
+            user.pincode =
+                pincode;
+
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(user)
+            );
+
+
+            loadProfile();
+
+
+            showProfileToast(
+                "Profile updated successfully."
+            );
+
+        }
+
+
+        /* =========================================
+           LOGOUT
+        ========================================== */
+
+        function logoutProfile() {
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to logout?"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            /*
+                Remove the current login/session.
+                Product data, cart, wishlist and orders
+                are intentionally kept.
+            */
+
+            localStorage.removeItem(
+                "currentUser"
+            );
+
+
+            localStorage.removeItem(
+                "isLoggedIn"
+            );
+
+
+            localStorage.removeItem(
+                "user"
+            );
+
+
+            showProfileToast(
+                "You have been logged out."
+            );
+
+
+            setTimeout(
+                function () {
+
+                    window.location.href =
+                        "login.html";
+
+                },
+                800
+            );
+
+        }
+
+
+        /* =========================================
+           TOAST
+        ========================================== */
+
+        function showProfileToast(message) {
+
+            const toast =
+                document.getElementById(
+                    "toast"
+                );
+
+
+            const toastMessage =
+                document.getElementById(
+                    "toastMessage"
+                );
+
+
+            if (
+                toast &&
+                toastMessage
+            ) {
+
+                toastMessage.textContent =
+                    message;
+
+
+                toast.classList.add(
+                    "show"
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        toast.classList.remove(
+                            "show"
+                        );
+
+                    },
+                    2500
+                );
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>FAQ | ShopEase</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+
+    <style>
+
+        .faq-page {
+            min-height: 70vh;
+            padding: 55px 0 80px;
+            background: #f8fafc;
+        }
+
+        .faq-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .faq-header h1 {
+            margin: 0 0 10px;
+            color: #0f172a;
+            font-size: 36px;
+        }
+
+        .faq-header p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .faq-list {
+            max-width: 850px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .faq-item {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            background: #fff;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            text-align: left;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .faq-question i {
+            color: #f59e0b;
+            transition: transform 0.2s ease;
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 20px 20px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 600px) {
+
+            .faq-page {
+                padding: 40px 0 60px;
+            }
+
+            .faq-header h1 {
+                font-size: 30px;
+            }
+
+            .faq-question {
+                padding: 16px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="top-bar">
+
+        <div class="container top-bar-content">
+
+            <span>
+                <i class="fa-solid fa-truck"></i>
+                Free shipping on orders above ₹999
+            </span>
+
+            <span>
+                <i class="fa-solid fa-phone"></i>
+                Support: +91 98765 43210
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <header class="navbar">
+
+        <div class="container navbar-container">
+
+            <a href="index.html" class="logo">
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </span>
+
+                <span>
+                    Shop<span class="logo-highlight">Ease</span>
+                </span>
+
+            </a>
+
+
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="index.html" class="nav-link">Home</a>
+
+                <a href="shop.html" class="nav-link">Shop</a>
+
+                <a href="categories.html" class="nav-link">
+                    Categories
+                </a>
+
+                <a href="about.html" class="nav-link">About</a>
+
+                <a href="contact.html" class="nav-link">Contact</a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+                <button
+                    type="button"
+                    class="nav-action"
+                    id="searchButton"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+
+                <a href="wishlist.html" class="nav-action">
+
+                    <i class="fa-regular fa-heart"></i>
+
+                    <span class="nav-badge" id="wishlistBadge">
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="cart.html" class="nav-action">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <span class="nav-badge" id="cartBadge">
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="profile.html" class="nav-action">
+
+                    <i class="fa-regular fa-user"></i>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="search-overlay" id="searchOverlay">
+
+        <div class="search-box">
+
+            <button
+                type="button"
+                class="search-close"
+                id="searchClose"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+
+            <form id="searchForm">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search products..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-submit"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <main class="faq-page">
+
+        <div class="container">
+
+
+            <div class="faq-header">
+
+                <h1>
+                    Frequently Asked Questions
+                </h1>
+
+                <p>
+                    Find answers to some of the most common questions
+                    about shopping with ShopEase.
+                </p>
+
+            </div>
+
+
+            <div class="faq-list">
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        How can I place an order?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        Browse the products in the Shop section,
+                        add the products you want to your cart,
+                        continue to checkout, enter your details
+                        and select a payment method.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        Is shipping free?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        ShopEase provides free shipping for orders
+                        above ₹999. Orders below ₹999 have a
+                        standard shipping charge of ₹99 in this demo.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        How can I view my orders?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        After placing an order, open the My Orders
+                        page from your account or the website footer.
+                        Your order history is stored in the browser
+                        for this front-end demo.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        Can I save products for later?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        Yes. Click the heart icon on a product to
+                        add it to your Wishlist. You can later view
+                        your saved products from the Wishlist page.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        What payment methods are available?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        The demo checkout supports Cash on Delivery,
+                        UPI and Credit/Debit Card options.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        Can I update my profile?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        Yes. Open My Profile to update your name,
+                        phone number and delivery information.
+
+                    </div>
+
+                </div>
+
+
+                <div class="faq-item">
+
+                    <button class="faq-question">
+
+                        Is this a real online store?
+
+                        <i class="fa-solid fa-chevron-down"></i>
+
+                    </button>
+
+                    <div class="faq-answer">
+
+                        This ShopEase project is a front-end e-commerce
+                        website created using HTML, CSS and JavaScript.
+                        It uses browser localStorage for demonstration
+                        purposes and does not include a real backend
+                        or payment gateway.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <div class="container footer-grid">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo">
+
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span class="logo-highlight">Ease</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Your trusted destination for quality fashion,
+                    footwear and accessories.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Shop</h3>
+
+                <a href="shop.html">All Products</a>
+                <a href="shop.html?category=men">Men</a>
+                <a href="shop.html?category=women">Women</a>
+                <a href="shop.html?category=shoes">Footwear</a>
+                <a href="shop.html?category=accessories">Accessories</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Customer Service</h3>
+
+                <a href="contact.html">Contact Us</a>
+                <a href="faq.html">FAQ</a>
+                <a href="my-orders.html">My Orders</a>
+                <a href="wishlist.html">Wishlist</a>
+                <a href="profile.html">My Account</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Information</h3>
+
+                <a href="about.html">About Us</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <div class="container">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+
+
+    <script>
+
+        document
+            .querySelectorAll(".faq-question")
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const item =
+                            button.parentElement;
+
+
+                        document
+                            .querySelectorAll(".faq-item")
+                            .forEach(function (otherItem) {
+
+                                if (otherItem !== item) {
+
+                                    otherItem.classList.remove(
+                                        "active"
+                                    );
+
+                                }
+
+                            });
+
+
+                        item.classList.toggle(
+                            "active"
+                        );
+
+                    }
+                );
+
+            });
+
+    </script>
+
+</body>
+
+</html>

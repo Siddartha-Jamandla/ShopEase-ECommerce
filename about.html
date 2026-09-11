@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>About Us | ShopEase</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+
+    <style>
+
+        .info-page {
+            min-height: 70vh;
+            padding: 60px 0 80px;
+            background: #f8fafc;
+        }
+
+        .info-hero {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 50px;
+        }
+
+        .info-hero h1 {
+            margin: 0 0 15px;
+            color: #0f172a;
+            font-size: 38px;
+        }
+
+        .info-hero p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .about-card {
+            background: #fff;
+            padding: 35px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+        }
+
+        .about-card h2 {
+            margin: 0 0 15px;
+            color: #0f172a;
+            font-size: 24px;
+        }
+
+        .about-card p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.8;
+        }
+
+        .values-section {
+            text-align: center;
+        }
+
+        .values-section h2 {
+            margin: 0 0 30px;
+            color: #0f172a;
+            font-size: 28px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .value-card {
+            background: #fff;
+            padding: 30px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+        }
+
+        .value-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #fff7ed;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
+        }
+
+        .value-card h3 {
+            margin: 0 0 10px;
+            color: #0f172a;
+            font-size: 17px;
+        }
+
+        .value-card p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+
+            .info-page {
+                padding: 40px 0 60px;
+            }
+
+            .info-hero h1 {
+                font-size: 30px;
+            }
+
+            .about-grid,
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .about-card {
+                padding: 25px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="top-bar">
+
+        <div class="container top-bar-content">
+
+            <span>
+                <i class="fa-solid fa-truck"></i>
+                Free shipping on orders above ₹999
+            </span>
+
+            <span>
+                <i class="fa-solid fa-phone"></i>
+                Support: +91 98765 43210
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <header class="navbar">
+
+        <div class="container navbar-container">
+
+            <a href="index.html" class="logo">
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </span>
+
+                <span>
+                    Shop<span class="logo-highlight">Ease</span>
+                </span>
+
+            </a>
+
+
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="index.html" class="nav-link">
+                    Home
+                </a>
+
+                <a href="shop.html" class="nav-link">
+                    Shop
+                </a>
+
+                <a href="categories.html" class="nav-link">
+                    Categories
+                </a>
+
+                <a href="about.html" class="nav-link">
+                    About
+                </a>
+
+                <a href="contact.html" class="nav-link">
+                    Contact
+                </a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+                <button
+                    type="button"
+                    class="nav-action"
+                    id="searchButton"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+
+                <a href="wishlist.html" class="nav-action">
+
+                    <i class="fa-regular fa-heart"></i>
+
+                    <span
+                        class="nav-badge"
+                        id="wishlistBadge"
+                    >
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="cart.html" class="nav-action">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <span
+                        class="nav-badge"
+                        id="cartBadge"
+                    >
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="profile.html" class="nav-action">
+
+                    <i class="fa-regular fa-user"></i>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div
+        class="search-overlay"
+        id="searchOverlay"
+    >
+
+        <div class="search-box">
+
+            <button
+                type="button"
+                class="search-close"
+                id="searchClose"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+
+            <form id="searchForm">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search products..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-submit"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <main class="info-page">
+
+        <div class="container">
+
+
+            <section class="info-hero">
+
+                <h1>
+                    About ShopEase
+                </h1>
+
+                <p>
+                    ShopEase is a modern online shopping destination
+                    designed to make discovering quality products
+                    simple, convenient and enjoyable.
+                </p>
+
+            </section>
+
+
+            <section class="about-grid">
+
+
+                <div class="about-card">
+
+                    <h2>
+                        Who We Are
+                    </h2>
+
+                    <p>
+                        ShopEase brings together carefully selected
+                        fashion, footwear and accessories in one
+                        convenient online store. Our goal is to provide
+                        customers with a smooth shopping experience,
+                        attractive products and reliable service.
+                    </p>
+
+                </div>
+
+
+                <div class="about-card">
+
+                    <h2>
+                        Our Mission
+                    </h2>
+
+                    <p>
+                        Our mission is to make online shopping easier
+                        by combining simple design, useful product
+                        information, secure checkout experiences and
+                        customer-focused service.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+            <section class="values-section">
+
+                <h2>
+                    Why Shop With Us?
+                </h2>
+
+
+                <div class="values-grid">
+
+
+                    <div class="value-card">
+
+                        <div class="value-icon">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+
+                        <h3>
+                            Quality Products
+                        </h3>
+
+                        <p>
+                            We focus on products that offer a balance
+                            of style, quality and everyday usefulness.
+                        </p>
+
+                    </div>
+
+
+                    <div class="value-card">
+
+                        <div class="value-icon">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+
+                        <h3>
+                            Secure Shopping
+                        </h3>
+
+                        <p>
+                            Your shopping journey is designed with
+                            account and checkout security in mind.
+                        </p>
+
+                    </div>
+
+
+                    <div class="value-card">
+
+                        <div class="value-icon">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+
+                        <h3>
+                            Customer Support
+                        </h3>
+
+                        <p>
+                            We aim to provide helpful support whenever
+                            customers need assistance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <div class="container footer-grid">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo">
+
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span class="logo-highlight">Ease</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Your trusted destination for quality fashion,
+                    footwear and accessories.
+                </p>
+
+                <div class="footer-social">
+
+                    <a href="#">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-x-twitter"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Shop</h3>
+
+                <a href="shop.html">All Products</a>
+                <a href="shop.html?category=men">Men</a>
+                <a href="shop.html?category=women">Women</a>
+                <a href="shop.html?category=shoes">Footwear</a>
+                <a href="shop.html?category=accessories">Accessories</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Customer Service</h3>
+
+                <a href="contact.html">Contact Us</a>
+                <a href="faq.html">FAQ</a>
+                <a href="my-orders.html">My Orders</a>
+                <a href="wishlist.html">Wishlist</a>
+                <a href="profile.html">My Account</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Information</h3>
+
+                <a href="about.html">About Us</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <div class="container">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+                <div class="payment-icons">
+
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-brands fa-cc-paypal"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Checkout - ShopEase</title>
+
+
+    <!-- Google Font -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- Main CSS -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/footer.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+    <!-- Checkout CSS -->
+
+    <link
+        rel="stylesheet"
+        href="css/checkout.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     TOP BAR
+========================================= -->
+
+<div class="top-bar">
+
+    <div class="container top-bar-content">
+
+        <span>
+            <i class="fa-solid fa-truck"></i>
+            Free shipping on orders above ₹999
+        </span>
+
+        <span>
+            <i class="fa-solid fa-phone"></i>
+            Support: +91 98765 43210
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     NAVBAR
+========================================= -->
+
+<header class="navbar">
+
+    <div class="container navbar-container">
+
+
+        <a
+            href="index.html"
+            class="logo"
+        >
+
+            <span class="logo-icon">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </span>
+
+            <span>
+                Shop<span>Ease</span>
+            </span>
+
+        </a>
+
+
+        <nav
+            class="nav-menu"
+            id="navMenu"
+        >
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="shop.html">
+                Shop
+            </a>
+
+            <a href="categories.html">
+                Categories
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </nav>
+
+
+        <div class="nav-actions">
+
+            <button
+                class="nav-action search-btn"
+                id="openSearch"
+            >
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+
+            <a
+                href="wishlist.html"
+                class="nav-action"
+            >
+
+                <i class="fa-regular fa-heart"></i>
+
+                <span
+                    class="nav-badge"
+                    id="wishlistCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <a
+                href="cart.html"
+                class="nav-action"
+            >
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span
+                    class="nav-badge"
+                    id="cartCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <a
+                href="login.html"
+                class="nav-action"
+            >
+
+                <i class="fa-regular fa-user"></i>
+
+            </a>
+
+
+            <button
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================
+     SEARCH
+========================================= -->
+
+<div
+    class="search-overlay"
+    id="searchOverlay"
+>
+
+    <div class="search-box">
+
+        <button
+            class="search-close"
+            id="closeSearch"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <h3>
+            Search Products
+        </h3>
+
+
+        <div class="search-input-wrapper">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search for products..."
+            >
+
+
+            <button id="searchSubmit">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     CHECKOUT
+========================================= -->
+
+<main class="checkout-page">
+
+    <div class="container">
+
+
+        <div class="checkout-header">
+
+            <h1>
+                Checkout
+            </h1>
+
+            <p>
+                Complete your details to place your order.
+            </p>
+
+        </div>
+
+
+        <!-- =====================================
+             CHECKOUT CONTENT
+        ====================================== -->
+
+        <form
+            id="checkoutForm"
+            novalidate
+        >
+
+            <div
+                class="checkout-layout"
+                id="checkoutLayout"
+            >
+
+
+                <!-- =================================
+                     LEFT SIDE
+                ================================== -->
+
+                <div>
+
+
+                    <!-- CUSTOMER DETAILS -->
+
+                    <section class="checkout-card">
+
+                        <div class="checkout-card-header">
+
+                            <span class="checkout-card-number">
+                                1
+                            </span>
+
+                            <h2>
+                                Contact Information
+                            </h2>
+
+                        </div>
+
+
+                        <div class="checkout-form-row">
+
+
+                            <div class="form-group">
+
+                                <label for="firstName">
+                                    First Name *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="firstName"
+                                    name="firstName"
+                                    placeholder="Enter first name"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="lastName">
+                                    Last Name *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="lastName"
+                                    name="lastName"
+                                    placeholder="Enter last name"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="email">
+                                    Email Address *
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="you@example.com"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="phone">
+                                    Phone Number *
+                                </label>
+
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="10-digit mobile number"
+                                    maxlength="10"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- ADDRESS -->
+
+                    <section class="checkout-card">
+
+                        <div class="checkout-card-header">
+
+                            <span class="checkout-card-number">
+                                2
+                            </span>
+
+                            <h2>
+                                Delivery Address
+                            </h2>
+
+                        </div>
+
+
+                        <div class="checkout-form-row">
+
+
+                            <div class="form-group full-width">
+
+                                <label for="address">
+                                    Street Address *
+                                </label>
+
+                                <textarea
+                                    id="address"
+                                    name="address"
+                                    placeholder="House / Flat No., Street, Area"
+                                    required
+                                ></textarea>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="city">
+                                    City *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="city"
+                                    name="city"
+                                    placeholder="Enter city"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="state">
+                                    State *
+                                </label>
+
+                                <select
+                                    id="state"
+                                    name="state"
+                                    required
+                                >
+
+                                    <option value="">
+                                        Select State
+                                    </option>
+
+                                    <option>
+                                        Andhra Pradesh
+                                    </option>
+
+                                    <option>
+                                        Telangana
+                                    </option>
+
+                                    <option>
+                                        Karnataka
+                                    </option>
+
+                                    <option>
+                                        Tamil Nadu
+                                    </option>
+
+                                    <option>
+                                        Maharashtra
+                                    </option>
+
+                                    <option>
+                                        Kerala
+                                    </option>
+
+                                    <option>
+                                        Gujarat
+                                    </option>
+
+                                    <option>
+                                        Delhi
+                                    </option>
+
+                                    <option>
+                                        Other
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="pincode">
+                                    PIN Code *
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="pincode"
+                                    name="pincode"
+                                    placeholder="6-digit PIN"
+                                    maxlength="6"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label for="country">
+                                    Country
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="country"
+                                    value="India"
+                                    readonly
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- PAYMENT -->
+
+                    <section class="checkout-card">
+
+                        <div class="checkout-card-header">
+
+                            <span class="checkout-card-number">
+                                3
+                            </span>
+
+                            <h2>
+                                Payment Method
+                            </h2>
+
+                        </div>
+
+
+                        <div class="payment-options">
+
+
+                            <label
+                                class="payment-option active"
+                            >
+
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value="cod"
+                                    checked
+                                >
+
+                                <div class="payment-option-icon">
+
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                                </div>
+
+
+                                <div class="payment-option-content">
+
+                                    <strong>
+                                        Cash on Delivery
+                                    </strong>
+
+                                    <span>
+                                        Pay when your order arrives
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="payment-option">
+
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value="upi"
+                                >
+
+                                <div class="payment-option-icon">
+
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+
+                                </div>
+
+
+                                <div class="payment-option-content">
+
+                                    <strong>
+                                        UPI
+                                    </strong>
+
+                                    <span>
+                                        Google Pay, PhonePe, Paytm and more
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                            <label class="payment-option">
+
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value="card"
+                                >
+
+                                <div class="payment-option-icon">
+
+                                    <i class="fa-regular fa-credit-card"></i>
+
+                                </div>
+
+
+                                <div class="payment-option-content">
+
+                                    <strong>
+                                        Credit / Debit Card
+                                    </strong>
+
+                                    <span>
+                                        Secure card payment
+                                    </span>
+
+                                </div>
+
+                            </label>
+
+
+                        </div>
+
+                    </section>
+
+
+                </div>
+
+
+                <!-- =================================
+                     RIGHT SIDE
+                ================================== -->
+
+                <aside class="checkout-summary">
+
+
+                    <h2>
+                        Your Order
+                    </h2>
+
+
+                    <div
+                        class="checkout-product-list"
+                        id="checkoutProductList"
+                    >
+                        <!-- Products generated by JS -->
+                    </div>
+
+
+                    <!-- COUPON -->
+
+                    <div class="coupon-box">
+
+                        <input
+                            type="text"
+                            id="couponInput"
+                            placeholder="Coupon code"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="applyCoupon()"
+                        >
+                            Apply
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="coupon-message"
+                        id="couponMessage"
+                    ></div>
+
+
+                    <!-- SUMMARY -->
+
+                    <div class="checkout-summary-row">
+
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <strong id="checkoutSubtotal">
+                            ₹0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="checkout-summary-row">
+
+                        <span>
+                            Shipping
+                        </span>
+
+                        <strong id="checkoutShipping">
+                            FREE
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="checkout-summary-row"
+                        id="discountRow"
+                        style="display:none;"
+                    >
+
+                        <span>
+                            Discount
+                        </span>
+
+                        <strong
+                            id="checkoutDiscount"
+                            style="color:#198754;"
+                        >
+                            -₹0
+                        </strong>
+
+                    </div>
+
+
+                    <hr class="checkout-summary-divider">
+
+
+                    <div class="checkout-total">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong id="checkoutTotal">
+                            ₹0
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="place-order-button"
+                    >
+
+                        <i class="fa-solid fa-lock"></i>
+                        Place Order
+
+                    </button>
+
+
+                    <div class="secure-checkout">
+
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                        Your information is securely handled.
+
+                    </div>
+
+
+                </aside>
+
+            </div>
+
+        </form>
+
+
+        <!-- =====================================
+             EMPTY CHECKOUT
+        ====================================== -->
+
+        <div
+            class="checkout-empty"
+            id="checkoutEmpty"
+            style="display:none;"
+        >
+
+            <i class="fa-solid fa-cart-shopping"></i>
+
+            <h2>
+                Your Cart is Empty
+            </h2>
+
+            <p>
+                Add some products to your cart before
+                proceeding to checkout.
+            </p>
+
+            <a
+                href="shop.html"
+                class="btn btn-primary"
+            >
+                Continue Shopping
+            </a>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer class="footer">
+
+    <div class="container">
+
+
+        <div class="footer-grid">
+
+
+            <div class="footer-brand">
+
+                <a
+                    href="index.html"
+                    class="logo"
+                >
+
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span>Ease</span>
+                    </span>
+
+                </a>
+
+
+                <p>
+                    Your trusted destination for fashion,
+                    footwear and lifestyle products.
+                </p>
+
+
+                <div class="social-links">
+
+                    <a href="#">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>
+                    Shop
+                </h4>
+
+                <a href="shop.html">
+                    All Products
+                </a>
+
+                <a href="shop.html?category=men">
+                    Men
+                </a>
+
+                <a href="shop.html?category=women">
+                    Women
+                </a>
+
+                <a href="shop.html?category=shoes">
+                    Shoes
+                </a>
+
+                <a href="shop.html?category=accessories">
+                    Accessories
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>
+                    Information
+                </h4>
+
+                <a href="about.html">
+                    About Us
+                </a>
+
+                <a href="contact.html">
+                    Contact
+                </a>
+
+                <a href="faq.html">
+                    FAQ
+                </a>
+
+                <a href="privacy-policy.html">
+                    Privacy Policy
+                </a>
+
+                <a href="terms.html">
+                    Terms & Conditions
+                </a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>
+                    Account
+                </h4>
+
+                <a href="login.html">
+                    Login
+                </a>
+
+                <a href="register.html">
+                    Register
+                </a>
+
+                <a href="wishlist.html">
+                    Wishlist
+                </a>
+
+                <a href="my-orders.html">
+                    My Orders
+                </a>
+
+                <a href="profile.html">
+                    My Profile
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 ShopEase. All rights reserved.
+            </p>
+
+
+            <div class="payment-icons">
+
+                <i class="fa-brands fa-cc-visa"></i>
+
+                <i class="fa-brands fa-cc-mastercard"></i>
+
+                <i class="fa-brands fa-cc-paypal"></i>
+
+                <i class="fa-solid fa-credit-card"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- Toast -->
+
+<div
+    class="toast"
+    id="toast"
+>
+
+    <i class="fa-solid fa-circle-check"></i>
+
+    <span id="toastMessage">
+        Success
+    </span>
+
+</div>
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+<script src="js/products.js"></script>
+
+<script src="js/main.js"></script>
+
+<script src="js/checkout.js"></script>
+
+
+</body>
+
+</html>

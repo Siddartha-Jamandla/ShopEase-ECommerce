@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ShopEase - Online Shopping</title>
+
+
+    <!-- Google Fonts -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- CSS -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/footer.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<div class="top-bar">
+
+    <div class="container top-bar-content">
+
+        <p>
+            <i class="fa-solid fa-truck"></i>
+            Free shipping on orders above ₹999
+        </p>
+
+        <p>
+            <i class="fa-solid fa-headset"></i>
+            Customer Support: +91 98765 43210
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header class="navbar-wrapper">
+
+    <div class="container navbar">
+
+
+        <!-- LOGO -->
+
+        <a
+            href="index.html"
+            class="logo"
+        >
+
+            <span class="logo-icon">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </span>
+
+            <span>
+                Shop<span class="logo-highlight">Ease</span>
+            </span>
+
+        </a>
+
+
+        <!-- DESKTOP NAV -->
+
+        <nav class="nav-menu">
+
+            <a
+                href="index.html"
+                class="active"
+            >
+                Home
+            </a>
+
+            <a href="shop.html">
+                Shop
+            </a>
+
+            <a href="categories.html">
+                Categories
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </nav>
+
+
+        <!-- NAV ACTIONS -->
+
+        <div class="nav-actions">
+
+
+            <!-- Search -->
+
+            <button
+                class="nav-action-btn"
+                id="searchButton"
+                aria-label="Search"
+            >
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+
+            <!-- Wishlist -->
+
+            <a
+                href="wishlist.html"
+                class="nav-action-btn"
+                aria-label="Wishlist"
+            >
+
+                <i class="fa-regular fa-heart"></i>
+
+                <span
+                    class="nav-badge"
+                    id="wishlistCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <!-- Cart -->
+
+            <a
+                href="cart.html"
+                class="nav-action-btn"
+                aria-label="Cart"
+            >
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span
+                    class="nav-badge"
+                    id="cartCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <!-- Account -->
+
+            <a
+                href="login.html"
+                class="nav-action-btn account-btn"
+                aria-label="Account"
+            >
+
+                <i class="fa-regular fa-user"></i>
+
+            </a>
+
+
+            <!-- Mobile menu -->
+
+            <button
+                class="nav-action-btn mobile-menu-btn"
+                id="mobileMenuButton"
+                aria-label="Menu"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- MOBILE MENU -->
+
+    <div
+        class="mobile-menu"
+        id="mobileMenu"
+    >
+
+        <a href="index.html">
+            <i class="fa-solid fa-house"></i>
+            Home
+        </a>
+
+        <a href="shop.html">
+            <i class="fa-solid fa-store"></i>
+            Shop
+        </a>
+
+        <a href="categories.html">
+            <i class="fa-solid fa-layer-group"></i>
+            Categories
+        </a>
+
+        <a href="wishlist.html">
+            <i class="fa-regular fa-heart"></i>
+            Wishlist
+        </a>
+
+        <a href="cart.html">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Cart
+        </a>
+
+        <a href="login.html">
+            <i class="fa-regular fa-user"></i>
+            Account
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SEARCH OVERLAY
+===================================================== -->
+
+<div
+    class="search-overlay"
+    id="searchOverlay"
+>
+
+    <div class="search-box">
+
+
+        <button
+            class="search-close"
+            id="searchClose"
+            aria-label="Close"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <h2>
+            What are you looking for?
+        </h2>
+
+
+        <div class="search-input-wrapper">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search products..."
+            >
+
+
+            <button
+                id="searchSubmit"
+                aria-label="Search"
+            >
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main>
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+    <div class="container hero-content">
+
+
+        <div class="hero-text">
+
+            <span class="hero-label">
+
+                <i class="fa-solid fa-sparkles"></i>
+
+                New Collection 2026
+
+            </span>
+
+
+            <h1>
+
+                Discover Your
+                <span>Perfect Style</span>
+
+            </h1>
+
+
+            <p>
+
+                Shop the latest fashion, footwear and
+                accessories at prices you'll love.
+                Quality products, fast delivery and
+                easy returns.
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+                <a
+                    href="shop.html"
+                    class="btn btn-primary"
+                >
+
+                    Shop Now
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </a>
+
+
+                <a
+                    href="categories.html"
+                    class="btn btn-outline"
+                >
+
+                    Explore Categories
+
+                </a>
+
+            </div>
+
+
+            <div class="hero-trust">
+
+
+                <div class="trust-item">
+
+                    <div class="trust-icon">
+
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Secure
+                        </strong>
+
+                        <span>
+                            Shopping
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="trust-item">
+
+                    <div class="trust-icon">
+
+                        <i class="fa-solid fa-truck-fast"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Fast
+                        </strong>
+
+                        <span>
+                            Delivery
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="trust-item">
+
+                    <div class="trust-icon">
+
+                        <i class="fa-solid fa-rotate-left"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Easy
+                        </strong>
+
+                        <span>
+                            Returns
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HERO VISUAL -->
+
+        <div class="hero-visual">
+
+            <div class="hero-image-card">
+
+                <div class="hero-circle"></div>
+
+
+                <div class="hero-product-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </div>
+
+
+                <div class="hero-floating-card card-one">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    <div>
+
+                        <strong>
+                            4.9/5
+                        </strong>
+
+                        <span>
+                            Customer Rating
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-floating-card card-two">
+
+                    <i class="fa-solid fa-fire"></i>
+
+                    <div>
+
+                        <strong>
+                            Trending
+                        </strong>
+
+                        <span>
+                            Products
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FEATURES
+===================================================== -->
+
+<section class="features-section">
+
+    <div class="container features-grid">
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+
+                <i class="fa-solid fa-truck"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    Free Shipping
+                </h3>
+
+                <p>
+                    On orders above ₹999
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    Easy Returns
+                </h3>
+
+                <p>
+                    7 days return policy
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+
+                <i class="fa-solid fa-lock"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    Secure Payment
+                </h3>
+
+                <p>
+                    100% secure checkout
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+
+                <i class="fa-solid fa-headset"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    24/7 Support
+                </h3>
+
+                <p>
+                    We're here to help
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CATEGORIES
+===================================================== -->
+
+<section class="section categories-section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-label">
+                    SHOP BY CATEGORY
+                </span>
+
+                <h2>
+                    Find What You Love
+                </h2>
+
+            </div>
+
+
+            <a
+                href="categories.html"
+                class="view-all"
+            >
+
+                View All
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+
+        <div class="category-grid">
+
+
+            <a
+                href="shop.html?category=men"
+                class="category-card"
+            >
+
+                <div class="category-icon">
+
+                    <i class="fa-solid fa-person"></i>
+
+                </div>
+
+                <h3>
+                    Men's Fashion
+                </h3>
+
+                <p>
+                    Explore Collection
+                </p>
+
+            </a>
+
+
+            <a
+                href="shop.html?category=women"
+                class="category-card"
+            >
+
+                <div class="category-icon">
+
+                    <i class="fa-solid fa-person-dress"></i>
+
+                </div>
+
+                <h3>
+                    Women's Fashion
+                </h3>
+
+                <p>
+                    Explore Collection
+                </p>
+
+            </a>
+
+
+            <a
+                href="shop.html?category=shoes"
+                class="category-card"
+            >
+
+                <div class="category-icon">
+
+                    <i class="fa-solid fa-shoe-prints"></i>
+
+                </div>
+
+                <h3>
+                    Footwear
+                </h3>
+
+                <p>
+                    Explore Collection
+                </p>
+
+            </a>
+
+
+            <a
+                href="shop.html?category=accessories"
+                class="category-card"
+            >
+
+                <div class="category-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </div>
+
+                <h3>
+                    Accessories
+                </h3>
+
+                <p>
+                    Explore Collection
+                </p>
+
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FEATURED PRODUCTS
+===================================================== -->
+
+<section class="section featured-section">
+
+    <div class="container">
+
+
+        <div class="section-heading">
+
+            <div>
+
+                <span class="section-label">
+                    OUR COLLECTION
+                </span>
+
+                <h2>
+                    Featured Products
+                </h2>
+
+            </div>
+
+
+            <a
+                href="shop.html"
+                class="view-all"
+            >
+
+                View All Products
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+
+        <div
+            class="product-grid"
+            id="featuredProducts"
+        ></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROMO
+===================================================== -->
+
+<section class="promo-section">
+
+    <div class="container">
+
+        <div class="promo-banner">
+
+
+            <div class="promo-content">
+
+                <span class="promo-label">
+                    LIMITED TIME OFFER
+                </span>
+
+
+                <h2>
+
+                    Up to 40% Off
+                    <br>
+                    Selected Products
+
+                </h2>
+
+
+                <p>
+                    Don't miss our biggest sale of the season.
+                </p>
+
+
+                <a
+                    href="shop.html"
+                    class="btn btn-light"
+                >
+
+                    Shop Sale
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </a>
+
+            </div>
+
+
+            <div class="promo-icon">
+
+                <i class="fa-solid fa-tags"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     NEWSLETTER
+===================================================== -->
+
+<section class="newsletter-section">
+
+    <div class="container">
+
+        <div class="newsletter-content">
+
+
+            <div class="newsletter-text">
+
+                <span class="section-label">
+                    STAY UPDATED
+                </span>
+
+
+                <h2>
+                    Get the Latest Offers
+                </h2>
+
+
+                <p>
+                    Subscribe to our newsletter and receive
+                    exclusive offers and updates.
+                </p>
+
+            </div>
+
+
+            <form
+                class="newsletter-form"
+                id="newsletterForm"
+            >
+
+                <input
+                    type="email"
+                    id="newsletterEmail"
+                    placeholder="Enter your email address"
+                    required
+                >
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Subscribe
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <div class="container footer-grid">
+
+
+        <div class="footer-brand">
+
+            <a
+                href="index.html"
+                class="logo footer-logo"
+            >
+
+                <span class="logo-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </span>
+
+                <span>
+                    Shop<span class="logo-highlight">Ease</span>
+                </span>
+
+            </a>
+
+
+            <p>
+
+                Your trusted destination for fashion,
+                footwear and accessories.
+
+            </p>
+
+
+            <div class="social-links">
+
+                <a href="#">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Shop
+            </h3>
+
+            <a href="shop.html">
+                All Products
+            </a>
+
+            <a href="shop.html?category=men">
+                Men's Fashion
+            </a>
+
+            <a href="shop.html?category=women">
+                Women's Fashion
+            </a>
+
+            <a href="shop.html?category=shoes">
+                Footwear
+            </a>
+
+            <a href="shop.html?category=accessories">
+                Accessories
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Customer Care
+            </h3>
+
+            <a href="contact.html">
+                Contact Us
+            </a>
+
+            <a href="faq.html">
+                FAQ
+            </a>
+
+            <a href="my-orders.html">
+                Track Order
+            </a>
+
+            <a href="privacy-policy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Company
+            </h3>
+
+            <a href="about.html">
+                About Us
+            </a>
+
+            <a href="contact.html">
+                Careers
+            </a>
+
+            <a href="contact.html">
+                Become a Seller
+            </a>
+
+            <a href="contact.html">
+                Help Center
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <div class="container footer-bottom-content">
+
+            <p>
+                © 2026 ShopEase. All rights reserved.
+            </p>
+
+
+            <div class="payment-icons">
+
+                <i class="fa-brands fa-cc-visa"></i>
+
+                <i class="fa-brands fa-cc-mastercard"></i>
+
+                <i class="fa-brands fa-cc-amex"></i>
+
+                <i class="fa-solid fa-credit-card"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    class="toast"
+    id="toast"
+>
+
+    <i class="fa-solid fa-check-circle"></i>
+
+    <span id="toastMessage">
+        Added successfully
+    </span>
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<!-- IMPORTANT:
+     products.js MUST come before main.js
+-->
+
+<script src="js/products.js"></script>
+
+<script src="js/main.js"></script>
+
+
+</body>
+
+</html>

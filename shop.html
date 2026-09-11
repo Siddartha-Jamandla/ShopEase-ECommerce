@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Shop - ShopEase</title>
+
+
+    <!-- Google Fonts -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- Existing CSS -->
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/footer.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+
+    <!-- Shop-specific CSS -->
+
+    <style>
+
+        /* =================================================
+           SHOP LAYOUT
+        ================================================= */
+
+        .shop-section {
+            padding: 60px 0 80px;
+        }
+
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 35px;
+            align-items: start;
+        }
+
+
+        /* =================================================
+           FILTER SIDEBAR
+        ================================================= */
+
+        .shop-sidebar {
+            position: sticky;
+            top: 100px;
+
+            padding: 25px;
+
+            background: var(--white);
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 25px;
+        }
+
+        .filter-header h3 {
+            color: var(--dark);
+
+            font-size: 17px;
+        }
+
+        .clear-filters {
+            border: none;
+
+            background: none;
+
+            color: var(--danger);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .filter-group {
+            padding: 20px 0;
+
+            border-top: 1px solid var(--border);
+        }
+
+        .filter-group:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .filter-group h4 {
+            color: var(--dark);
+
+            font-size: 13px;
+
+            margin-bottom: 14px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            margin-bottom: 11px;
+
+            color: var(--text);
+
+            font-size: 12px;
+
+            cursor: pointer;
+        }
+
+        .filter-option input {
+            accent-color: var(--primary);
+        }
+
+        .price-value {
+            display: flex;
+            justify-content: space-between;
+
+            color: var(--text-light);
+
+            font-size: 11px;
+
+            margin-bottom: 8px;
+        }
+
+        #priceFilter {
+            width: 100%;
+
+            accent-color: var(--primary);
+        }
+
+
+        /* =================================================
+           SHOP TOOLBAR
+        ================================================= */
+
+        .shop-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            margin-bottom: 25px;
+        }
+
+        .shop-count {
+            color: var(--text-light);
+
+            font-size: 13px;
+        }
+
+        .shop-count strong {
+            color: var(--dark);
+        }
+
+        .sort-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sort-wrapper label {
+            color: var(--text-light);
+
+            font-size: 12px;
+        }
+
+        .sort-wrapper select {
+            min-width: 170px;
+
+            padding: 9px 12px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 7px;
+
+            background: var(--white);
+
+            color: var(--dark);
+
+            outline: none;
+
+            font-size: 12px;
+        }
+
+
+        /* =================================================
+           NO PRODUCTS
+        ================================================= */
+
+        .no-products {
+            padding: 70px 20px;
+
+            text-align: center;
+
+            background: var(--light);
+
+            border-radius: var(--radius);
+        }
+
+        .no-products i {
+            color: #9ca3af;
+
+            font-size: 50px;
+
+            margin-bottom: 15px;
+        }
+
+        .no-products h3 {
+            color: var(--dark);
+
+            margin-bottom: 7px;
+        }
+
+        .no-products p {
+            color: var(--text-light);
+
+            font-size: 13px;
+        }
+
+
+        /* =================================================
+           MOBILE FILTER BUTTON
+        ================================================= */
+
+        .mobile-filter-button {
+            display: none;
+        }
+
+
+        @media (max-width: 900px) {
+
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .shop-sidebar {
+                position: static;
+            }
+
+            .mobile-filter-button {
+                display: inline-flex;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .shop-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sort-wrapper {
+                justify-content: space-between;
+            }
+
+            .sort-wrapper select {
+                flex: 1;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
+
+<div class="top-bar">
+
+    <div class="container top-bar-content">
+
+        <p>
+            <i class="fa-solid fa-truck"></i>
+            Free shipping on orders above ₹999
+        </p>
+
+        <p>
+            <i class="fa-solid fa-headset"></i>
+            Customer Support: +91 98765 43210
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header class="navbar-wrapper">
+
+    <div class="container navbar">
+
+
+        <a
+            href="index.html"
+            class="logo"
+        >
+
+            <span class="logo-icon">
+
+                <i class="fa-solid fa-bag-shopping"></i>
+
+            </span>
+
+            <span>
+                Shop<span class="logo-highlight">Ease</span>
+            </span>
+
+        </a>
+
+
+        <nav class="nav-menu">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a
+                href="shop.html"
+                class="active"
+            >
+                Shop
+            </a>
+
+            <a href="categories.html">
+                Categories
+            </a>
+
+            <a href="about.html">
+                About
+            </a>
+
+            <a href="contact.html">
+                Contact
+            </a>
+
+        </nav>
+
+
+        <div class="nav-actions">
+
+            <button
+                class="nav-action-btn"
+                id="searchButton"
+            >
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+
+            <a
+                href="wishlist.html"
+                class="nav-action-btn"
+            >
+
+                <i class="fa-regular fa-heart"></i>
+
+                <span
+                    class="nav-badge"
+                    id="wishlistCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <a
+                href="cart.html"
+                class="nav-action-btn"
+            >
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span
+                    class="nav-badge"
+                    id="cartCount"
+                >
+                    0
+                </span>
+
+            </a>
+
+
+            <a
+                href="login.html"
+                class="nav-action-btn account-btn"
+            >
+
+                <i class="fa-regular fa-user"></i>
+
+            </a>
+
+
+            <button
+                class="nav-action-btn mobile-menu-btn"
+                id="mobileMenuButton"
+            >
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="mobile-menu"
+        id="mobileMenu"
+    >
+
+        <a href="index.html">
+            <i class="fa-solid fa-house"></i>
+            Home
+        </a>
+
+        <a href="shop.html">
+            <i class="fa-solid fa-store"></i>
+            Shop
+        </a>
+
+        <a href="categories.html">
+            <i class="fa-solid fa-layer-group"></i>
+            Categories
+        </a>
+
+        <a href="wishlist.html">
+            <i class="fa-regular fa-heart"></i>
+            Wishlist
+        </a>
+
+        <a href="cart.html">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Cart
+        </a>
+
+        <a href="login.html">
+            <i class="fa-regular fa-user"></i>
+            Account
+        </a>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     SEARCH
+===================================================== -->
+
+<div
+    class="search-overlay"
+    id="searchOverlay"
+>
+
+    <div class="search-box">
+
+        <button
+            class="search-close"
+            id="searchClose"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <h2>
+            What are you looking for?
+        </h2>
+
+
+        <div class="search-input-wrapper">
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search products..."
+            >
+
+
+            <button id="searchSubmit">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PAGE HEADER
+===================================================== -->
+
+<section class="page-header">
+
+    <div class="container">
+
+        <h1>
+            Shop
+        </h1>
+
+
+        <div class="breadcrumb">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <i class="fa-solid fa-chevron-right"></i>
+
+            <span>
+                Shop
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SHOP
+===================================================== -->
+
+<section class="shop-section">
+
+    <div class="container">
+
+
+        <div class="shop-layout">
+
+
+            <!-- =================================================
+                 SIDEBAR
+            ================================================= -->
+
+            <aside class="shop-sidebar">
+
+                <div class="filter-header">
+
+                    <h3>
+                        Filters
+                    </h3>
+
+
+                    <button
+                        class="clear-filters"
+                        id="clearFilters"
+                    >
+                        Clear All
+                    </button>
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="filter-group">
+
+                    <h4>
+                        Category
+                    </h4>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="men"
+                            class="category-filter"
+                        >
+
+                        Men's Fashion
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="women"
+                            class="category-filter"
+                        >
+
+                        Women's Fashion
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="shoes"
+                            class="category-filter"
+                        >
+
+                        Footwear
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="accessories"
+                            class="category-filter"
+                        >
+
+                        Accessories
+
+                    </label>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="electronics"
+                            class="category-filter"
+                        >
+
+                        Electronics
+
+                    </label>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="home"
+                            class="category-filter"
+                        >
+
+                        Home & Living
+
+                    </label>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="beauty"
+                            class="category-filter"
+                        >
+
+                        Beauty
+
+                    </label>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="appliances"
+                            class="category-filter"
+                        >
+
+                        Appliances
+
+                    </label>
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="fitness"
+                            class="category-filter"
+                        >
+
+                        Fitness
+
+                    </label>
+
+                </div>
+
+
+                <!-- PRICE -->
+
+                <div class="filter-group">
+
+                    <h4>
+                        Maximum Price
+                    </h4>
+
+
+                    <div class="price-value">
+
+                        <span>
+                            ₹500
+                        </span>
+
+                        <strong id="priceValue">
+                            ₹5000
+                        </strong>
+
+                    </div>
+
+
+                    <input
+                        type="range"
+                        id="priceFilter"
+                        min="500"
+                        max="5000"
+                        step="100"
+                        value="5000"
+                    >
+
+                </div>
+
+
+                <!-- RATING -->
+
+                <div class="filter-group">
+
+                    <h4>
+                        Customer Rating
+                    </h4>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="radio"
+                            name="rating"
+                            value="4"
+                        >
+
+                        <i class="fa-solid fa-star"></i>
+                        4 & above
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="radio"
+                            name="rating"
+                            value="3"
+                        >
+
+                        <i class="fa-solid fa-star"></i>
+                        3 & above
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="radio"
+                            name="rating"
+                            value="0"
+                            checked
+                        >
+
+                        All Ratings
+
+                    </label>
+
+                </div>
+
+
+                <!-- BRANDS -->
+
+                <div class="filter-group">
+
+                    <h4>
+                        Brand
+                    </h4>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="UrbanStep"
+                            class="brand-filter"
+                        >
+
+                        UrbanStep
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="StreetWear"
+                            class="brand-filter"
+                        >
+
+                        StreetWear
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="CarryPro"
+                            class="brand-filter"
+                        >
+
+                        CarryPro
+
+                    </label>
+
+
+                    <label class="filter-option">
+
+                        <input
+                            type="checkbox"
+                            value="RunMax"
+                            class="brand-filter"
+                        >
+
+                        RunMax
+
+                    </label>
+
+                </div>
+
+            </aside>
+
+
+            <!-- =================================================
+                 PRODUCTS
+            ================================================= -->
+
+            <div class="shop-products">
+
+
+                <div class="shop-toolbar">
+
+
+                    <div
+                        class="shop-count"
+                        id="shopCount"
+                    >
+                        Showing
+                        <strong>0</strong>
+                        products
+                    </div>
+
+
+                    <div class="sort-wrapper">
+
+                        <label for="sortProducts">
+                            Sort by:
+                        </label>
+
+
+                        <select
+                            id="sortProducts"
+                        >
+
+                            <option value="featured">
+                                Featured
+                            </option>
+
+                            <option value="price-low">
+                                Price: Low to High
+                            </option>
+
+                            <option value="price-high">
+                                Price: High to Low
+                            </option>
+
+                            <option value="rating">
+                                Highest Rated
+                            </option>
+
+                            <option value="name">
+                                Name: A-Z
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PRODUCT GRID -->
+
+                <div
+                    class="product-grid"
+                    id="shopProductGrid"
+                ></div>
+
+
+                <!-- NO PRODUCTS -->
+
+                <div
+                    class="no-products"
+                    id="noProducts"
+                    style="display: none;"
+                >
+
+                    <i class="fa-solid fa-box-open"></i>
+
+                    <h3>
+                        No Products Found
+                    </h3>
+
+                    <p>
+                        Try changing your filters or search.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+    <div class="container footer-grid">
+
+
+        <div class="footer-brand">
+
+            <a
+                href="index.html"
+                class="logo footer-logo"
+            >
+
+                <span class="logo-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </span>
+
+                <span>
+                    Shop<span class="logo-highlight">Ease</span>
+                </span>
+
+            </a>
+
+
+            <p>
+                Your trusted destination for fashion,
+                footwear and accessories.
+            </p>
+
+
+            <div class="social-links">
+
+                <a href="#">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+
+                <a href="#">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Shop
+            </h3>
+
+            <a href="shop.html">
+                All Products
+            </a>
+
+            <a href="shop.html?category=men">
+                Men's Fashion
+            </a>
+
+            <a href="shop.html?category=women">
+                Women's Fashion
+            </a>
+
+            <a href="shop.html?category=shoes">
+                Footwear
+            </a>
+
+            <a href="shop.html?category=accessories">
+                Accessories
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Customer Care
+            </h3>
+
+            <a href="contact.html">
+                Contact Us
+            </a>
+
+            <a href="faq.html">
+                FAQ
+            </a>
+
+            <a href="my-orders.html">
+                Track Order
+            </a>
+
+            <a href="privacy-policy.html">
+                Privacy Policy
+            </a>
+
+            <a href="terms.html">
+                Terms & Conditions
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h3>
+                Company
+            </h3>
+
+            <a href="about.html">
+                About Us
+            </a>
+
+            <a href="contact.html">
+                Careers
+            </a>
+
+            <a href="contact.html">
+                Become a Seller
+            </a>
+
+            <a href="contact.html">
+                Help Center
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <div class="container footer-bottom-content">
+
+            <p>
+                © 2026 ShopEase. All rights reserved.
+            </p>
+
+
+            <div class="payment-icons">
+
+                <i class="fa-brands fa-cc-visa"></i>
+
+                <i class="fa-brands fa-cc-mastercard"></i>
+
+                <i class="fa-brands fa-cc-amex"></i>
+
+                <i class="fa-solid fa-credit-card"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    class="toast"
+    id="toast"
+>
+
+    <i class="fa-solid fa-check-circle"></i>
+
+    <span id="toastMessage">
+        Message
+    </span>
+
+</div>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script src="js/products.js"></script>
+
+<script src="js/main.js"></script>
+
+<script src="js/search.js"></script>
+
+<script src="js/filters.js"></script>
+
+
+</body>
+
+</html>

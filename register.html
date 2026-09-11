@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Account | ShopEase</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <style>
+
+        .auth-page {
+            min-height: 70vh;
+            padding: 60px 20px;
+            background: #f8fafc;
+        }
+
+        .auth-container {
+            max-width: 520px;
+            margin: auto;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(15,23,42,.08);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-icon {
+            width: 65px;
+            height: 65px;
+            margin: auto auto 18px;
+            border-radius: 50%;
+            background: #fff7ed;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
+        }
+
+        .auth-header h1 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .auth-header p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .auth-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .auth-input-wrapper {
+            position: relative;
+        }
+
+        .auth-input-wrapper > i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .auth-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 45px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            outline: none;
+            font: inherit;
+        }
+
+        .auth-input:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .form-error,
+        .form-success {
+            display: none;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .form-error {
+            color: #dc2626;
+        }
+
+        .form-success {
+            color: #16a34a;
+            background: #f0fdf4;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .form-error.show,
+        .form-success.show {
+            display: block;
+        }
+
+        .auth-button {
+            width: 100%;
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .auth-link {
+            color: #d97706;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .password-hint {
+            margin-top: 6px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        @media (max-width: 550px) {
+
+            .auth-page {
+                padding: 40px 15px;
+            }
+
+            .auth-card {
+                padding: 28px 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="top-bar">
+
+        <div class="container top-bar-content">
+
+            <span>
+                <i class="fa-solid fa-truck"></i>
+                Free shipping on orders above ₹999
+            </span>
+
+            <span>
+                <i class="fa-solid fa-phone"></i>
+                Support: +91 98765 43210
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <header class="main-header">
+
+        <div class="container navbar">
+
+            <a href="index.html" class="logo">
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </span>
+
+                <span>
+                    Shop<span>Ease</span>
+                </span>
+
+            </a>
+
+
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="index.html">Home</a>
+                <a href="shop.html">Shop</a>
+                <a href="categories.html">Categories</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+                <button
+                    class="nav-action search-toggle"
+                    id="searchToggle"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+                <a href="wishlist.html" class="nav-action">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="nav-badge" id="wishlistCount">0</span>
+                </a>
+
+                <a href="cart.html" class="nav-action">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="nav-badge" id="cartCount">0</span>
+                </a>
+
+                <a href="login.html" class="nav-action">
+                    <i class="fa-regular fa-user"></i>
+                </a>
+
+                <button
+                    class="mobile-menu-toggle"
+                    id="mobileMenuToggle"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="search-overlay" id="searchOverlay">
+
+        <div class="container search-container">
+
+            <button
+                class="search-close"
+                id="searchClose"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <form
+                class="search-form"
+                id="searchForm"
+            >
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search products..."
+                >
+
+                <button type="submit">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <main class="auth-page">
+
+        <div class="auth-container">
+
+            <div class="auth-card">
+
+                <div class="auth-header">
+
+                    <div class="auth-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <h1>Create Account</h1>
+
+                    <p>
+                        Join ShopEase and start shopping today.
+                    </p>
+
+                </div>
+
+
+                <form
+                    class="auth-form"
+                    id="registerForm"
+                >
+
+                    <div class="auth-group">
+
+                        <label for="registerName">
+                            Full Name
+                        </label>
+
+                        <div class="auth-input-wrapper">
+
+                            <i class="fa-regular fa-user"></i>
+
+                            <input
+                                type="text"
+                                id="registerName"
+                                class="auth-input"
+                                placeholder="Your full name"
+                            >
+
+                        </div>
+
+                        <div
+                            class="form-error"
+                            id="registerNameError"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="auth-group">
+
+                        <label for="registerEmail">
+                            Email Address
+                        </label>
+
+                        <div class="auth-input-wrapper">
+
+                            <i class="fa-regular fa-envelope"></i>
+
+                            <input
+                                type="email"
+                                id="registerEmail"
+                                class="auth-input"
+                                placeholder="you@example.com"
+                            >
+
+                        </div>
+
+                        <div
+                            class="form-error"
+                            id="registerEmailError"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="auth-group">
+
+                        <label for="registerPhone">
+                            Mobile Number
+                        </label>
+
+                        <div class="auth-input-wrapper">
+
+                            <i class="fa-solid fa-phone"></i>
+
+                            <input
+                                type="tel"
+                                id="registerPhone"
+                                class="auth-input"
+                                placeholder="10-digit mobile number"
+                                maxlength="10"
+                            >
+
+                        </div>
+
+                        <div
+                            class="form-error"
+                            id="registerPhoneError"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="auth-group">
+
+                        <label for="registerPassword">
+                            Password
+                        </label>
+
+                        <div class="auth-input-wrapper">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input
+                                type="password"
+                                id="registerPassword"
+                                class="auth-input"
+                                placeholder="Create a password"
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="registerPassword"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="password-hint">
+                            Minimum 6 characters.
+                        </div>
+
+                        <div
+                            class="form-error"
+                            id="registerPasswordError"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="auth-group">
+
+                        <label for="registerConfirmPassword">
+                            Confirm Password
+                        </label>
+
+                        <div class="auth-input-wrapper">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input
+                                type="password"
+                                id="registerConfirmPassword"
+                                class="auth-input"
+                                placeholder="Confirm your password"
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                data-target="registerConfirmPassword"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+
+                        </div>
+
+                        <div
+                            class="form-error"
+                            id="registerConfirmPasswordError"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        class="form-error"
+                        id="registerGeneralError"
+                    ></div>
+
+                    <div
+                        class="form-success"
+                        id="registerGeneralSuccess"
+                    ></div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary auth-button"
+                    >
+                        <i class="fa-solid fa-user-plus"></i>
+                        Create Account
+                    </button>
+
+                </form>
+
+
+                <div class="auth-footer">
+
+                    Already have an account?
+
+                    <a
+                        href="login.html"
+                        class="auth-link"
+                    >
+                        Login
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="main-footer">
+
+        <div class="container footer-grid">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo footer-logo">
+
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span>Ease</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Your trusted online destination for quality products,
+                    great prices and a seamless shopping experience.
+                </p>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Shop</h3>
+
+                <a href="shop.html">All Products</a>
+                <a href="shop.html?category=men">Men</a>
+                <a href="shop.html?category=women">Women</a>
+                <a href="shop.html?category=shoes">Shoes</a>
+                <a href="shop.html?category=accessories">Accessories</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Customer Care</h3>
+
+                <a href="contact.html">Contact Us</a>
+                <a href="faq.html">FAQ</a>
+                <a href="my-orders.html">My Orders</a>
+                <a href="wishlist.html">Wishlist</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Information</h3>
+
+                <a href="about.html">About Us</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <div class="container footer-bottom-content">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+                <div class="payment-icons">
+
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-brands fa-cc-amex"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+
+</body>
+
+</html>

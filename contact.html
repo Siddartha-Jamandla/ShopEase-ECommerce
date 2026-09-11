@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Contact Us | ShopEase</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+
+    <style>
+
+        .contact-page {
+            min-height: 70vh;
+            padding: 55px 0 80px;
+            background: #f8fafc;
+        }
+
+        .contact-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .contact-header h1 {
+            margin: 0 0 10px;
+            color: #0f172a;
+            font-size: 36px;
+        }
+
+        .contact-header p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 25px;
+        }
+
+        .contact-info,
+        .contact-form-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 30px;
+        }
+
+        .contact-info h2,
+        .contact-form-card h2 {
+            margin: 0 0 20px;
+            color: #0f172a;
+            font-size: 21px;
+        }
+
+        .contact-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .contact-icon {
+            width: 45px;
+            height: 45px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: #fff7ed;
+            color: #f59e0b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contact-item h3 {
+            margin: 0 0 5px;
+            color: #334155;
+            font-size: 14px;
+        }
+
+        .contact-item p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .contact-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .contact-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .contact-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .contact-group label {
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .contact-group input,
+        .contact-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .contact-group input {
+            height: 45px;
+        }
+
+        .contact-group textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .contact-group input:focus,
+        .contact-group textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+        }
+
+        .contact-submit {
+            margin-top: 5px;
+        }
+
+        @media (max-width: 750px) {
+
+            .contact-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-form {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-group.full {
+                grid-column: auto;
+            }
+
+            .contact-info,
+            .contact-form-card {
+                padding: 22px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="top-bar">
+
+        <div class="container top-bar-content">
+
+            <span>
+                <i class="fa-solid fa-truck"></i>
+                Free shipping on orders above ₹999
+            </span>
+
+            <span>
+                <i class="fa-solid fa-phone"></i>
+                Support: +91 98765 43210
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <header class="navbar">
+
+        <div class="container navbar-container">
+
+            <a href="index.html" class="logo">
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </span>
+
+                <span>
+                    Shop<span class="logo-highlight">Ease</span>
+                </span>
+
+            </a>
+
+
+            <nav class="nav-menu" id="navMenu">
+
+                <a href="index.html" class="nav-link">
+                    Home
+                </a>
+
+                <a href="shop.html" class="nav-link">
+                    Shop
+                </a>
+
+                <a href="categories.html" class="nav-link">
+                    Categories
+                </a>
+
+                <a href="about.html" class="nav-link">
+                    About
+                </a>
+
+                <a href="contact.html" class="nav-link">
+                    Contact
+                </a>
+
+            </nav>
+
+
+            <div class="nav-actions">
+
+                <button
+                    type="button"
+                    class="nav-action"
+                    id="searchButton"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+
+                <a href="wishlist.html" class="nav-action">
+
+                    <i class="fa-regular fa-heart"></i>
+
+                    <span class="nav-badge" id="wishlistBadge">
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="cart.html" class="nav-action">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                    <span class="nav-badge" id="cartBadge">
+                        0
+                    </span>
+
+                </a>
+
+
+                <a href="profile.html" class="nav-action">
+
+                    <i class="fa-regular fa-user"></i>
+
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="search-overlay" id="searchOverlay">
+
+        <div class="search-box">
+
+            <button
+                type="button"
+                class="search-close"
+                id="searchClose"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+
+            <form id="searchForm">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search products..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-submit"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <main class="contact-page">
+
+        <div class="container">
+
+            <div class="contact-header">
+
+                <h1>
+                    Contact Us
+                </h1>
+
+                <p>
+                    Have a question? We'd love to hear from you.
+                </p>
+
+            </div>
+
+
+            <div class="contact-layout">
+
+
+                <section class="contact-info">
+
+                    <h2>
+                        Get In Touch
+                    </h2>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Address
+                            </h3>
+
+                            <p>
+                                ShopEase Customer Support<br>
+                                Hyderabad, Telangana, India
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Phone
+                            </h3>
+
+                            <p>
+                                +91 98765 43210
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Email
+                            </h3>
+
+                            <p>
+                                support@shopease.example
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="contact-item">
+
+                        <div class="contact-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+
+                        <div>
+
+                            <h3>
+                                Support Hours
+                            </h3>
+
+                            <p>
+                                Monday – Saturday<br>
+                                9:00 AM – 6:00 PM
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="contact-form-card">
+
+                    <h2>
+                        Send Us a Message
+                    </h2>
+
+
+                    <form
+                        class="contact-form"
+                        id="contactForm"
+                    >
+
+
+                        <div class="contact-group">
+
+                            <label for="contactName">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="contactName"
+                                required
+                                placeholder="Enter your name"
+                            >
+
+                        </div>
+
+
+                        <div class="contact-group">
+
+                            <label for="contactEmail">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="contactEmail"
+                                required
+                                placeholder="Enter your email"
+                            >
+
+                        </div>
+
+
+                        <div class="contact-group full">
+
+                            <label for="contactSubject">
+                                Subject
+                            </label>
+
+                            <input
+                                type="text"
+                                id="contactSubject"
+                                required
+                                placeholder="What can we help with?"
+                            >
+
+                        </div>
+
+
+                        <div class="contact-group full">
+
+                            <label for="contactMessage">
+                                Message
+                            </label>
+
+                            <textarea
+                                id="contactMessage"
+                                required
+                                placeholder="Write your message..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="contact-submit">
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+
+                                <i class="fa-solid fa-paper-plane"></i>
+
+                                Send Message
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <footer class="footer">
+
+        <div class="container footer-grid">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo">
+
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span class="logo-highlight">Ease</span>
+                    </span>
+
+                </a>
+
+                <p>
+                    Your trusted destination for quality fashion,
+                    footwear and accessories.
+                </p>
+
+                <div class="footer-social">
+
+                    <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Shop</h3>
+
+                <a href="shop.html">All Products</a>
+                <a href="shop.html?category=men">Men</a>
+                <a href="shop.html?category=women">Women</a>
+                <a href="shop.html?category=shoes">Footwear</a>
+                <a href="shop.html?category=accessories">Accessories</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Customer Service</h3>
+
+                <a href="contact.html">Contact Us</a>
+                <a href="faq.html">FAQ</a>
+                <a href="my-orders.html">My Orders</a>
+                <a href="wishlist.html">Wishlist</a>
+                <a href="profile.html">My Account</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h3>Information</h3>
+
+                <a href="about.html">About Us</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <div class="container">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+                <div class="payment-icons">
+
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-brands fa-cc-paypal"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <div class="toast" id="toast">
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        <span id="toastMessage">
+            Done
+        </span>
+
+    </div>
+
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+
+
+    <script>
+
+        document
+            .getElementById("contactForm")
+            .addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+                    showToast(
+                        "Your message has been submitted successfully."
+                    );
+
+                    this.reset();
+
+                }
+            );
+
+    </script>
+
+</body>
+
+</html>

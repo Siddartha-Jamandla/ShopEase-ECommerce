@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Product Details - ShopEase</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- Product CSS -->
+    <link rel="stylesheet" href="css/product.css">
+</head>
+
+<body>
+
+<!-- =========================================
+     TOP BAR
+========================================= -->
+
+<div class="top-bar">
+    <div class="container top-bar-content">
+        <span>
+            <i class="fa-solid fa-truck"></i>
+            Free shipping on orders above ₹999
+        </span>
+
+        <span>
+            <i class="fa-solid fa-phone"></i>
+            Support: +91 98765 43210
+        </span>
+    </div>
+</div>
+
+
+<!-- =========================================
+     NAVBAR
+========================================= -->
+
+<header class="navbar">
+    <div class="container navbar-container">
+
+        <a href="index.html" class="logo">
+            <span class="logo-icon">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </span>
+            <span>Shop<span>Ease</span></span>
+        </a>
+
+        <nav class="nav-menu" id="navMenu">
+            <a href="index.html">Home</a>
+            <a href="shop.html">Shop</a>
+            <a href="categories.html">Categories</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+
+        <div class="nav-actions">
+
+            <button class="nav-action search-btn" id="openSearch">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+
+            <a href="wishlist.html" class="nav-action">
+                <i class="fa-regular fa-heart"></i>
+                <span class="nav-badge" id="wishlistCount">0</span>
+            </a>
+
+            <a href="cart.html" class="nav-action">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="nav-badge" id="cartCount">0</span>
+            </a>
+
+            <a href="login.html" class="nav-action account-action">
+                <i class="fa-regular fa-user"></i>
+            </a>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+        </div>
+    </div>
+</header>
+
+
+<!-- =========================================
+     SEARCH OVERLAY
+========================================= -->
+
+<div class="search-overlay" id="searchOverlay">
+
+    <div class="search-box">
+
+        <button class="search-close" id="closeSearch">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h3>Search Products</h3>
+
+        <div class="search-input-wrapper">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search for products..."
+            >
+
+            <button id="searchSubmit">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================
+     PRODUCT DETAILS
+========================================= -->
+
+<main class="product-details-page">
+
+    <div class="container">
+
+        <div class="product-breadcrumb">
+            <a href="index.html">Home</a>
+            <span>/</span>
+            <a href="shop.html">Shop</a>
+            <span>/</span>
+            <span id="breadcrumbProduct">Product</span>
+        </div>
+
+
+        <!-- PRODUCT CONTENT -->
+
+        <div id="productContent">
+
+            <div class="product-details-layout">
+
+                <!-- =============================
+                     GALLERY
+                ============================== -->
+
+                <div class="product-gallery">
+
+                    <div class="product-main-image">
+
+                        <span
+                            class="product-gallery-badge"
+                            id="productBadge"
+                        >
+                            SALE
+                        </span>
+
+                        <img
+                            id="mainProductImage"
+                            src=""
+                            alt="Product"
+                            style="display: none;"
+                        >
+
+                        <div
+                            class="product-main-placeholder"
+                            id="mainImagePlaceholder"
+                        >
+                            <i class="fa-solid fa-image"></i>
+                        </div>
+
+                    </div>
+
+
+                    <div class="product-thumbnails">
+
+                        <button
+                            class="product-thumbnail active"
+                            onclick="changeProductImage(1, this)"
+                        >
+                            <img
+                                id="thumbnail1"
+                                src=""
+                                alt="Product image"
+                            >
+
+                            <span class="thumbnail-placeholder">
+                                <i class="fa-solid fa-image"></i>
+                            </span>
+                        </button>
+
+                        <button
+                            class="product-thumbnail"
+                            onclick="changeProductImage(2, this)"
+                        >
+                            <img
+                                id="thumbnail2"
+                                src=""
+                                alt="Product image"
+                            >
+
+                            <span class="thumbnail-placeholder">
+                                <i class="fa-solid fa-image"></i>
+                            </span>
+                        </button>
+
+                        <button
+                            class="product-thumbnail"
+                            onclick="changeProductImage(3, this)"
+                        >
+                            <img
+                                id="thumbnail3"
+                                src=""
+                                alt="Product image"
+                            >
+
+                            <span class="thumbnail-placeholder">
+                                <i class="fa-solid fa-image"></i>
+                            </span>
+                        </button>
+
+                        <button
+                            class="product-thumbnail"
+                            onclick="changeProductImage(4, this)"
+                        >
+                            <img
+                                id="thumbnail4"
+                                src=""
+                                alt="Product image"
+                            >
+
+                            <span class="thumbnail-placeholder">
+                                <i class="fa-solid fa-image"></i>
+                            </span>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================
+                     PRODUCT INFORMATION
+                ============================== -->
+
+                <div class="product-details-info">
+
+                    <div
+                        class="product-category-label"
+                        id="productCategory"
+                    >
+                        Category
+                    </div>
+
+                    <h1
+                        class="product-details-title"
+                        id="productName"
+                    >
+                        Product Name
+                    </h1>
+
+
+                    <div class="product-details-rating">
+
+                        <span
+                            class="rating-stars"
+                            id="productRatingStars"
+                        >
+                            ★★★★★
+                        </span>
+
+                        <span
+                            class="rating-text"
+                            id="productRatingText"
+                        >
+                            4.8 (124 reviews)
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-details-price">
+
+                        <span
+                            class="current-price"
+                            id="productPrice"
+                        >
+                            ₹2,499
+                        </span>
+
+                        <span
+                            class="old-price"
+                            id="productOldPrice"
+                        >
+                            ₹3,299
+                        </span>
+
+                        <span
+                            class="discount-label"
+                            id="productDiscount"
+                        >
+                            24% OFF
+                        </span>
+
+                    </div>
+
+
+                    <p
+                        class="product-details-description"
+                        id="productDescription"
+                    >
+                        Product description.
+                    </p>
+
+
+                    <hr class="product-divider">
+
+
+                    <!-- SIZE -->
+
+                    <div class="product-option">
+
+                        <span class="product-option-title">
+                            Select Size
+                        </span>
+
+                        <div class="option-buttons">
+
+                            <button
+                                class="size-button"
+                                onclick="selectSize(this)"
+                            >
+                                S
+                            </button>
+
+                            <button
+                                class="size-button active"
+                                onclick="selectSize(this)"
+                            >
+                                M
+                            </button>
+
+                            <button
+                                class="size-button"
+                                onclick="selectSize(this)"
+                            >
+                                L
+                            </button>
+
+                            <button
+                                class="size-button"
+                                onclick="selectSize(this)"
+                            >
+                                XL
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- COLOR -->
+
+                    <div class="product-option">
+
+                        <span class="product-option-title">
+                            Select Color
+                        </span>
+
+                        <div class="option-buttons">
+
+                            <button
+                                class="color-button active"
+                                style="--color-value: #111827;"
+                                data-color="Black"
+                                onclick="selectColor(this)"
+                                aria-label="Black"
+                            ></button>
+
+                            <button
+                                class="color-button"
+                                style="--color-value: #ffffff;"
+                                data-color="White"
+                                onclick="selectColor(this)"
+                                aria-label="White"
+                            ></button>
+
+                            <button
+                                class="color-button"
+                                style="--color-value: #64748b;"
+                                data-color="Grey"
+                                onclick="selectColor(this)"
+                                aria-label="Grey"
+                            ></button>
+
+                            <button
+                                class="color-button"
+                                style="--color-value: #1d4ed8;"
+                                data-color="Blue"
+                                onclick="selectColor(this)"
+                                aria-label="Blue"
+                            ></button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PURCHASE -->
+
+                    <div class="purchase-row">
+
+                        <div class="quantity-control">
+
+                            <button
+                                class="quantity-button"
+                                onclick="changeQuantity(-1)"
+                            >
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+
+                            <span
+                                class="quantity-value"
+                                id="productQuantity"
+                            >
+                                1
+                            </span>
+
+                            <button
+                                class="quantity-button"
+                                onclick="changeQuantity(1)"
+                            >
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+
+                        </div>
+
+
+                        <button
+                            class="add-cart-button"
+                            onclick="addCurrentProductToCart(false)"
+                        >
+                            <i class="fa-solid fa-cart-plus"></i>
+                            Add to Cart
+                        </button>
+
+
+                        <button
+                            class="product-wishlist-button"
+                            id="productWishlistButton"
+                            onclick="toggleProductWishlist()"
+                            aria-label="Add to wishlist"
+                        >
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+
+                    </div>
+
+
+                    <button
+                        class="buy-now-button"
+                        onclick="addCurrentProductToCart(true)"
+                    >
+                        Buy Now
+                    </button>
+
+
+                    <!-- DELIVERY -->
+
+                    <div class="delivery-box">
+
+                        <div class="delivery-item">
+
+                            <div class="delivery-icon">
+                                <i class="fa-solid fa-truck"></i>
+                            </div>
+
+                            <div>
+                                <strong>Free Delivery</strong>
+                                <span>
+                                    Free delivery on orders above ₹999
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="delivery-item">
+
+                            <div class="delivery-icon">
+                                <i class="fa-solid fa-rotate-left"></i>
+                            </div>
+
+                            <div>
+                                <strong>Easy Returns</strong>
+                                <span>
+                                    7-day easy return policy
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="delivery-item">
+
+                            <div class="delivery-icon">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+
+                            <div>
+                                <strong>Secure Payment</strong>
+                                <span>
+                                    100% secure payment experience
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PRODUCT NOT FOUND -->
+
+        <div
+            class="product-not-found"
+            id="productNotFound"
+            style="display: none;"
+        >
+            <i class="fa-solid fa-box-open"></i>
+
+            <h2>Product Not Found</h2>
+
+            <p>
+                Sorry, the product you are looking for does not exist.
+            </p>
+
+            <a href="shop.html" class="btn btn-primary">
+                Continue Shopping
+            </a>
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================
+     RELATED PRODUCTS
+========================================= -->
+
+<section class="related-products">
+
+    <div class="container">
+
+        <div class="related-products-header">
+            <h2>You May Also Like</h2>
+            <p>More products you might be interested in</p>
+        </div>
+
+        <div
+            class="product-grid"
+            id="relatedProductsGrid"
+        >
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer class="footer">
+
+    <div class="container">
+
+        <div class="footer-grid">
+
+            <div class="footer-brand">
+
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+                    <span>Shop<span>Ease</span></span>
+                </a>
+
+                <p>
+                    Your trusted destination for fashion,
+                    footwear and lifestyle products.
+                </p>
+
+                <div class="social-links">
+
+                    <a href="#">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+
+                    <a href="#">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>Shop</h4>
+
+                <a href="shop.html">All Products</a>
+                <a href="shop.html?category=men">Men</a>
+                <a href="shop.html?category=women">Women</a>
+                <a href="shop.html?category=shoes">Shoes</a>
+                <a href="shop.html?category=accessories">Accessories</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>Information</h4>
+
+                <a href="about.html">About Us</a>
+                <a href="contact.html">Contact</a>
+                <a href="faq.html">FAQ</a>
+                <a href="privacy-policy.html">Privacy Policy</a>
+                <a href="terms.html">Terms & Conditions</a>
+
+            </div>
+
+
+            <div class="footer-column">
+
+                <h4>Account</h4>
+
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+                <a href="wishlist.html">Wishlist</a>
+                <a href="my-orders.html">My Orders</a>
+                <a href="profile.html">My Profile</a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 ShopEase. All rights reserved.
+            </p>
+
+            <div class="payment-icons">
+                <i class="fa-brands fa-cc-visa"></i>
+                <i class="fa-brands fa-cc-mastercard"></i>
+                <i class="fa-brands fa-cc-paypal"></i>
+                <i class="fa-solid fa-credit-card"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- Toast -->
+
+<div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMessage">Success</span>
+</div>
+
+
+<!-- =========================================
+     JAVASCRIPT
+========================================= -->
+
+<script src="js/products.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

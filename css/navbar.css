@@ -1,0 +1,232 @@
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.navbar-wrapper {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 900;
+
+    background: var(--white);
+
+    border-bottom: 1px solid var(--border);
+}
+
+.navbar {
+    min-height: 74px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.logo {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    color: var(--dark);
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+
+    display: grid;
+    place-items: center;
+
+    background: var(--primary);
+
+    color: var(--white);
+
+    border-radius: 9px;
+
+    font-size: 16px;
+}
+
+.logo-highlight {
+    color: var(--primary);
+}
+
+
+/* =====================================================
+   DESKTOP NAVIGATION
+===================================================== */
+
+.nav-menu {
+    display: flex;
+
+    align-items: center;
+
+    gap: 30px;
+}
+
+.nav-menu a {
+    position: relative;
+
+    color: var(--text);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    padding: 28px 0;
+
+    transition: 0.3s;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+    color: var(--primary-dark);
+}
+
+.nav-menu a.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 17px;
+
+    height: 2px;
+
+    background: var(--primary);
+}
+
+
+/* =====================================================
+   NAV ACTIONS
+===================================================== */
+
+.nav-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+.nav-action-btn {
+    width: 40px;
+    height: 40px;
+
+    position: relative;
+
+    display: grid;
+    place-items: center;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--dark);
+
+    border-radius: 50%;
+
+    font-size: 16px;
+
+    transition: 0.3s;
+}
+
+.nav-action-btn:hover {
+    background: var(--light-2);
+
+    color: var(--primary-dark);
+}
+
+.nav-badge {
+    min-width: 17px;
+    height: 17px;
+
+    position: absolute;
+
+    top: 1px;
+    right: 0;
+
+    display: grid;
+    place-items: center;
+
+    padding: 0 4px;
+
+    background: var(--primary);
+
+    color: var(--white);
+
+    border: 2px solid var(--white);
+
+    border-radius: 20px;
+
+    font-size: 8px;
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   MOBILE MENU BUTTON
+===================================================== */
+
+.mobile-menu-btn {
+    display: none;
+}
+
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+.mobile-menu {
+    display: none;
+
+    padding: 10px 20px 20px;
+
+    border-top: 1px solid var(--border);
+
+    background: var(--white);
+}
+
+.mobile-menu.active {
+    display: block;
+}
+
+.mobile-menu a {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px 0;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--dark);
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mobile-menu a:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu a i {
+    width: 20px;
+
+    color: var(--primary-dark);
+}

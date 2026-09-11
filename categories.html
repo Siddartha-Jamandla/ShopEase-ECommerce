@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Categories | ShopEase</title>
+
+    <meta
+        name="description"
+        content="Browse ShopEase products by category."
+    >
+
+    <!-- Google Font -->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- Main CSS -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/components.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/navbar.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/footer.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+    <!-- Category CSS -->
+    <style>
+
+        /* =====================================================
+           CATEGORY PAGE
+        ===================================================== */
+
+        .category-page {
+            padding: 60px 0 80px;
+        }
+
+        .category-intro {
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto 45px;
+        }
+
+        .category-intro .eyebrow {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #f59e0b;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .category-intro h1 {
+            margin: 0 0 12px;
+            color: #0f172a;
+            font-size: 40px;
+            font-weight: 800;
+        }
+
+        .category-intro p {
+            margin: 0;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+
+        /* =====================================================
+           FILTER BAR
+        ===================================================== */
+
+        .category-filter-box {
+            margin-bottom: 45px;
+            padding: 24px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .category-filter-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .category-filter-top h3 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 18px;
+        }
+
+        .category-filter-top p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .category-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-filter-actions button {
+            border: 0;
+            background: transparent;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+
+        /* =====================================================
+           FILTER GRID
+        ===================================================== */
+
+        .category-filters {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .filter-group h4 {
+            margin: 0 0 12px;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-option input {
+            accent-color: #f59e0b;
+        }
+
+
+        /* =====================================================
+           PRICE FILTER
+        ===================================================== */
+
+        .price-value {
+            margin-top: 8px;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        #categoryMaxPrice {
+            width: 100%;
+            accent-color: #f59e0b;
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           SORT BAR
+        ===================================================== */
+
+        .category-products-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .category-products-count {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .category-sort {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-sort label {
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .category-sort select {
+            min-width: 190px;
+            padding: 10px 35px 10px 12px;
+            border: 1px solid #dbe1e8;
+            border-radius: 8px;
+            background: #fff;
+            color: #0f172a;
+            cursor: pointer;
+            outline: none;
+        }
+
+
+        /* =====================================================
+           CATEGORY SECTIONS
+        ===================================================== */
+
+        .category-product-section {
+            margin-bottom: 65px;
+        }
+
+        .category-product-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .category-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .category-title-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .category-section-icon {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: #fff7ed;
+            color: #f59e0b;
+            font-size: 20px;
+        }
+
+        .category-label {
+            display: block;
+            margin-bottom: 4px;
+            color: #f59e0b;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+        }
+
+        .category-section-header h2 {
+            margin: 0 0 5px;
+            color: #0f172a;
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        .category-section-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .category-section-action {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .category-product-count {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .category-view-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .category-view-all:hover {
+            color: #f59e0b;
+        }
+
+        .category-product-grid {
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+        .category-empty {
+            padding: 70px 20px;
+            text-align: center;
+            border: 1px dashed #dbe1e8;
+            border-radius: 14px;
+            background: #f8fafc;
+        }
+
+        .category-empty i {
+            margin-bottom: 14px;
+            color: #94a3b8;
+            font-size: 34px;
+        }
+
+        .category-empty h3 {
+            margin: 0 0 7px;
+            color: #0f172a;
+            font-size: 20px;
+        }
+
+        .category-empty p {
+            margin: 0;
+            color: #64748b;
+        }
+
+
+        /* =====================================================
+           NO FILTER RESULTS
+        ===================================================== */
+
+        .category-no-results {
+            display: none;
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: 16px;
+            background: #f8fafc;
+        }
+
+        .category-no-results i {
+            margin-bottom: 15px;
+            color: #94a3b8;
+            font-size: 40px;
+        }
+
+        .category-no-results h3 {
+            margin: 0 0 8px;
+            color: #0f172a;
+        }
+
+        .category-no-results p {
+            margin: 0 0 20px;
+            color: #64748b;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 1000px) {
+
+            .category-filters {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .category-product-grid {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+            }
+
+        }
+
+
+        @media (max-width: 760px) {
+
+            .category-intro h1 {
+                font-size: 32px;
+            }
+
+            .category-filter-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .category-products-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .category-sort {
+                width: 100%;
+            }
+
+            .category-sort select {
+                width: 100%;
+            }
+
+            .category-section-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .category-section-action {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .category-product-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+
+        @media (max-width: 520px) {
+
+            .category-page {
+                padding: 40px 0 60px;
+            }
+
+            .category-filters {
+                grid-template-columns: 1fr;
+            }
+
+            .category-intro h1 {
+                font-size: 27px;
+            }
+
+            .category-section-icon {
+                width: 45px;
+                height: 45px;
+            }
+
+            .category-section-header h2 {
+                font-size: 21px;
+            }
+
+            .category-product-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+
+        /* =====================================================
+           PROFESSIONAL CATEGORY ENHANCEMENTS
+        ===================================================== */
+        :root {
+            --cat-primary: #f59e0b;
+            --cat-dark: #0f172a;
+            --cat-muted: #64748b;
+            --cat-border: #e5e7eb;
+            --cat-soft: #fffaf2;
+        }
+
+        .category-page {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(245,158,11,.07), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .category-intro {
+            position: relative;
+            padding: 10px 20px 0;
+        }
+
+        .category-intro .eyebrow {
+            padding: 7px 12px;
+            border: 1px solid rgba(245,158,11,.18);
+            border-radius: 999px;
+            background: rgba(255,247,237,.9);
+        }
+
+        .category-intro h1 {
+            font-size: clamp(30px, 5vw, 46px);
+            letter-spacing: -.8px;
+        }
+
+        .category-filter-box {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        .category-filter-box::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #f97316);
+        }
+
+        .filter-group {
+            min-width: 0;
+        }
+
+        .filter-option {
+            padding: 8px 10px;
+            border-radius: 8px;
+            transition: background .2s ease, color .2s ease, transform .2s ease;
+        }
+
+        .filter-option:hover {
+            background: #fff7ed;
+            color: #0f172a;
+            transform: translateX(2px);
+        }
+
+        .filter-option input {
+            width: 15px;
+            height: 15px;
+        }
+
+        .category-products-toolbar {
+            padding: 14px 0;
+        }
+
+        .category-products-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-products-count::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+        }
+
+        .category-sort select {
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .category-sort select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+        }
+
+        .category-product-section {
+            padding: 4px 0 10px;
+        }
+
+        .category-section-header {
+            position: relative;
+        }
+
+        .category-title-area {
+            min-width: 0;
+        }
+
+        .category-section-icon {
+            box-shadow: 0 8px 20px rgba(245,158,11,.12);
+        }
+
+        .category-section-header h2 {
+            letter-spacing: -.3px;
+        }
+
+        .category-view-all {
+            padding: 9px 13px;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            background: #fff;
+            transition: all .2s ease;
+        }
+
+        .category-view-all:hover {
+            border-color: #f59e0b;
+            background: #fff7ed;
+            transform: translateY(-1px);
+        }
+
+        .category-no-results {
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 10px 30px rgba(15,23,42,.04);
+        }
+
+        .category-no-results .btn {
+            border-radius: 9px;
+        }
+
+        @media (max-width: 760px) {
+            .category-page {
+                padding-top: 34px;
+            }
+
+            .category-filter-box {
+                padding: 18px;
+            }
+
+            .category-section-action {
+                gap: 10px;
+            }
+        }
+
+        .quick-category-nav {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 0 0 30px;
+        }
+
+        .quick-category-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            padding: 15px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+            color: #0f172a;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 5px 18px rgba(15,23,42,.035);
+            transition: transform .2s ease, border-color .2s ease,
+                        box-shadow .2s ease, color .2s ease;
+        }
+
+        .quick-category-link > i:first-child {
+            color: #f59e0b;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .quick-category-link span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .quick-category-link > i:last-child {
+            margin-left: auto;
+            color: #94a3b8;
+            font-size: 11px;
+            transition: transform .2s ease;
+        }
+
+        .quick-category-link:hover {
+            border-color: rgba(245,158,11,.45);
+            color: #b45309;
+            box-shadow: 0 10px 24px rgba(15,23,42,.07);
+            transform: translateY(-2px);
+        }
+
+        .quick-category-link:hover > i:last-child {
+            transform: translateX(3px);
+        }
+
+        @media (max-width: 760px) {
+            .quick-category-nav {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .quick-category-nav {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+    <div class="top-bar">
+
+        <div class="container">
+
+            <div class="top-bar-content">
+
+                <span>
+                    <i class="fa-solid fa-truck"></i>
+                    Free shipping on orders above ₹999
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-phone"></i>
+                    Support: +91 98765 43210
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
+
+    <header class="site-header">
+
+        <div class="container">
+
+            <nav class="navbar">
+
+                <a
+                    href="index.html"
+                    class="logo"
+                >
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </span>
+
+                    <span>
+                        Shop<span>Ease</span>
+                    </span>
+                </a>
+
+
+                <button
+                    type="button"
+                    class="mobile-menu-toggle"
+                    id="mobileMenuToggle"
+                    aria-label="Open menu"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+
+                <ul
+                    class="nav-menu"
+                    id="navMenu"
+                >
+
+                    <li>
+                        <a href="index.html">
+                            Home
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="shop.html">
+                            Shop
+                        </a>
+                    </li>
+
+                    <li>
+                        <a
+                            href="categories.html"
+                            class="active"
+                        >
+                            Categories
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="about.html">
+                            About
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="contact.html">
+                            Contact
+                        </a>
+                    </li>
+
+                </ul>
+
+
+                <div class="navbar-actions">
+
+                    <button
+                        type="button"
+                        class="nav-action"
+                        id="searchToggle"
+                        aria-label="Search"
+                    >
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+
+
+                    <a
+                        href="wishlist.html"
+                        class="nav-action"
+                        aria-label="Wishlist"
+                    >
+                        <i class="fa-regular fa-heart"></i>
+                        <span
+                            class="nav-badge"
+                            id="wishlistCount"
+                        >
+                            0
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="cart.html"
+                        class="nav-action"
+                        aria-label="Cart"
+                    >
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span
+                            class="nav-badge"
+                            id="cartCount"
+                        >
+                            0
+                        </span>
+                    </a>
+
+
+                    <a
+                        href="profile.html"
+                        class="nav-action"
+                        aria-label="Account"
+                    >
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+
+                </div>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         SEARCH OVERLAY
+    ====================================================== -->
+
+    <div
+        class="search-overlay"
+        id="searchOverlay"
+    >
+
+        <div class="search-overlay-inner">
+
+            <form
+                id="searchForm"
+                class="search-form"
+            >
+
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Search products..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    aria-label="Search"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+
+            </form>
+
+            <button
+                type="button"
+                id="searchClose"
+                class="search-close"
+                aria-label="Close search"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <section class="page-header">
+
+        <div class="container">
+
+            <div class="breadcrumb">
+
+                <a href="index.html">
+                    Home
+                </a>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+                <span>
+                    Categories
+                </span>
+
+            </div>
+
+            <h1>
+                Categories
+            </h1>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CATEGORY PAGE
+    ====================================================== -->
+
+    <main class="category-page" id="main-content">
+
+        <div class="container">
+
+
+            <!-- INTRO -->
+
+            <div class="category-intro">
+
+                <span class="eyebrow">
+                    SHOP BY CATEGORY
+                </span>
+
+                <h1>
+                    Find What You Love
+                </h1>
+
+                <p>
+                    Explore our complete collection of
+                    fashion, footwear and accessories,
+                    organized into convenient categories.
+                </p>
+
+            </div>
+
+
+
+            <!-- QUICK CATEGORY NAVIGATION -->
+            <div class="quick-category-nav" aria-label="Quick category navigation">
+                <a href="categories.html?category=men" class="quick-category-link">
+                    <i class="fa-solid fa-shirt"></i>
+                    <span>Men's Fashion</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="categories.html?category=women" class="quick-category-link">
+                    <i class="fa-solid fa-person-dress"></i>
+                    <span>Women's Fashion</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="categories.html?category=shoes" class="quick-category-link">
+                    <i class="fa-solid fa-shoe-prints"></i>
+                    <span>Footwear</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="categories.html?category=accessories" class="quick-category-link">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Accessories</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- =================================================
+                 FILTER BOX
+            ================================================== -->
+
+            <div class="category-filter-box">
+
+                <div class="category-filter-top">
+
+                    <div>
+
+                        <h3>
+                            Filter Products
+                        </h3>
+
+                        <p>
+                            Refine products across all categories.
+                        </p>
+
+                    </div>
+
+
+                    <div class="category-filter-actions">
+
+                        <button
+                            type="button"
+                            id="clearCategoryFilters"
+                        >
+                            <i class="fa-solid fa-rotate-left"></i>
+                            Clear All
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="category-filters">
+
+
+                    <!-- CATEGORY -->
+
+                    <div class="filter-group">
+
+                        <h4>
+                            Category
+                        </h4>
+
+                        <div
+                            class="filter-options"
+                            id="categoryPageCategoryFilters"
+                        >
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="men"
+                                >
+                                Men's Fashion
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="women"
+                                >
+                                Women's Fashion
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="shoes"
+                                >
+                                Footwear
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="accessories"
+                                >
+                                Accessories
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRICE -->
+
+                    <div class="filter-group">
+
+                        <h4>
+                            Maximum Price
+                        </h4>
+
+                        <input
+                            type="range"
+                            id="categoryMaxPrice"
+                            min="500"
+                            max="5000"
+                            step="100"
+                            value="5000"
+                        >
+
+                        <div class="price-value">
+
+                            Up to
+                            <span id="categoryPriceValue">
+                                ₹5,000
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RATING -->
+
+                    <div class="filter-group">
+
+                        <h4>
+                            Rating
+                        </h4>
+
+                        <div class="filter-options">
+
+                            <label class="filter-option">
+                                <input
+                                    type="radio"
+                                    name="categoryRating"
+                                    value="0"
+                                    checked
+                                >
+                                All Ratings
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="radio"
+                                    name="categoryRating"
+                                    value="4"
+                                >
+                                4★ & Above
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="radio"
+                                    name="categoryRating"
+                                    value="3"
+                                >
+                                3★ & Above
+                            </label>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- BRAND -->
+
+                    <div class="filter-group">
+
+                        <h4>
+                            Brand
+                        </h4>
+
+                        <div
+                            class="filter-options"
+                            id="categoryPageBrandFilters"
+                        >
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="UrbanStep"
+                                >
+                                UrbanStep
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="StreetWear"
+                                >
+                                StreetWear
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="CarryPro"
+                                >
+                                CarryPro
+                            </label>
+
+                            <label class="filter-option">
+                                <input
+                                    type="checkbox"
+                                    value="RunMax"
+                                >
+                                RunMax
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TOOLBAR
+            ================================================== -->
+
+            <div class="category-products-toolbar">
+
+                <div
+                    class="category-products-count"
+                    id="categoryProductCount"
+                >
+                    0 products
+                </div>
+
+
+                <div class="category-sort">
+
+                    <label for="categorySortProducts">
+                        Sort By
+                    </label>
+
+                    <select id="categorySortProducts">
+
+                        <option value="featured">
+                            Featured
+                        </option>
+
+                        <option value="price-low">
+                            Price: Low to High
+                        </option>
+
+                        <option value="price-high">
+                            Price: High to Low
+                        </option>
+
+                        <option value="rating">
+                            Highest Rated
+                        </option>
+
+                        <option value="name">
+                            Name: A-Z
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CATEGORY PRODUCT SECTIONS
+            ================================================== -->
+
+            <div id="categorySections" aria-live="polite">
+
+                <!-- JavaScript inserts products here -->
+
+            </div>
+
+
+            <!-- =================================================
+                 NO RESULTS
+            ================================================== -->
+
+            <div
+                class="category-no-results"
+                id="categoryNoResults"
+            >
+
+                <i class="fa-solid fa-box-open"></i>
+
+                <h3>
+                    No Products Found
+                </h3>
+
+                <p>
+                    Try changing your filters to see more products.
+                </p>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="categoryResetButton"
+                >
+                    Reset Filters
+                </button>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <div class="footer-grid">
+
+                <div class="footer-brand">
+
+                    <a
+                        href="index.html"
+                        class="logo"
+                    >
+                        <span class="logo-icon">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </span>
+
+                        <span>
+                            Shop<span>Ease</span>
+                        </span>
+                    </a>
+
+                    <p>
+                        Your trusted destination for
+                        quality fashion, footwear and
+                        accessories.
+                    </p>
+
+                    <div class="social-links">
+
+                        <a href="#" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+
+                        <a href="#" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+
+                        <a href="#" aria-label="Twitter">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+
+                        <a href="#" aria-label="YouTube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <div class="footer-column">
+
+                    <h4>
+                        Shop
+                    </h4>
+
+                    <a href="shop.html">
+                        All Products
+                    </a>
+
+                    <a href="categories.html?category=men">
+                        Men's Fashion
+                    </a>
+
+                    <a href="categories.html?category=women">
+                        Women's Fashion
+                    </a>
+
+                    <a href="categories.html?category=shoes">
+                        Footwear
+                    </a>
+
+                    <a href="categories.html?category=accessories">
+                        Accessories
+                    </a>
+
+                </div>
+
+
+                <div class="footer-column">
+
+                    <h4>
+                        Customer Care
+                    </h4>
+
+                    <a href="contact.html">
+                        Contact Us
+                    </a>
+
+                    <a href="faq.html">
+                        FAQ
+                    </a>
+
+                    <a href="my-orders.html">
+                        My Orders
+                    </a>
+
+                    <a href="wishlist.html">
+                        Wishlist
+                    </a>
+
+                    <a href="profile.html">
+                        My Account
+                    </a>
+
+                </div>
+
+
+                <div class="footer-column">
+
+                    <h4>
+                        Information
+                    </h4>
+
+                    <a href="about.html">
+                        About Us
+                    </a>
+
+                    <a href="privacy-policy.html">
+                        Privacy Policy
+                    </a>
+
+                    <a href="terms.html">
+                        Terms & Conditions
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="footer-bottom">
+
+                <p>
+                    © 2026 ShopEase. All rights reserved.
+                </p>
+
+                <div class="payment-icons">
+
+                    <i class="fa-brands fa-cc-visa"></i>
+                    <i class="fa-brands fa-cc-mastercard"></i>
+                    <i class="fa-solid fa-credit-card"></i>
+                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+    <div
+        class="toast"
+        id="toast"
+    ></div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="js/products.js?v=20260911"></script>
+    <script src="js/main.js?v=20260911"></script>
+    <script src="js/categories.js?v=20260911"></script>
+
+</body>
+</html>
