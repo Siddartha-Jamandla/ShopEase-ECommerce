@@ -214,6 +214,8 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if m:
                 if method == "GET":
                     return self._api_product_get(int(m.group(1)))
+                if method == "PUT":
+                    return self._api_product_update(int(m.group(1)))
                 raise ApiError(405, "Method not allowed")
 
             if path == "/api/register" and method == "POST":
@@ -275,6 +277,41 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
 
     # -- products ----------------------------------------------------------
 
+    def _validate_product_fields(self, body, current):
+        """Merge request body over the current product row and validate.
+
+        Returns the merged field dict. Raises ApiError(400) on bad input.
+        'current' is a dict of the existing product columns.
+        """
+        name = str(body.get("name", current.get("name", ""))).strip()
+        description = str(body.get("description", current.get("description", "")))
+        category = str(body.get("category", current.get("category", "general"))).strip() or "general"
+        image_url = str(body.get("image_url", current.get("image_url", "")))
+        if not name:
+            raise ApiError(400, "Field 'name' is required and cannot be empty")
+        if "price" in body or "price" not in current:
+            try:
+                price = float(body.get("price"))
+            except (TypeError, ValueError):
+                raise ApiError(400, "Field 'price' must be a number")
+        else:
+            price = current["price"]
+        if price < 0:
+            raise ApiError(400, "Field 'price' must be >= 0")
+        if "stock" in body or "stock" not in current:
+            try:
+                stock = int(body.get("stock", 0))
+            except (TypeError, ValueError):
+                raise ApiError(400, "Field 'stock' must be an integer")
+        else:
+            stock = current["stock"]
+        if stock < 0:
+            raise ApiError(400, "Field 'stock' must be >= 0")
+        return {
+            "name": name, "description": description, "price": price,
+            "category": category, "image_url": image_url, "stock": stock,
+        }
+
     def _api_products_list(self, query):
         category = (query.get("category", [""])[0] or "").strip()
         search = (query.get("search", [""])[0] or "").strip()
@@ -334,6 +371,31 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             row = conn.execute("SELECT * FROM products WHERE id = ?", (cur.lastrowid,)).fetchone()
             conn.close()
         self._ok(row_to_dict(row), status=201)
+
+    def _api_product_update(self, product_id):
+        if self.headers.get("X-Admin-Key", "") != ADMIN_KEY:
+            raise ApiError(403, "Admin key required (X-Admin-Key header)")
+        body = self._read_json()
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+            conn.close()
+        if row is None:
+            raise ApiError(404, "Product not found")
+        fields = self._validate_product_fields(body, row_to_dict(row))
+        with _db_lock:
+            conn = get_db()
+            conn.execute(
+                "UPDATE products SET name = ?, description = ?, price = ?,"
+                " category = ?, image_url = ?, stock = ? WHERE id = ?",
+                (fields["name"], fields["description"], fields["price"],
+                 fields["category"], fields["image_url"], fields["stock"], product_id),
+            )
+            conn.commit()
+            updated = row_to_dict(conn.execute(
+                "SELECT * FROM products WHERE id = ?", (product_id,)).fetchone())
+            conn.close()
+        self._ok(updated)
 
     # -- auth --------------------------------------------------------------
 
