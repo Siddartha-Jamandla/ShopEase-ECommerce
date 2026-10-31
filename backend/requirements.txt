@@ -1,0 +1,3 @@
+# ShopEase backend - Python standard library ONLY.
+# No third-party packages are required.
+# (http.server, sqlite3, json, hashlib, urllib, secrets, threading, mimetypes)
