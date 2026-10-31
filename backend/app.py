@@ -25,6 +25,8 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
+import error_bot  # local: automated error monitor + self-healing
+
 # ---------------------------------------------------------------- paths
 
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -56,6 +58,10 @@ def init_db():
         conn.commit()
         conn.close()
     print(f"[shopease] database ready at {DB_PATH}")
+    try:
+        error_bot.init_error_bot(DB_PATH)
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------- auth
@@ -179,7 +185,23 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             query = parse_qs(parsed.query)
 
             if path == "/api/health":
-                return self._ok({"status": "ok", "time": utcnow()})
+                info = {"status": "ok", "time": utcnow()}
+                try:
+                    info["error_bot"] = error_bot.health_status()
+                except Exception:
+                    pass
+                return self._ok(info)
+
+            if path == "/api/errors" and method == "GET":
+                # admin-only: needs ?key=ADMIN_KEY or Authorization header
+                key = query.get("key", [""])[0] or self.headers.get("X-Admin-Key", "")
+                if key != ADMIN_KEY:
+                    raise ApiError(403, "Forbidden")
+                try:
+                    errs = error_bot.get_recent_errors(20)
+                except Exception:
+                    errs = []
+                return self._ok({"errors": errs})
 
             if path == "/api/products":
                 if method == "GET":
@@ -236,9 +258,20 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             self._fail(e.status, e.message)
         except BrokenPipeError:
             pass
-        except Exception as e:  # never leak tracebacks to the client
-            print(f"[shopease] ERROR {self.command} {self.path}: {e!r}")
-            self._fail(500, "Internal server error")
+        except Exception as e:  # error-bot: log + try self-heal, never leak tracebacks
+            try:
+                eid, fixed, action = error_bot.handle_exception(
+                    e, path=self.path, method=method, reinit_db=init_db
+                )
+                print(f"[shopease] ERROR id={eid} fixed={fixed} {e!r} action={action}")
+            except Exception:
+                eid, fixed = 0, False
+            msg = "Internal server error"
+            if eid:
+                msg += f" (ref #{eid})"
+            if fixed:
+                msg += " — auto-fix applied, please retry"
+            self._fail(500, msg)
 
     # -- products ----------------------------------------------------------
 
