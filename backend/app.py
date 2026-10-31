@@ -32,7 +32,7 @@ ROOT_DIR = os.path.dirname(BACKEND_DIR)          # repo root: serves the fronten
 DB_PATH = os.path.join(BACKEND_DIR, "shopease.db")
 SCHEMA_PATH = os.path.join(BACKEND_DIR, "schema.sql")
 
-PORT = int(os.environ.get("SHOPEASE_PORT", "8000"))
+PORT = int(os.environ.get("PORT", os.environ.get("SHOPEASE_PORT", "8000")))
 ADMIN_KEY = os.environ.get("SHOPEASE_ADMIN_KEY", "admin-secret-change-me")
 
 # ---------------------------------------------------------------- database
