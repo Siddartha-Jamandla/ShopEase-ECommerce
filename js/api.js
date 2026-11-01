@@ -83,7 +83,10 @@ const ShopEaseAPI = {
     const qs = new URLSearchParams(params).toString();
     try {
       const data = await this._request("GET", "/api/products" + (qs ? "?" + qs : ""));
-      LocalStore.cacheProducts(data); // keep offline copy fresh
+      // Paginated responses are objects ({items, page, per_page, total,
+      // total_pages}); plain requests still return the product array.
+      const items = Array.isArray(data) ? data : data.items || [];
+      LocalStore.cacheProducts(items); // keep offline copy fresh
       return data;
     } catch (e) {
       return LocalStore.getProducts(params); // offline fallback
@@ -248,11 +251,19 @@ const LocalStore = {
       list = this._defaultProducts();
     }
     if (params.category) list = list.filter((x) => x.category === params.category);
-    if (params.search) {
-      const s = params.search.toLowerCase();
+    const s = String(params.q || params.search || "").toLowerCase();
+    if (s) {
       list = list.filter((x) =>
         (x.name + " " + x.description).toLowerCase().includes(s));
     }
+    const sortFns = {
+      price_asc: (a, b) => a.price - b.price,
+      price_desc: (a, b) => b.price - a.price,
+      name_asc: (a, b) => String(a.name).localeCompare(String(b.name)),
+      name_desc: (a, b) => String(b.name).localeCompare(String(a.name)),
+      newest: (a, b) => b.id - a.id,
+    };
+    if (sortFns[params.sort]) list = [...list].sort(sortFns[params.sort]);
     return list;
   },
 

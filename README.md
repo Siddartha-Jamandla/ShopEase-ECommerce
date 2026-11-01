@@ -78,7 +78,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | Method | Endpoint              | Auth | Description |
 |--------|-----------------------|------|-------------|
 | GET    | `/api/health`         | –    | Liveness check → `{status:"ok", time}` |
-| GET    | `/api/products`       | –    | List products. Optional `?category=` and `?search=` |
+| GET    | `/api/products`       | –    | List products. Filters: `?category=`, `?q=` (alias `?search=`). Sort: `?sort=newest\|price_asc\|price_desc\|name_asc\|name_desc`. Pagination: `?page=&per_page=` (1–100, default 20) → `{items, page, per_page, total, total_pages}`; plain array otherwise |
 | GET    | `/api/products/:id`   | –    | Single product (404 if missing) |
 | POST   | `/api/products`       | admin key (`X-Admin-Key`) | Create product: `name`, `price`, `category?`, `description?`, `image_url?`, `stock?` |
 | PUT    | `/api/products/:id`   | admin key (`X-Admin-Key`) | Partial update of any product field (validated like create); 404 if missing |

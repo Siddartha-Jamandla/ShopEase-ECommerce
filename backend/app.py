@@ -314,9 +314,38 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             "category": category, "image_url": image_url, "stock": stock,
         }
 
+    # Sort keys accepted by GET /api/products?sort=<key>. (rating_* sorts are
+    # added with the reviews feature; they need the reviews table.)
+    _PRODUCT_SORTS = {
+        "newest": "id DESC",
+        "price_asc": "price ASC",
+        "price_desc": "price DESC",
+        "name_asc": "name COLLATE NOCASE ASC",
+        "name_desc": "name COLLATE NOCASE DESC",
+    }
+
     def _api_products_list(self, query):
         category = (query.get("category", [""])[0] or "").strip()
-        search = (query.get("search", [""])[0] or "").strip()
+        # `q` is the documented param; `search` is kept as a legacy alias.
+        search = (query.get("q", [""])[0] or query.get("search", [""])[0] or "").strip()
+        sort = (query.get("sort", [""])[0] or "").strip().lower()
+        page_raw = (query.get("page", [""])[0] or "").strip()
+        per_page_raw = (query.get("per_page", [""])[0] or "").strip()
+        paginate = bool(page_raw or per_page_raw or sort)
+
+        if sort and sort not in self._PRODUCT_SORTS:
+            raise ApiError(400, "Invalid 'sort'. Use one of: "
+                               + ", ".join(sorted(self._PRODUCT_SORTS)))
+        try:
+            page = int(page_raw) if page_raw else 1
+            per_page = int(per_page_raw) if per_page_raw else 20
+        except ValueError:
+            raise ApiError(400, "'page' and 'per_page' must be integers")
+        if page < 1:
+            raise ApiError(400, "'page' must be >= 1")
+        if not 1 <= per_page <= 100:
+            raise ApiError(400, "'per_page' must be between 1 and 100")
+
         sql = "SELECT * FROM products"
         clauses, params = [], []
         if category:
@@ -325,12 +354,26 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         if search:
             clauses.append("(name LIKE ? OR description LIKE ?)")
             params += [f"%{search}%", f"%{search}%"]
-        if clauses:
-            sql += " WHERE " + " AND ".join(clauses)
-        sql += " ORDER BY id"
+        where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+        sql += where + " ORDER BY " + (self._PRODUCT_SORTS[sort] if sort else "id")
+
         with _db_lock:
-            rows = get_db().execute(sql, params).fetchall()
-        self._ok([row_to_dict(r) for r in rows])
+            conn = get_db()
+            if not paginate:
+                # Backwards compatible: plain product array, as before.
+                rows = conn.execute(sql, params).fetchall()
+                conn.close()
+                return self._ok([row_to_dict(r) for r in rows])
+            total = conn.execute(
+                "SELECT COUNT(*) FROM products" + where, params).fetchone()[0]
+            offset = (page - 1) * per_page
+            rows = conn.execute(
+                sql + " LIMIT ? OFFSET ?", params + [per_page, offset]).fetchall()
+            conn.close()
+        total_pages = (total + per_page - 1) // per_page
+        self._ok({"items": [row_to_dict(r) for r in rows], "page": page,
+                  "per_page": per_page, "total": total,
+                  "total_pages": total_pages})
 
     def _api_product_get(self, product_id):
         with _db_lock:
