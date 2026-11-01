@@ -1,7 +1,7 @@
 -- ============================================================
 -- ShopEase E-Commerce - SQLite Database Schema
 -- ============================================================
--- Tables: users, products, cart_items, orders, order_items
+-- Tables: users, products, cart_items, orders, order_items, reviews, wishlist
 -- Run with: sqlite3 shopease.db < schema.sql
 -- (backend/app.py applies this automatically on startup)
 -- ============================================================
@@ -56,3 +56,18 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+
+-- Product reviews: one review per user per product, rating 1-5.
+CREATE TABLE IF NOT EXISTS reviews (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    rating     INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title      TEXT    NOT NULL DEFAULT '',
+    comment    TEXT    NOT NULL DEFAULT '',
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);

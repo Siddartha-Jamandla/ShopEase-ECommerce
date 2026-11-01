@@ -134,6 +134,34 @@ const ShopEaseAPI = {
     window.location.href = "index.html";
   },
 
+  // ---------------------------------------------------------- reviews
+  async getReviews(productId, params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    try {
+      return await this._request(
+        "GET",
+        "/api/products/" + productId + "/reviews" + (qs ? "?" + qs : "")
+      );
+    } catch (e) {
+      return { items: [], page: 1, per_page: 20, total: 0, total_pages: 0, average_rating: null };
+    }
+  },
+
+  async addReview(productId, review) {
+    if (!this.isLoggedIn) throw new Error("Please log in to write a review");
+    return this._request("POST", "/api/products/" + productId + "/reviews", review);
+  },
+
+  async updateReview(productId, review) {
+    if (!this.isLoggedIn) throw new Error("Please log in to edit your review");
+    return this._request("PUT", "/api/products/" + productId + "/reviews", review);
+  },
+
+  async deleteReview(productId) {
+    if (!this.isLoggedIn) throw new Error("Please log in to delete your review");
+    return this._request("DELETE", "/api/products/" + productId + "/reviews");
+  },
+
   // ---------------------------------------------------------- cart
   async getCart() {
     if (this.isLoggedIn) {

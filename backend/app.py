@@ -210,6 +210,19 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_products_create()
                 raise ApiError(405, "Method not allowed")
 
+            m = re.fullmatch(r"/api/products/(\d+)/reviews", path)
+            if m:
+                product_id = int(m.group(1))
+                if method == "GET":
+                    return self._api_reviews_list(product_id, query)
+                if method == "POST":
+                    return self._api_review_create(product_id)
+                if method == "PUT":
+                    return self._api_review_update(product_id)
+                if method == "DELETE":
+                    return self._api_review_delete(product_id)
+                raise ApiError(405, "Method not allowed")
+
             m = re.fullmatch(r"/api/products/(\d+)", path)
             if m:
                 if method == "GET":
@@ -314,14 +327,18 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             "category": category, "image_url": image_url, "stock": stock,
         }
 
-    # Sort keys accepted by GET /api/products?sort=<key>. (rating_* sorts are
-    # added with the reviews feature; they need the reviews table.)
+    # Sort keys accepted by GET /api/products?sort=<key>. rating_* sorts use a
+    # correlated subquery on the reviews table (unrated products sort last).
+    _AVG_RATING_SQL = ("(SELECT AVG(rating) FROM reviews r"
+                       " WHERE r.product_id = products.id)")
     _PRODUCT_SORTS = {
         "newest": "id DESC",
         "price_asc": "price ASC",
         "price_desc": "price DESC",
         "name_asc": "name COLLATE NOCASE ASC",
         "name_desc": "name COLLATE NOCASE DESC",
+        "rating_desc": _AVG_RATING_SQL + " DESC",
+        "rating_asc": _AVG_RATING_SQL + " IS NULL, " + _AVG_RATING_SQL + " ASC",
     }
 
     def _api_products_list(self, query):
@@ -377,7 +394,13 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
 
     def _api_product_get(self, product_id):
         with _db_lock:
-            row = get_db().execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+            row = get_db().execute(
+                """SELECT p.*,
+                          (SELECT ROUND(AVG(rating), 2) FROM reviews
+                           WHERE product_id = p.id) AS average_rating,
+                          (SELECT COUNT(*) FROM reviews
+                           WHERE product_id = p.id) AS review_count
+                   FROM products p WHERE p.id = ?""", (product_id,)).fetchone()
         if row is None:
             raise ApiError(404, "Product not found")
         self._ok(row_to_dict(row))
@@ -469,6 +492,116 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 raise ApiError(409, "Cannot delete: product is still referenced elsewhere")
             conn.close()
         self._ok({"deleted": True, "id": product_id, "name": row["name"]})
+
+    # -- reviews -------------------------------------------------------------
+
+    def _validate_review_fields(self, body):
+        """Validate a review body. Returns {'rating','title','comment'}."""
+        try:
+            rating = int(body.get("rating"))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'rating' must be an integer from 1 to 5")
+        if not 1 <= rating <= 5:
+            raise ApiError(400, "Field 'rating' must be between 1 and 5")
+        title = str(body.get("title", "")).strip()
+        comment = str(body.get("comment", "")).strip()
+        if len(title) > 120:
+            raise ApiError(400, "Field 'title' must be at most 120 characters")
+        if len(comment) > 2000:
+            raise ApiError(400, "Field 'comment' must be at most 2000 characters")
+        return {"rating": rating, "title": title, "comment": comment}
+
+    def _require_product(self, conn, product_id):
+        """Raise ApiError(404) when the product is missing (closes conn first)."""
+        row = conn.execute("SELECT id FROM products WHERE id = ?",
+                           (product_id,)).fetchone()
+        if row is None:
+            conn.close()
+            raise ApiError(404, "Product not found")
+
+    def _api_reviews_list(self, product_id, query):
+        try:
+            page = int((query.get("page", [""])[0] or "").strip() or 1)
+            per_page = int((query.get("per_page", [""])[0] or "").strip() or 20)
+        except ValueError:
+            raise ApiError(400, "'page' and 'per_page' must be integers")
+        if page < 1:
+            raise ApiError(400, "'page' must be >= 1")
+        if not 1 <= per_page <= 100:
+            raise ApiError(400, "'per_page' must be between 1 and 100")
+        with _db_lock:
+            conn = get_db()
+            if conn.execute("SELECT id FROM products WHERE id = ?",
+                            (product_id,)).fetchone() is None:
+                conn.close()
+                raise ApiError(404, "Product not found")
+            total = conn.execute("SELECT COUNT(*) FROM reviews WHERE product_id = ?",
+                                 (product_id,)).fetchone()[0]
+            rows = conn.execute(
+                """SELECT r.id, r.user_id, r.product_id, r.rating, r.title,
+                          r.comment, r.created_at, u.name AS user_name
+                   FROM reviews r JOIN users u ON u.id = r.user_id
+                   WHERE r.product_id = ? ORDER BY r.id DESC
+                   LIMIT ? OFFSET ?""",
+                (product_id, per_page, (page - 1) * per_page)).fetchall()
+            avg = conn.execute("SELECT ROUND(AVG(rating), 2) FROM reviews"
+                               " WHERE product_id = ?", (product_id,)).fetchone()[0]
+            conn.close()
+        self._ok({"items": [row_to_dict(r) for r in rows], "page": page,
+                  "per_page": per_page, "total": total,
+                  "total_pages": (total + per_page - 1) // per_page,
+                  "average_rating": avg})
+
+    def _api_review_create(self, product_id):
+        user_id = self._require_auth()
+        fields = self._validate_review_fields(self._read_json())
+        with _db_lock:
+            conn = get_db()
+            self._require_product(conn, product_id)
+            if conn.execute("SELECT id FROM reviews WHERE user_id = ? AND product_id = ?",
+                            (user_id, product_id)).fetchone():
+                conn.close()
+                raise ApiError(409, "You have already reviewed this product"
+                                    " (use PUT to update your review)")
+            cur = conn.execute(
+                "INSERT INTO reviews (user_id, product_id, rating, title, comment)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (user_id, product_id, fields["rating"], fields["title"], fields["comment"]))
+            conn.commit()
+            row = conn.execute("SELECT * FROM reviews WHERE id = ?",
+                               (cur.lastrowid,)).fetchone()
+            conn.close()
+        self._ok(row_to_dict(row), status=201)
+
+    def _api_review_update(self, product_id):
+        user_id = self._require_auth()
+        fields = self._validate_review_fields(self._read_json())
+        with _db_lock:
+            conn = get_db()
+            self._require_product(conn, product_id)
+            cur = conn.execute(
+                "UPDATE reviews SET rating = ?, title = ?, comment = ?"
+                " WHERE user_id = ? AND product_id = ?",
+                (fields["rating"], fields["title"], fields["comment"], user_id, product_id))
+            conn.commit()
+            row = conn.execute("SELECT * FROM reviews WHERE user_id = ? AND product_id = ?",
+                               (user_id, product_id)).fetchone()
+            conn.close()
+        if row is None:
+            raise ApiError(404, "Review not found (you have not reviewed this product)")
+        self._ok(row_to_dict(row))
+
+    def _api_review_delete(self, product_id):
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            cur = conn.execute("DELETE FROM reviews WHERE user_id = ? AND product_id = ?",
+                               (user_id, product_id))
+            conn.commit()
+            conn.close()
+        if cur.rowcount == 0:
+            raise ApiError(404, "Review not found (you have not reviewed this product)")
+        self._ok({"deleted": True})
 
     # -- auth --------------------------------------------------------------
 
