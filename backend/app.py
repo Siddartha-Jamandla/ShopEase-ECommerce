@@ -257,6 +257,17 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if path == "/api/checkout" and method == "POST":
                 return self._api_checkout()
 
+            if path == "/api/wishlist":
+                if method == "GET":
+                    return self._api_wishlist_list()
+                if method == "POST":
+                    return self._api_wishlist_add()
+                raise ApiError(405, "Method not allowed")
+
+            m = re.fullmatch(r"/api/wishlist/(\d+)", path)
+            if m and method == "DELETE":
+                return self._api_wishlist_remove(int(m.group(1)))
+
             if path == "/api/orders" and method == "GET":
                 return self._api_orders_list()
 
@@ -602,6 +613,69 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         if cur.rowcount == 0:
             raise ApiError(404, "Review not found (you have not reviewed this product)")
         self._ok({"deleted": True})
+
+    # -- wishlist ------------------------------------------------------------
+
+    def _api_wishlist_list(self):
+        user_id = self._require_auth()
+        with _db_lock:
+            rows = get_db().execute(
+                """SELECT w.id, w.product_id, w.created_at AS added_at,
+                          p.name, p.description, p.price, p.category,
+                          p.image_url, p.stock,
+                          (SELECT ROUND(AVG(rating), 2) FROM reviews
+                           WHERE product_id = p.id) AS average_rating,
+                          (SELECT COUNT(*) FROM reviews
+                           WHERE product_id = p.id) AS review_count
+                   FROM wishlist w JOIN products p ON p.id = w.product_id
+                   WHERE w.user_id = ? ORDER BY w.id DESC""",
+                (user_id,)).fetchall()
+        self._ok([row_to_dict(r) for r in rows])
+
+    def _api_wishlist_add(self):
+        user_id = self._require_auth()
+        body = self._read_json()
+        try:
+            product_id = int(body.get("product_id"))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'product_id' must be an integer")
+        with _db_lock:
+            conn = get_db()
+            self._require_product(conn, product_id)
+            try:
+                conn.execute(
+                    "INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)",
+                    (user_id, product_id))
+                conn.commit()
+                added = True
+                status = 201
+            except sqlite3.IntegrityError:
+                # Already wishlisted: idempotent, not an error.
+                added = False
+                status = 200
+            row = conn.execute(
+                """SELECT w.id, w.product_id, w.created_at AS added_at,
+                          p.name, p.price, p.image_url, p.stock
+                   FROM wishlist w JOIN products p ON p.id = w.product_id
+                   WHERE w.user_id = ? AND w.product_id = ?""",
+                (user_id, product_id)).fetchone()
+            conn.close()
+        item = row_to_dict(row)
+        item["added"] = added
+        self._ok(item, status=status)
+
+    def _api_wishlist_remove(self, product_id):
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            cur = conn.execute(
+                "DELETE FROM wishlist WHERE user_id = ? AND product_id = ?",
+                (user_id, product_id))
+            conn.commit()
+            conn.close()
+        if cur.rowcount == 0:
+            raise ApiError(404, "Product is not in your wishlist")
+        self._ok({"deleted": True, "product_id": product_id})
 
     # -- auth --------------------------------------------------------------
 

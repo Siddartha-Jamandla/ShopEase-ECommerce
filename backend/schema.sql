@@ -71,3 +71,14 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user ON reviews(user_id);
+
+-- Wishlist: one row per user per product (idempotent add).
+CREATE TABLE IF NOT EXISTS wishlist (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id);

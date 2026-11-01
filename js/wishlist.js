@@ -10,6 +10,61 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 /* =========================================
+   BACKEND WISHLIST (logged-in users)
+========================================= */
+
+/* Cache of backend wishlist items keyed by product id, so the card
+   builder and "add to cart" keep working with server-side products. */
+var wishlistApiCache = {};
+
+
+/* True when js/api.js is loaded and the user is signed in. */
+function useBackendWishlist() {
+
+    return (typeof ShopEaseAPI !== "undefined") &&
+        ShopEaseAPI.isLoggedIn;
+
+}
+
+
+/* Map a backend wishlist item to the product shape
+   createWishlistCard() expects. */
+function mapApiWishlistItem(item) {
+
+    const product = {
+
+        id: Number(item.product_id),
+
+        name: item.name,
+
+        category: item.category,
+
+        price: Number(item.price),
+
+        oldPrice: null,
+
+        rating: Number(item.average_rating) || 0,
+
+        reviews: Number(item.review_count) || 0,
+
+        image: item.image_url,
+
+        badge: null,
+
+        icon: "fa-bag-shopping",
+
+        description: item.description || ""
+
+    };
+
+    wishlistApiCache[product.id] = product;
+
+    return product;
+
+}
+
+
+/* =========================================
    GET WISHLIST
 ========================================= */
 
@@ -48,7 +103,7 @@ function saveWishlist(wishlist) {
    LOAD WISHLIST
 ========================================= */
 
-function loadWishlist() {
+async function loadWishlist() {
 
     const wishlistContainer =
         document.getElementById("wishlistProducts");
@@ -65,8 +120,46 @@ function loadWishlist() {
     }
 
 
-    const wishlist = getWishlist().map(item => Number(typeof item === "object" ? item.id : item)).filter(item => !Number.isNaN(item));
-    localStorage.setItem("wishlist", JSON.stringify([...new Set(wishlist)]));
+    let wishlistProducts = [];
+
+
+    if (useBackendWishlist()) {
+
+        /* Logged in: render the server-side wishlist. */
+
+        try {
+
+            wishlistProducts =
+                (await ShopEaseAPI.getWishlist())
+                    .map(mapApiWishlistItem);
+
+        } catch (error) {
+
+            wishlistProducts = [];
+
+        }
+
+    } else {
+
+        /* Guest: render the localStorage wishlist (unchanged behaviour). */
+
+        const wishlist = getWishlist().map(item => Number(typeof item === "object" ? item.id : item)).filter(item => !Number.isNaN(item));
+        localStorage.setItem("wishlist", JSON.stringify([...new Set(wishlist)]));
+
+
+        wishlistProducts = wishlist
+            .map(function (id) {
+
+                return products.find(function (product) {
+
+                    return product.id === Number(id);
+
+                });
+
+            })
+            .filter(Boolean);
+
+    }
 
 
     /* Update count */
@@ -74,8 +167,8 @@ function loadWishlist() {
     if (countText) {
 
         countText.textContent =
-            wishlist.length +
-            (wishlist.length === 1
+            wishlistProducts.length +
+            (wishlistProducts.length === 1
                 ? " product saved"
                 : " products saved");
 
@@ -84,7 +177,7 @@ function loadWishlist() {
 
     /* Empty state */
 
-    if (wishlist.length === 0) {
+    if (wishlistProducts.length === 0) {
 
         wishlistContainer.innerHTML = "";
 
@@ -100,21 +193,6 @@ function loadWishlist() {
     if (emptyWishlist) {
         emptyWishlist.style.display = "none";
     }
-
-
-    /* Find products */
-
-    const wishlistProducts = wishlist
-        .map(function (id) {
-
-            return products.find(function (product) {
-
-                return product.id === Number(id);
-
-            });
-
-        })
-        .filter(Boolean);
 
 
     wishlistContainer.innerHTML =
@@ -424,22 +502,42 @@ function setupWishlistCards() {
    REMOVE ITEM
 ========================================= */
 
-function removeFromWishlist(productId) {
+async function removeFromWishlist(productId) {
 
-    let wishlist =
-        getWishlist();
+    if (useBackendWishlist()) {
+
+        try {
+
+            await ShopEaseAPI.removeFromWishlist(productId);
+
+        } catch (error) {
+
+            showWishlistToast(
+                "Could not remove the product. Please try again."
+            );
+
+            return;
+
+        }
+
+    } else {
+
+        let wishlist =
+            getWishlist();
 
 
-    wishlist =
-        wishlist.filter(function (id) {
+        wishlist =
+            wishlist.filter(function (id) {
 
-            return Number(id) !==
-                Number(productId);
+                return Number(id) !==
+                    Number(productId);
 
-        });
+            });
 
 
-    saveWishlist(wishlist);
+        saveWishlist(wishlist);
+
+    }
 
 
     if (
@@ -469,6 +567,7 @@ function removeFromWishlist(productId) {
 function addWishlistProductToCart(productId) {
 
     const product =
+        wishlistApiCache[Number(productId)] ||
         products.find(function (item) {
 
             return item.id ===
@@ -558,31 +657,70 @@ function addWishlistProductToCart(productId) {
    CLEAR WISHLIST
 ========================================= */
 
-function clearWishlist() {
+async function clearWishlist() {
 
-    const wishlist =
-        getWishlist();
-
-
-    if (wishlist.length === 0) {
-        return;
-    }
+    const confirmedMessage =
+        "Are you sure you want to remove all wishlist items?";
 
 
-    const confirmed =
-        confirm(
-            "Are you sure you want to remove all wishlist items?"
+    if (useBackendWishlist()) {
+
+        let items = [];
+
+        try {
+
+            items = await ShopEaseAPI.getWishlist();
+
+        } catch (error) {
+
+            items = [];
+
+        }
+
+
+        if (items.length === 0) {
+            return;
+        }
+
+
+        if (!confirm(confirmedMessage)) {
+            return;
+        }
+
+
+        for (const item of items) {
+
+            try {
+
+                await ShopEaseAPI.removeFromWishlist(item.product_id);
+
+            } catch (error) {
+                /* keep going */
+            }
+
+        }
+
+    } else {
+
+        const wishlist =
+            getWishlist();
+
+
+        if (wishlist.length === 0) {
+            return;
+        }
+
+
+        if (!confirm(confirmedMessage)) {
+            return;
+        }
+
+
+        localStorage.removeItem(
+            "wishlist"
         );
 
-
-    if (!confirmed) {
-        return;
     }
-
-
-    localStorage.removeItem(
-        "wishlist"
-    );
 
 
     if (

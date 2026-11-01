@@ -231,6 +231,69 @@ const ShopEaseAPI = {
     if (!this.isLoggedIn) throw new Error("Please log in to view orders");
     return this._request("GET", "/api/orders/" + id);
   },
+
+  // ---------------------------------------------------------- wishlist
+  /**
+   * Wishlist items: [{id, product_id, added_at, name, description, price,
+   * category, image_url, stock, average_rating, review_count}].
+   * Logged-in users get the backend list (local copy is synced as a mirror);
+   * guests get the localStorage copy only.
+   */
+  async getWishlist() {
+    if (this.isLoggedIn) {
+      try {
+        const items = await this._request("GET", "/api/wishlist");
+        LocalStore.syncWishlistIds(items.map((i) => i.product_id));
+        return items;
+      } catch (e) {
+        /* fall through to local copy */
+      }
+    }
+    return LocalStore.getWishlist();
+  },
+
+  async addToWishlist(productId) {
+    productId = Number(productId);
+    if (this.isLoggedIn) {
+      try {
+        const res = await this._request("POST", "/api/wishlist", {
+          product_id: productId,
+        });
+        LocalStore.addWishlistId(productId);
+        return res;
+      } catch (e) {
+        /* fall through to local copy */
+      }
+    }
+    LocalStore.addWishlistId(productId);
+    return { added: true, product_id: productId };
+  },
+
+  async removeFromWishlist(productId) {
+    productId = Number(productId);
+    if (this.isLoggedIn) {
+      try {
+        const res = await this._request("DELETE", "/api/wishlist/" + productId);
+        LocalStore.removeWishlistId(productId);
+        return res;
+      } catch (e) {
+        /* fall through to local copy */
+      }
+    }
+    LocalStore.removeWishlistId(productId);
+    return { deleted: true, product_id: productId };
+  },
+
+  /** Pull the server wishlist into the local mirror (called on page load). */
+  async syncWishlist() {
+    if (!this.isLoggedIn) return;
+    try {
+      const items = await this._request("GET", "/api/wishlist");
+      LocalStore.syncWishlistIds(items.map((i) => i.product_id));
+    } catch (e) {
+      /* keep the local copy */
+    }
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -240,6 +303,7 @@ const ShopEaseAPI = {
 const LocalStore = {
   PRODUCTS_KEY: "shopease_products",
   CART_KEY: "shopease_cart",
+  WISHLIST_KEY: "wishlist", // shared with js/products.js + js/wishlist.js
 
   _defaultProducts() {
     // 12 products matching backend/seed.py (offline copy)
@@ -363,6 +427,57 @@ const LocalStore = {
 
   clearCart() {
     this._writeCart([]);
+  },
+
+  // -- wishlist local mirror (same "wishlist" key as js/wishlist.js) --------
+  _wishlistIds() {
+    try {
+      const ids = JSON.parse(localStorage.getItem(this.WISHLIST_KEY) || "[]") || [];
+      return [...new Set(ids.map((i) => Number(typeof i === "object" ? i.id : i)).filter((i) => !Number.isNaN(i)))];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /** Guest wishlist as product objects (mirrors the API item shape). */
+  getWishlist() {
+    return this._wishlistIds()
+      .map((id) => this.getProduct(id))
+      .filter(Boolean)
+      .map((p) => ({
+        product_id: p.id,
+        added_at: null,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        category: p.category,
+        image_url: p.image_url,
+        stock: p.stock,
+        average_rating: null,
+        review_count: 0,
+      }));
+  },
+
+  syncWishlistIds(ids) {
+    try {
+      localStorage.setItem(this.WISHLIST_KEY, JSON.stringify([...new Set(ids.map(Number))]));
+    } catch (e) { /* ignore */ }
+  },
+
+  addWishlistId(id) {
+    const ids = this._wishlistIds();
+    if (!ids.includes(Number(id))) ids.push(Number(id));
+    this.syncWishlistIds(ids);
+  },
+
+  removeWishlistId(id) {
+    this.syncWishlistIds(this._wishlistIds().filter((i) => i !== Number(id)));
+  },
+
+  clearWishlist() {
+    try {
+      localStorage.removeItem(this.WISHLIST_KEY);
+    } catch (e) { /* ignore */ }
   },
 };
 
