@@ -82,6 +82,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | GET    | `/api/products/:id`   | –    | Single product (404 if missing) |
 | POST   | `/api/products`       | admin key (`X-Admin-Key`) | Create product: `name`, `price`, `category?`, `description?`, `image_url?`, `stock?` |
 | PUT    | `/api/products/:id`   | admin key (`X-Admin-Key`) | Partial update of any product field (validated like create); 404 if missing |
+| DELETE | `/api/products/:id`   | admin key (`X-Admin-Key`) | Delete product; carts cascade automatically; 409 if referenced in past orders |
 | POST   | `/api/register`       | –    | `{name, email, password}` (≥6 chars) → `{user, token}` |
 | POST   | `/api/login`          | –    | `{email, password}` → `{user, token}` |
 | GET    | `/api/cart`           | user | Cart with product details → `{items, total, count}` |

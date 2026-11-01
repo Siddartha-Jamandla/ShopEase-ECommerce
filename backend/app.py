@@ -216,6 +216,8 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_product_get(int(m.group(1)))
                 if method == "PUT":
                     return self._api_product_update(int(m.group(1)))
+                if method == "DELETE":
+                    return self._api_product_delete(int(m.group(1)))
                 raise ApiError(405, "Method not allowed")
 
             if path == "/api/register" and method == "POST":
@@ -396,6 +398,34 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 "SELECT * FROM products WHERE id = ?", (product_id,)).fetchone())
             conn.close()
         self._ok(updated)
+
+    def _api_product_delete(self, product_id):
+        if self.headers.get("X-Admin-Key", "") != ADMIN_KEY:
+            raise ApiError(403, "Admin key required (X-Admin-Key header)")
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute(
+                "SELECT id, name FROM products WHERE id = ?", (product_id,)).fetchone()
+            if row is None:
+                conn.close()
+                raise ApiError(404, "Product not found")
+            # Never delete a product that appears in a past order: the order
+            # history (with its price snapshots) must stay intact.
+            ordered = conn.execute(
+                "SELECT 1 FROM order_items WHERE product_id = ? LIMIT 1",
+                (product_id,)).fetchone()
+            if ordered is not None:
+                conn.close()
+                raise ApiError(409, "Cannot delete: product is referenced in past orders")
+            # cart_items cascade automatically (ON DELETE CASCADE in schema).
+            try:
+                conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+                conn.commit()
+            except sqlite3.IntegrityError:
+                conn.close()
+                raise ApiError(409, "Cannot delete: product is still referenced elsewhere")
+            conn.close()
+        self._ok({"deleted": True, "id": product_id, "name": row["name"]})
 
     # -- auth --------------------------------------------------------------
 

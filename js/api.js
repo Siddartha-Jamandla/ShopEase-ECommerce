@@ -106,6 +106,10 @@ const ShopEaseAPI = {
     return this._request("PUT", "/api/products/" + id, fields, { adminKey });
   },
 
+  async deleteProduct(id, adminKey) {
+    return this._request("DELETE", "/api/products/" + id, undefined, { adminKey });
+  },
+
   // ---------------------------------------------------------- auth
   async register(name, email, password) {
     const data = await this._request("POST", "/api/register", { name, email, password });
