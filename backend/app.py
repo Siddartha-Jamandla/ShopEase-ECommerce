@@ -50,11 +50,27 @@ def get_db():
     return conn
 
 
+def _ensure_column(conn, table, column, column_ddl):
+    """Idempotent migration: ADD COLUMN when an existing DB predates it.
+
+    init_db() runs schema.sql (all CREATE TABLE IF NOT EXISTS) on every
+    startup, but that never adds columns to tables created by older
+    schema versions — this fills that gap.
+    """
+    cols = [r["name"] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column_ddl}")
+        print(f"[shopease] migrated: added {table}.{column}")
+
+
 def init_db():
     with _db_lock:
         conn = get_db()
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             conn.executescript(f.read())
+        # Backfill columns for DBs created before they existed in schema.sql.
+        _ensure_column(conn, "products", "stock", "stock INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "orders", "status", "status TEXT NOT NULL DEFAULT 'placed'")
         conn.commit()
         conn.close()
     print(f"[shopease] database ready at {DB_PATH}")
