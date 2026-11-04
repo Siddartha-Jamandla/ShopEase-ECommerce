@@ -738,7 +738,7 @@ const products = [
         oldPrice: 4999,
         rating: 4.7,
         reviews: 245,
-        image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/noise-buds-pro.jpg",
         badge: "Top Rated",
         description: "Wireless earbuds with deep bass, fast pairing, and all-day battery life."
     },
@@ -752,7 +752,7 @@ const products = [
         oldPrice: 3999,
         rating: 4.6,
         reviews: 176,
-        image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/nord-buds.jpg",
         badge: "Popular",
         description: "Compact wireless earbuds built for immersive music and clear calls."
     },
@@ -766,7 +766,7 @@ const products = [
         oldPrice: 64999,
         rating: 4.8,
         reviews: 203,
-        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/tablet-air.jpg",
         badge: "New",
         description: "Lightweight tablet with vibrant display and excellent productivity tools."
     },
@@ -780,7 +780,7 @@ const products = [
         oldPrice: 89999,
         rating: 4.9,
         reviews: 144,
-        image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/smart-tv-4k.jpg",
         badge: "Premium",
         description: "Cinematic 4K entertainment with rich contrast and smart streaming."
     },
@@ -794,7 +794,7 @@ const products = [
         oldPrice: 9999,
         rating: 4.7,
         reviews: 131,
-        image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/air-fryer.jpg",
         badge: "Fast Selling",
         description: "Crispy cooking made easier with a smart airflow design and intuitive controls."
     },
@@ -808,7 +808,7 @@ const products = [
         oldPrice: 3499,
         rating: 4.5,
         reviews: 92,
-        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/aroma-diffuser.jpg",
         badge: "Popular",
         description: "A calming home scent diffuser that fits beautifully into any room."
     },
@@ -822,7 +822,7 @@ const products = [
         oldPrice: 11999,
         rating: 4.6,
         reviews: 88,
-        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/accent-chair.jpg",
         badge: "New",
         description: "Contemporary accent chair with elegant form and soft everyday comfort."
     },
@@ -836,7 +836,7 @@ const products = [
         oldPrice: 3299,
         rating: 4.8,
         reviews: 204,
-        image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/glow-serum.jpg",
         badge: "Bestseller",
         description: "Hydrating serum set designed to brighten, smooth and soften skin."
     },
@@ -850,7 +850,7 @@ const products = [
         oldPrice: 4599,
         rating: 4.6,
         reviews: 118,
-        image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/hair-straightener.jpg",
         badge: "Trend",
         description: "Salon-style styling with smooth glide and heat control."
     },
@@ -864,7 +864,7 @@ const products = [
         oldPrice: 2499,
         rating: 4.7,
         reviews: 185,
-        image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/yoga-mat.jpg",
         badge: "Best Seller",
         description: "Soft, supportive yoga mat for home workouts, stretching and recovery."
     },
@@ -878,7 +878,7 @@ const products = [
         oldPrice: 1999,
         rating: 4.5,
         reviews: 114,
-        image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/resistance-bands.jpg",
         badge: "Popular",
         description: "Travel-friendly bands for quick strength, mobility and posture work."
     },
@@ -892,7 +892,7 @@ const products = [
         oldPrice: 3999,
         rating: 4.6,
         reviews: 97,
-        image: "https://images.unsplash.com/photo-1571175443880-49eec7a8d6f6?auto=format&fit=crop&w=900&q=80",
+        image: "images/products/portable-blender.jpg",
         badge: "Hot",
         description: "Compact smoothie blender with rechargeable power and travel-friendly design."
     }

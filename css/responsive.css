@@ -135,30 +135,8 @@
         border-radius: 25px;
     }
 
-    .hero-circle {
-        width: 220px;
-        height: 220px;
-    }
-
-    .hero-product-icon {
-        width: 130px;
-        height: 130px;
-
-        font-size: 50px;
-    }
-
     .hero-floating-card {
         padding: 10px 12px;
-    }
-
-    .card-one {
-        top: 35px;
-        left: 5px;
-    }
-
-    .card-two {
-        right: 5px;
-        bottom: 35px;
     }
 
 
@@ -260,7 +238,7 @@
         font-size: 29px;
     }
 
-    .promo-icon {
+    .promo-image {
         display: none;
     }
 

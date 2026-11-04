@@ -19,9 +19,8 @@ BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BACKEND_DIR, "shopease.db")
 SCHEMA_PATH = os.path.join(BACKEND_DIR, "schema.sql")
 
-# NOTE: fashion products use the repo's real product photos under
-# assets/images/products/ ; home & electronics use the shared placeholder
-# (assets/images/products/placeholder.jpg) until real photos are added.
+# NOTE: all products use real product photos under assets/images/products/ .
+# The shared placeholder (placeholder.jpg) is only a last-resort fallback.
 IMG = "assets/images/products/"
 PH = IMG + "placeholder.jpg"
 
@@ -52,43 +51,43 @@ PRODUCTS = [
     ("Ceramic Dinner Set (18 pcs)",
      "Elegant 18-piece ceramic dinner set for 6. Chip-resistant glaze, "
      "microwave and dishwasher safe.",
-     1999, "home", PH, 40),
+     1999, "home", IMG + "ceramic-dinner-set.jpg", 40),
 
     ("LED Table Lamp",
      "Modern touch-control LED desk lamp with 3 brightness levels and a "
      "warm-to-cool colour range. USB powered.",
-     749, "home", PH, 90),
+     749, "home", IMG + "led-table-lamp.jpg", 90),
 
     ("Cotton Bedsheet (King)",
      "220 TC pure cotton king-size bedsheet with 2 pillow covers. "
      "Soft, colour-fast and skin friendly.",
-     999, "home", PH, 70),
+     999, "home", IMG + "cotton-bedsheet-king.jpg", 70),
 
     ("Stainless Steel Water Bottle 1L",
      "Double-wall vacuum insulated 1L bottle. Keeps drinks hot for 12 hrs "
      "or cold for 24 hrs. BPA free.",
-     649, "home", PH, 200),
+     649, "home", IMG + "steel-water-bottle.jpg", 200),
 
     # ---- Electronics ----------------------------------------------------
     ("Wireless Bluetooth Earbuds",
      "True wireless earbuds with 40-hour total battery, ENC noise "
      "reduction and low-latency gaming mode.",
-     1799, "electronics", PH, 110),
+     1799, "electronics", IMG + "bluetooth-earbuds.jpg", 110),
 
     ("Smart Fitness Band",
      "Fitness band with heart-rate and SpO2 tracking, 14-day battery, "
      "100+ sport modes and 1.47-inch display.",
-     2499, "electronics", PH, 75),
+     2499, "electronics", IMG + "fitness-band.jpg", 75),
 
     ("Portable Bluetooth Speaker",
      "Compact Bluetooth speaker with deep bass, 18-hour playtime and "
      "IPX6 splash resistance.",
-     1599, "electronics", PH, 65),
+     1599, "electronics", IMG + "bluetooth-speaker.jpg", 65),
 
     ("USB-C Fast Charger 65W",
      "65W GaN fast charger with dual USB-C + USB-A ports. Charges "
      "laptops, phones and tablets at full speed.",
-     1299, "electronics", PH, 130),
+     1299, "electronics", IMG + "usb-c-charger-65w.jpg", 130),
 ]
 
 

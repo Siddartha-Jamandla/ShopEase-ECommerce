@@ -354,27 +354,26 @@
 
             <span class="hero-label">
 
-                <i class="fa-solid fa-sparkles"></i>
+                <i class="fa-solid fa-truck"></i>
 
-                New Collection 2026
+                Free shipping on orders above ₹999
 
             </span>
 
 
             <h1>
 
-                Discover Your
-                <span>Perfect Style</span>
+                Everything you need,
+                <span>delivered across India.</span>
 
             </h1>
 
 
             <p>
 
-                Shop the latest fashion, footwear and
-                accessories at prices you'll love.
-                Quality products, fast delivery and
-                easy returns.
+                62 hand-picked products across fashion, electronics,
+                home &amp; living and more — honest prices, 7-day easy
+                returns, and a support team that actually replies.
 
             </p>
 
@@ -423,7 +422,7 @@
                         </strong>
 
                         <span>
-                            Shopping
+                            Checkout
                         </span>
 
                     </div>
@@ -442,11 +441,11 @@
                     <div>
 
                         <strong>
-                            Fast
+                            7-Day
                         </strong>
 
                         <span>
-                            Delivery
+                            Returns
                         </span>
 
                     </div>
@@ -465,11 +464,11 @@
                     <div>
 
                         <strong>
-                            Easy
+                            Pan-India
                         </strong>
 
                         <span>
-                            Returns
+                            Delivery
                         </span>
 
                     </div>
@@ -486,54 +485,19 @@
         <div class="hero-visual">
 
             <div class="hero-image-card">
+                <img
+                    src="assets/images/banners/hero-fashion.jpg"
+                    alt="ShopEase fashion collection"
+                    class="hero-photo"
+                >
 
-                <div class="hero-circle"></div>
-
-
-                <div class="hero-product-icon">
-
-                    <i class="fa-solid fa-bag-shopping"></i>
-
-                </div>
-
-
-                <div class="hero-floating-card card-one">
-
-                    <i class="fa-solid fa-star"></i>
-
-                    <div>
-
-                        <strong>
-                            4.9/5
-                        </strong>
-
-                        <span>
-                            Customer Rating
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="hero-floating-card card-two">
-
-                    <i class="fa-solid fa-fire"></i>
-
-                    <div>
-
-                        <strong>
-                            Trending
-                        </strong>
-
-                        <span>
-                            Products
-                        </span>
-
-                    </div>
-
-                </div>
-
+                <button
+                    class="hero-floating-card"
+                    id="heroBestseller"
+                    aria-label="View our bestselling product"
+                >
+                    <!-- filled by JavaScript with a real top-rated product -->
+                </button>
             </div>
 
         </div>
@@ -687,96 +651,66 @@
 
 
         <div class="category-grid">
-
-
             <a
                 href="shop.html?category=men"
-                class="category-card"
+                class="category-card category-card-img"
             >
-
-                <div class="category-icon">
-
-                    <i class="fa-solid fa-person"></i>
-
-                </div>
-
-                <h3>
-                    Men's Fashion
-                </h3>
-
-                <p>
-                    Explore Collection
-                </p>
-
+                <img
+                    src="assets/images/categories/fashion.jpg"
+                    alt="Men's fashion collection"
+                    loading="lazy"
+                >
+                <span class="category-card-body">
+                    <h3>Men's Fashion</h3>
+                    <p><span data-count-for="men">–</span> products <i class="fa-solid fa-arrow-right"></i></p>
+                </span>
             </a>
-
-
+            
             <a
-                href="shop.html?category=women"
-                class="category-card"
+                href="shop.html?category=electronics"
+                class="category-card category-card-img"
             >
-
-                <div class="category-icon">
-
-                    <i class="fa-solid fa-person-dress"></i>
-
-                </div>
-
-                <h3>
-                    Women's Fashion
-                </h3>
-
-                <p>
-                    Explore Collection
-                </p>
-
+                <img
+                    src="assets/images/categories/electronics.jpg"
+                    alt="Electronics collection"
+                    loading="lazy"
+                >
+                <span class="category-card-body">
+                    <h3>Electronics</h3>
+                    <p><span data-count-for="electronics">–</span> products <i class="fa-solid fa-arrow-right"></i></p>
+                </span>
             </a>
-
-
+            
             <a
-                href="shop.html?category=shoes"
-                class="category-card"
+                href="shop.html?category=home"
+                class="category-card category-card-img"
             >
-
-                <div class="category-icon">
-
-                    <i class="fa-solid fa-shoe-prints"></i>
-
-                </div>
-
-                <h3>
-                    Footwear
-                </h3>
-
-                <p>
-                    Explore Collection
-                </p>
-
+                <img
+                    src="assets/images/categories/home-living.jpg"
+                    alt="Home and living collection"
+                    loading="lazy"
+                >
+                <span class="category-card-body">
+                    <h3>Home & Living</h3>
+                    <p><span data-count-for="home">–</span> products <i class="fa-solid fa-arrow-right"></i></p>
+                </span>
             </a>
-
-
+            
             <a
-                href="shop.html?category=accessories"
-                class="category-card"
+                href="shop.html?category=beauty"
+                class="category-card category-card-img"
             >
-
-                <div class="category-icon">
-
-                    <i class="fa-solid fa-bag-shopping"></i>
-
-                </div>
-
-                <h3>
-                    Accessories
-                </h3>
-
-                <p>
-                    Explore Collection
-                </p>
-
+                <img
+                    src="assets/images/categories/beauty.jpg"
+                    alt="Beauty collection"
+                    loading="lazy"
+                >
+                <span class="category-card-body">
+                    <h3>Beauty</h3>
+                    <p><span data-count-for="beauty">–</span> products <i class="fa-solid fa-arrow-right"></i></p>
+                </span>
             </a>
-
-        </div>
+            </div>
 
     </div>
 
@@ -849,17 +783,17 @@
                 </span>
 
 
-                <h2>
+                <h2 id="promoTitle">
 
-                    Up to 40% Off
+                    Up to 30% off
                     <br>
-                    Selected Products
+                    top-rated picks
 
                 </h2>
 
 
-                <p>
-                    Don't miss our biggest sale of the season.
+                <p id="promoSub">
+                    Real discounts on the products customers rate highest.
                 </p>
 
 
@@ -877,11 +811,12 @@
             </div>
 
 
-            <div class="promo-icon">
-
-                <i class="fa-solid fa-tags"></i>
-
-            </div>
+            <img
+                id="promoImage"
+                class="promo-image"
+                src="assets/images/products/placeholder.jpg"
+                alt="Discounted product"
+            >
 
         </div>
 
@@ -984,8 +919,8 @@
 
             <p>
 
-                Your trusted destination for fashion,
-                footwear and accessories.
+                Fashion, electronics, home &amp; living and more —
+                hand-picked products at honest prices, shipped across India.
 
             </p>
 

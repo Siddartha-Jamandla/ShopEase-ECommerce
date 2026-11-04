@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
     setupMobileMenu();
     setupSearch();
     setupNewsletter();
+    setupHeroBestseller();
+    setupPromoBanner();
+    setupCategoryCounts();
 
     updateCartCount();
     updateWishlistCount();
@@ -1039,4 +1042,119 @@ function showToast(message) {
 
     }, 2500);
 
+}
+
+
+/* =========================================
+   HERO BESTSELLER CARD (real top-rated product)
+========================================= */
+
+function setupHeroBestseller() {
+
+    const card = document.getElementById("heroBestseller");
+
+    if (!card || typeof products === "undefined" || !Array.isArray(products)) {
+        return;
+    }
+
+    const top = [...products]
+        .filter(p => p && p.rating)
+        .sort((a, b) => (b.rating - a.rating) || ((b.reviews || 0) - (a.reviews || 0)))[0];
+
+    if (!top) {
+        return;
+    }
+
+    const img = (typeof getProductImage === "function")
+        ? getProductImage(top)
+        : (top.image || "assets/images/products/placeholder.jpg");
+
+    const price = (typeof formatPrice === "function")
+        ? formatPrice(top.price)
+        : ("\u20b9" + top.price);
+
+    card.innerHTML = `
+        <img src="${img}" alt="${top.name}"
+             onerror="this.src='assets/images/products/placeholder.jpg'">
+        <span class="hero-card-text">
+            <span class="hero-card-label">Bestseller</span>
+            <strong>${top.name}</strong>
+            <span class="hero-card-meta">${price} &middot; <i class="fa-solid fa-star"></i> ${top.rating} (${top.reviews || 0})</span>
+        </span>`;
+
+    card.addEventListener("click", () => {
+        window.location.href = `product-details.html?id=${top.id}`;
+    });
+}
+
+
+/* =========================================
+   PROMO BANNER (real max discount)
+========================================= */
+
+function setupPromoBanner() {
+
+    if (typeof products === "undefined" || !Array.isArray(products)) {
+        return;
+    }
+
+    let best = null;
+    let bestDiscount = 0;
+
+    products.forEach(p => {
+        const d = (typeof getDiscountPercentage === "function")
+            ? getDiscountPercentage(p) : 0;
+        if (d > bestDiscount) {
+            bestDiscount = d;
+            best = p;
+        }
+    });
+
+    if (!best || bestDiscount <= 0) {
+        return;
+    }
+
+    const title = document.getElementById("promoTitle");
+    const sub = document.getElementById("promoSub");
+    const img = document.getElementById("promoImage");
+
+    if (title) {
+        title.innerHTML = `Up to ${bestDiscount}% off<br>top-rated picks`;
+    }
+
+    if (sub) {
+        sub.textContent =
+            `Including the ${best.name} \u2014 rated ${best.rating}/5 by ${best.reviews || 0} customers.`;
+    }
+
+    if (img) {
+        img.src = (typeof getProductImage === "function")
+            ? getProductImage(best)
+            : best.image;
+        img.alt = best.name;
+        img.onerror = function () {
+            this.src = "assets/images/products/placeholder.jpg";
+        };
+        img.style.cursor = "pointer";
+        img.addEventListener("click", () => {
+            window.location.href = `product-details.html?id=${best.id}`;
+        });
+    }
+}
+
+
+/* =========================================
+   CATEGORY PRODUCT COUNTS (real numbers)
+========================================= */
+
+function setupCategoryCounts() {
+
+    if (typeof products === "undefined" || !Array.isArray(products)) {
+        return;
+    }
+
+    document.querySelectorAll("[data-count-for]").forEach(el => {
+        const cat = el.getAttribute("data-count-for");
+        el.textContent = products.filter(p => p.category === cat).length;
+    });
 }
