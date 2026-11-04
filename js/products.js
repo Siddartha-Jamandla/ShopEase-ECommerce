@@ -18,7 +18,7 @@ const products = [
         oldPrice: 1299,
         rating: 4.6,
         reviews: 128,
-        image: "images/products/mens-oversized-tshirt.jpg",
+        image: "assets/images/products/mens-oversized-tshirt.jpg",
         badge: "Best Seller",
         description: "Premium cotton oversized t-shirt with a modern relaxed fit."
     },
@@ -32,7 +32,7 @@ const products = [
         oldPrice: 2799,
         rating: 4.7,
         reviews: 94,
-        image: "images/products/classic-denim-jacket.jpg",
+        image: "assets/images/products/classic-denim-jacket.jpg",
         badge: "Trending",
         description: "Classic blue denim jacket designed for everyday styling."
     },
@@ -46,7 +46,7 @@ const products = [
         oldPrice: 1799,
         rating: 4.5,
         reviews: 86,
-        image: "images/products/slim-fit-shirt.jpg",
+        image: "assets/images/products/slim-fit-shirt.jpg",
         badge: "Popular",
         description: "Comfortable slim fit shirt suitable for casual and semi-formal looks."
     },
@@ -60,7 +60,7 @@ const products = [
         oldPrice: 1499,
         rating: 4.4,
         reviews: 72,
-        image: "images/products/premium-polo.jpg",
+        image: "assets/images/products/premium-polo.jpg",
         badge: "",
         description: "Soft premium cotton polo shirt with a clean modern design."
     },
@@ -74,7 +74,7 @@ const products = [
         oldPrice: 2199,
         rating: 4.6,
         reviews: 113,
-        image: "images/products/cargo-pants.jpg",
+        image: "assets/images/products/cargo-pants.jpg",
         badge: "New",
         description: "Relaxed cargo pants with multiple utility pockets."
     },
@@ -88,7 +88,7 @@ const products = [
         oldPrice: 1999,
         rating: 4.3,
         reviews: 58,
-        image: "images/products/formal-trousers.jpg",
+        image: "assets/images/products/formal-trousers.jpg",
         badge: "",
         description: "Smart formal trousers with a comfortable tailored fit."
     },
@@ -102,7 +102,7 @@ const products = [
         oldPrice: 2299,
         rating: 4.7,
         reviews: 147,
-        image: "images/products/hooded-sweatshirt.jpg",
+        image: "assets/images/products/hooded-sweatshirt.jpg",
         badge: "Best Seller",
         description: "Warm and comfortable hoodie made for everyday wear."
     },
@@ -116,7 +116,7 @@ const products = [
         oldPrice: 1899,
         rating: 4.5,
         reviews: 67,
-        image: "images/products/linen-shirt.jpg",
+        image: "assets/images/products/linen-shirt.jpg",
         badge: "New",
         description: "Breathable linen shirt perfect for warm-weather outfits."
     },
@@ -130,7 +130,7 @@ const products = [
         oldPrice: 1599,
         rating: 4.4,
         reviews: 91,
-        image: "images/products/track-pants.jpg",
+        image: "assets/images/products/track-pants.jpg",
         badge: "",
         description: "Lightweight athletic track pants for workouts and daily use."
     },
@@ -144,7 +144,7 @@ const products = [
         oldPrice: 3299,
         rating: 4.8,
         reviews: 54,
-        image: "images/products/bomber-jacket.jpg",
+        image: "assets/images/products/bomber-jacket.jpg",
         badge: "Premium",
         description: "Stylish bomber jacket with a contemporary streetwear design."
     },
@@ -163,7 +163,7 @@ const products = [
         oldPrice: 2199,
         rating: 4.7,
         reviews: 156,
-        image: "images/products/floral-summer-dress.jpg",
+        image: "assets/images/products/floral-summer-dress.jpg",
         badge: "Best Seller",
         description: "Elegant floral dress designed for comfortable summer styling."
     },
@@ -177,7 +177,7 @@ const products = [
         oldPrice: 1199,
         rating: 4.5,
         reviews: 82,
-        image: "images/products/ribbed-top.jpg",
+        image: "assets/images/products/ribbed-top.jpg",
         badge: "Trending",
         description: "Minimal ribbed top with a stylish contemporary silhouette."
     },
@@ -191,7 +191,7 @@ const products = [
         oldPrice: 2399,
         rating: 4.6,
         reviews: 119,
-        image: "images/products/wide-leg-jeans.jpg",
+        image: "assets/images/products/wide-leg-jeans.jpg",
         badge: "Popular",
         description: "Comfortable wide-leg denim with a modern relaxed fit."
     },
@@ -205,7 +205,7 @@ const products = [
         oldPrice: 1999,
         rating: 4.8,
         reviews: 171,
-        image: "images/products/womens-hoodie.jpg",
+        image: "assets/images/products/womens-hoodie.jpg",
         badge: "Best Seller",
         description: "Soft oversized hoodie with a cozy everyday fit."
     },
@@ -219,7 +219,7 @@ const products = [
         oldPrice: 1799,
         rating: 4.4,
         reviews: 63,
-        image: "images/products/pleated-skirt.jpg",
+        image: "assets/images/products/pleated-skirt.jpg",
         badge: "",
         description: "Elegant pleated midi skirt for casual and formal styling."
     },
@@ -233,7 +233,7 @@ const products = [
         oldPrice: 3499,
         rating: 4.7,
         reviews: 76,
-        image: "images/products/womens-blazer.jpg",
+        image: "assets/images/products/womens-blazer.jpg",
         badge: "Premium",
         description: "Sophisticated blazer designed for polished professional looks."
     },
@@ -247,7 +247,7 @@ const products = [
         oldPrice: 1399,
         rating: 4.3,
         reviews: 49,
-        image: "images/products/crop-shirt.jpg",
+        image: "assets/images/products/crop-shirt.jpg",
         badge: "New",
         description: "Trendy crop shirt with a comfortable lightweight design."
     },
@@ -261,7 +261,7 @@ const products = [
         oldPrice: 2699,
         rating: 4.8,
         reviews: 134,
-        image: "images/products/maxi-dress.jpg",
+        image: "assets/images/products/maxi-dress.jpg",
         badge: "Trending",
         description: "Flowing maxi dress with an elegant feminine silhouette."
     },
@@ -275,7 +275,7 @@ const products = [
         oldPrice: 999,
         rating: 4.5,
         reviews: 201,
-        image: "images/products/high-waist-leggings.jpg",
+        image: "assets/images/products/high-waist-leggings.jpg",
         badge: "Best Seller",
         description: "Stretchable high-waist leggings for workouts and casual wear."
     },
@@ -289,7 +289,7 @@ const products = [
         oldPrice: 2199,
         rating: 4.6,
         reviews: 88,
-        image: "images/products/knitted-cardigan.jpg",
+        image: "assets/images/products/knitted-cardigan.jpg",
         badge: "",
         description: "Soft knitted cardigan with a timeless everyday design."
     },
@@ -308,7 +308,7 @@ const products = [
         oldPrice: 2999,
         rating: 4.8,
         reviews: 245,
-        image: "images/products/urban-runner.jpg",
+        image: "assets/images/products/urban-runner.jpg",
         badge: "Best Seller",
         description: "Lightweight running sneakers with responsive cushioning."
     },
@@ -322,7 +322,7 @@ const products = [
         oldPrice: 2599,
         rating: 4.7,
         reviews: 198,
-        image: "images/products/classic-white-sneakers.jpg",
+        image: "assets/images/products/classic-white-sneakers.jpg",
         badge: "Popular",
         description: "Minimal white sneakers designed for everyday outfits."
     },
@@ -336,7 +336,7 @@ const products = [
         oldPrice: 3699,
         rating: 4.9,
         reviews: 176,
-        image: "images/products/performance-running.jpg",
+        image: "assets/images/products/performance-running.jpg",
         badge: "Premium",
         description: "High-performance running shoes with advanced cushioning."
     },
@@ -350,7 +350,7 @@ const products = [
         oldPrice: 1799,
         rating: 4.4,
         reviews: 102,
-        image: "images/products/canvas-shoes.jpg",
+        image: "assets/images/products/canvas-shoes.jpg",
         badge: "",
         description: "Comfortable canvas shoes for casual everyday wear."
     },
@@ -364,7 +364,7 @@ const products = [
         oldPrice: 3299,
         rating: 4.6,
         reviews: 87,
-        image: "images/products/leather-loafers.jpg",
+        image: "assets/images/products/leather-loafers.jpg",
         badge: "Premium",
         description: "Classic leather loafers with a refined formal finish."
     },
@@ -378,7 +378,7 @@ const products = [
         oldPrice: 2799,
         rating: 4.5,
         reviews: 114,
-        image: "images/products/high-top-sneakers.jpg",
+        image: "assets/images/products/high-top-sneakers.jpg",
         badge: "Trending",
         description: "Modern high-top sneakers inspired by streetwear fashion."
     },
@@ -392,7 +392,7 @@ const products = [
         oldPrice: 2299,
         rating: 4.7,
         reviews: 143,
-        image: "images/products/womens-walking-shoes.jpg",
+        image: "assets/images/products/womens-walking-shoes.jpg",
         badge: "Popular",
         description: "Comfortable walking shoes designed for all-day support."
     },
@@ -406,7 +406,7 @@ const products = [
         oldPrice: 1899,
         rating: 4.3,
         reviews: 71,
-        image: "images/products/slip-on-shoes.jpg",
+        image: "assets/images/products/slip-on-shoes.jpg",
         badge: "",
         description: "Easy slip-on shoes combining comfort and modern style."
     },
@@ -420,7 +420,7 @@ const products = [
         oldPrice: 3199,
         rating: 4.8,
         reviews: 96,
-        image: "images/products/training-shoes.jpg",
+        image: "assets/images/products/training-shoes.jpg",
         badge: "New",
         description: "Durable training shoes designed for gym and athletic activities."
     },
@@ -434,7 +434,7 @@ const products = [
         oldPrice: 2499,
         rating: 4.6,
         reviews: 109,
-        image: "images/products/beige-sneakers.jpg",
+        image: "assets/images/products/beige-sneakers.jpg",
         badge: "Trending",
         description: "Minimal beige sneakers that pair easily with any outfit."
     },
@@ -453,7 +453,7 @@ const products = [
         oldPrice: 2999,
         rating: 4.8,
         reviews: 164,
-        image: "images/products/leather-backpack.jpg",
+        image: "assets/images/products/leather-backpack.jpg",
         badge: "Best Seller",
         description: "Premium backpack with multiple compartments and laptop storage."
     },
@@ -467,7 +467,7 @@ const products = [
         oldPrice: 2699,
         rating: 4.6,
         reviews: 92,
-        image: "images/products/minimal-watch.jpg",
+        image: "assets/images/products/minimal-watch.jpg",
         badge: "Premium",
         description: "Elegant minimalist watch with a sophisticated dial."
     },
@@ -481,7 +481,7 @@ const products = [
         oldPrice: 1899,
         rating: 4.5,
         reviews: 118,
-        image: "images/products/crossbody-bag.jpg",
+        image: "assets/images/products/crossbody-bag.jpg",
         badge: "Popular",
         description: "Compact crossbody bag perfect for everyday essentials."
     },
@@ -495,7 +495,7 @@ const products = [
         oldPrice: 1399,
         rating: 4.4,
         reviews: 134,
-        image: "images/products/sunglasses.jpg",
+        image: "assets/images/products/sunglasses.jpg",
         badge: "",
         description: "Stylish sunglasses offering reliable UV protection."
     },
@@ -509,7 +509,7 @@ const products = [
         oldPrice: 3499,
         rating: 4.9,
         reviews: 187,
-        image: "images/products/laptop-backpack.jpg",
+        image: "assets/images/products/laptop-backpack.jpg",
         badge: "Best Seller",
         description: "Spacious travel backpack with dedicated laptop protection."
     },
@@ -523,7 +523,7 @@ const products = [
         oldPrice: 1199,
         rating: 4.7,
         reviews: 213,
-        image: "images/products/leather-wallet.jpg",
+        image: "assets/images/products/leather-wallet.jpg",
         badge: "Popular",
         description: "Slim leather wallet with multiple card slots."
     },
@@ -537,7 +537,7 @@ const products = [
         oldPrice: 1599,
         rating: 4.4,
         reviews: 75,
-        image: "images/products/canvas-backpack.jpg",
+        image: "assets/images/products/canvas-backpack.jpg",
         badge: "",
         description: "Lightweight canvas backpack for college and everyday use."
     },
@@ -551,7 +551,7 @@ const products = [
         oldPrice: 999,
         rating: 4.5,
         reviews: 143,
-        image: "images/products/leather-belt.jpg",
+        image: "assets/images/products/leather-belt.jpg",
         badge: "",
         description: "Classic leather belt with a durable metal buckle."
     },
@@ -565,7 +565,7 @@ const products = [
         oldPrice: 899,
         rating: 4.3,
         reviews: 61,
-        image: "images/products/baseball-cap.jpg",
+        image: "assets/images/products/baseball-cap.jpg",
         badge: "New",
         description: "Adjustable baseball cap with a clean everyday design."
     },
@@ -579,7 +579,7 @@ const products = [
         oldPrice: 2499,
         rating: 4.7,
         reviews: 97,
-        image: "images/products/duffel-bag.jpg",
+        image: "assets/images/products/duffel-bag.jpg",
         badge: "Trending",
         description: "Spacious duffel bag designed for weekend trips and travel."
     },
@@ -598,7 +598,7 @@ const products = [
         oldPrice: 1299,
         rating: 4.5,
         reviews: 109,
-        image: "images/products/graphic-tshirt.jpg",
+        image: "assets/images/products/graphic-tshirt.jpg",
         badge: "Trending",
         description: "Premium graphic t-shirt with a modern streetwear print."
     },
@@ -612,7 +612,7 @@ const products = [
         oldPrice: 2499,
         rating: 4.6,
         reviews: 84,
-        image: "images/products/casual-jumpsuit.jpg",
+        image: "assets/images/products/casual-jumpsuit.jpg",
         badge: "New",
         description: "Stylish casual jumpsuit with a comfortable modern fit."
     },
@@ -626,7 +626,7 @@ const products = [
         oldPrice: 2899,
         rating: 4.7,
         reviews: 156,
-        image: "images/products/classic-running.jpg",
+        image: "assets/images/products/classic-running.jpg",
         badge: "Popular",
         description: "Reliable running sneakers for everyday training."
     },
@@ -640,7 +640,7 @@ const products = [
         oldPrice: 2199,
         rating: 4.6,
         reviews: 93,
-        image: "images/products/shoulder-bag.jpg",
+        image: "assets/images/products/shoulder-bag.jpg",
         badge: "Trending",
         description: "Elegant shoulder bag with a spacious practical interior."
     },
@@ -654,7 +654,7 @@ const products = [
         oldPrice: 1899,
         rating: 4.5,
         reviews: 73,
-        image: "images/products/mens-kurta.jpg",
+        image: "assets/images/products/mens-kurta.jpg",
         badge: "New",
         description: "Modern casual kurta combining traditional style with comfort."
     },
@@ -668,7 +668,7 @@ const products = [
         oldPrice: 1599,
         rating: 4.7,
         reviews: 127,
-        image: "images/products/printed-kurti.jpg",
+        image: "assets/images/products/printed-kurti.jpg",
         badge: "Best Seller",
         description: "Beautiful printed kurti suitable for everyday occasions."
     },
@@ -682,7 +682,7 @@ const products = [
         oldPrice: 1199,
         rating: 4.4,
         reviews: 65,
-        image: "images/products/training-shorts.jpg",
+        image: "assets/images/products/training-shorts.jpg",
         badge: "",
         description: "Breathable sports shorts designed for training and workouts."
     },
@@ -696,7 +696,7 @@ const products = [
         oldPrice: 2599,
         rating: 4.8,
         reviews: 142,
-        image: "images/products/activewear-set.jpg",
+        image: "assets/images/products/activewear-set.jpg",
         badge: "Best Seller",
         description: "Comfortable two-piece activewear set for workouts and fitness."
     },
@@ -710,7 +710,7 @@ const products = [
         oldPrice: 1499,
         rating: 4.5,
         reviews: 89,
-        image: "images/products/travel-sunglasses.jpg",
+        image: "assets/images/products/travel-sunglasses.jpg",
         badge: "New",
         description: "Modern sunglasses designed for travel and outdoor adventures."
     },
@@ -724,7 +724,7 @@ const products = [
         oldPrice: 2799,
         rating: 4.8,
         reviews: 221,
-        image: "images/products/everyday-sneakers.jpg",
+        image: "assets/images/products/everyday-sneakers.jpg",
         badge: "Best Seller",
         description: "Premium everyday sneakers combining comfort, durability and style."
     },
@@ -738,7 +738,7 @@ const products = [
         oldPrice: 4999,
         rating: 4.7,
         reviews: 245,
-        image: "images/products/noise-buds-pro.jpg",
+        image: "assets/images/products/noise-buds-pro.jpg",
         badge: "Top Rated",
         description: "Wireless earbuds with deep bass, fast pairing, and all-day battery life."
     },
@@ -752,7 +752,7 @@ const products = [
         oldPrice: 3999,
         rating: 4.6,
         reviews: 176,
-        image: "images/products/nord-buds.jpg",
+        image: "assets/images/products/nord-buds.jpg",
         badge: "Popular",
         description: "Compact wireless earbuds built for immersive music and clear calls."
     },
@@ -766,7 +766,7 @@ const products = [
         oldPrice: 64999,
         rating: 4.8,
         reviews: 203,
-        image: "images/products/tablet-air.jpg",
+        image: "assets/images/products/tablet-air.jpg",
         badge: "New",
         description: "Lightweight tablet with vibrant display and excellent productivity tools."
     },
@@ -780,7 +780,7 @@ const products = [
         oldPrice: 89999,
         rating: 4.9,
         reviews: 144,
-        image: "images/products/smart-tv-4k.jpg",
+        image: "assets/images/products/smart-tv-4k.jpg",
         badge: "Premium",
         description: "Cinematic 4K entertainment with rich contrast and smart streaming."
     },
@@ -794,7 +794,7 @@ const products = [
         oldPrice: 9999,
         rating: 4.7,
         reviews: 131,
-        image: "images/products/air-fryer.jpg",
+        image: "assets/images/products/air-fryer.jpg",
         badge: "Fast Selling",
         description: "Crispy cooking made easier with a smart airflow design and intuitive controls."
     },
@@ -808,7 +808,7 @@ const products = [
         oldPrice: 3499,
         rating: 4.5,
         reviews: 92,
-        image: "images/products/aroma-diffuser.jpg",
+        image: "assets/images/products/aroma-diffuser.jpg",
         badge: "Popular",
         description: "A calming home scent diffuser that fits beautifully into any room."
     },
@@ -822,7 +822,7 @@ const products = [
         oldPrice: 11999,
         rating: 4.6,
         reviews: 88,
-        image: "images/products/accent-chair.jpg",
+        image: "assets/images/products/accent-chair.jpg",
         badge: "New",
         description: "Contemporary accent chair with elegant form and soft everyday comfort."
     },
@@ -836,7 +836,7 @@ const products = [
         oldPrice: 3299,
         rating: 4.8,
         reviews: 204,
-        image: "images/products/glow-serum.jpg",
+        image: "assets/images/products/glow-serum.jpg",
         badge: "Bestseller",
         description: "Hydrating serum set designed to brighten, smooth and soften skin."
     },
@@ -850,7 +850,7 @@ const products = [
         oldPrice: 4599,
         rating: 4.6,
         reviews: 118,
-        image: "images/products/hair-straightener.jpg",
+        image: "assets/images/products/hair-straightener.jpg",
         badge: "Trend",
         description: "Salon-style styling with smooth glide and heat control."
     },
@@ -864,7 +864,7 @@ const products = [
         oldPrice: 2499,
         rating: 4.7,
         reviews: 185,
-        image: "images/products/yoga-mat.jpg",
+        image: "assets/images/products/yoga-mat.jpg",
         badge: "Best Seller",
         description: "Soft, supportive yoga mat for home workouts, stretching and recovery."
     },
@@ -878,7 +878,7 @@ const products = [
         oldPrice: 1999,
         rating: 4.5,
         reviews: 114,
-        image: "images/products/resistance-bands.jpg",
+        image: "assets/images/products/resistance-bands.jpg",
         badge: "Popular",
         description: "Travel-friendly bands for quick strength, mobility and posture work."
     },
@@ -892,7 +892,7 @@ const products = [
         oldPrice: 3999,
         rating: 4.6,
         reviews: 97,
-        image: "images/products/portable-blender.jpg",
+        image: "assets/images/products/portable-blender.jpg",
         badge: "Hot",
         description: "Compact smoothie blender with rechargeable power and travel-friendly design."
     }
