@@ -80,6 +80,13 @@ function createHomepageProductCard(product) {
                     Add to Cart
                 </button>
 
+                <img
+                    src="${getProductImage(product)}"
+                    alt="${product.name}"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                >
+
                 <div class="product-image-placeholder">
                     <i class="fa-solid ${product.icon}"></i>
                 </div>
