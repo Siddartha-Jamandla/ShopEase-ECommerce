@@ -6,6 +6,10 @@ A complete e-commerce web app: storefront (HTML/CSS/JS) + **Python REST API**
 > Built with the skills on my resume: **Python, JavaScript, SQL, HTML/CSS** —
 > no frameworks, no paid services, everything runs with a plain `python3`.
 
+## Live Demo
+
+**[https://siddarthashopease.pythonanywhere.com/](https://siddarthashopease.pythonanywhere.com/)** — the full app running live: storefront, REST API, and database.
+
 ---
 
 ## Architecture
