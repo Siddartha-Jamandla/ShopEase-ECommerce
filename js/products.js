@@ -1,9 +1,11 @@
 /* =========================================================
    ShopEase - Product Database
-   50 Professional Ecommerce Products
+   62 products — served live from the database (/api/products).
+   The static array below is the offline fallback, used when
+   the API is unreachable.
 ========================================================= */
 
-const products = [
+const productsFallback = [
 
     // =====================================================
     // MEN'S FASHION
@@ -899,8 +901,8 @@ const products = [
 
 ];
 
-function normalizeProductData() {
-    products.forEach(product => {
+function normalizeProductData(list) {
+    list.forEach(product => {
         product.categorySlug = String(product.categorySlug || product.category || "").toLowerCase();
         product.category = product.categorySlug;
         product.icon = product.icon || getFallbackIcon(product.category);
@@ -933,7 +935,60 @@ function getFallbackIcon(category) {
     return icons[category] || "fa-box";
 }
 
-normalizeProductData();
+normalizeProductData(productsFallback);
+
+/* =========================================================
+   LIVE CATALOG — database-backed via /api/products
+========================================================= */
+
+// Map an API product row to the storefront's product shape.
+function mapApiProduct(p) {
+    return {
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        brand: p.brand || "",
+        price: Number(p.price),
+        oldPrice: p.old_price != null ? Number(p.old_price) : null,
+        rating: p.rating != null ? Number(p.rating) : 0,
+        reviews: p.reviews_count != null ? Number(p.reviews_count) : 0,
+        image: p.image_url || "",
+        badge: p.badge || "",
+        description: p.description || "",
+        stock: p.stock != null ? Number(p.stock) : 0
+    };
+}
+
+// window.products is available synchronously (fallback data) so every
+// page renders even when the backend is down. window.productsReady
+// resolves once the live catalog has been attempted — pages that render
+// product grids await it to prefer database data.
+window.products = productsFallback;
+window.productsReady = (async function loadLiveCatalog() {
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+        try {
+            const res = await fetch("/api/products?per_page=100", {
+                signal: controller.signal
+            });
+            if (!res.ok) throw new Error("API status " + res.status);
+            const body = await res.json();
+            const items = Array.isArray(body.data) ? body.data : body.data.items;
+            if (Array.isArray(items) && items.length > 0) {
+                const live = items.map(mapApiProduct);
+                normalizeProductData(live);
+                window.products = live;
+            }
+        } finally {
+            clearTimeout(timeout);
+        }
+    } catch (err) {
+        console.warn("Live catalog unavailable, using fallback.", err);
+    }
+    document.dispatchEvent(new Event("products-ready"));
+    return window.products;
+})();
 
 /* =========================================================
    PRODUCT HELPER FUNCTIONS
@@ -951,12 +1006,12 @@ function getProductImage(product) {
 }
 
 function getProductById(id) {
-    return products.find(product => product.id === Number(id));
+    return window.products.find(product => product.id === Number(id));
 }
 
 
 function getProductsByCategory(category) {
-    return products.filter(product => product.category === category);
+    return window.products.filter(product => product.category === category);
 }
 
 

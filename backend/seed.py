@@ -2,13 +2,13 @@
 """
 ShopEase E-Commerce - Database seed script (stdlib only)
 =======================================================
-Creates the tables (from schema.sql) and inserts 12 realistic
-products with INR prices. Idempotent: skips when products exist
-unless --force is passed.
+Creates the tables (from schema.sql) and upserts the full 62-product
+catalog with INR prices, brands, ratings and real product photos.
+Idempotent: safe to run multiple times — products are matched by id
+and updated in place (INSERT ... ON CONFLICT DO UPDATE).
 
 Usage:
     python3 backend/seed.py
-    python3 backend/seed.py --force     # wipe and re-seed products
 """
 
 import os
@@ -19,104 +19,296 @@ BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BACKEND_DIR, "shopease.db")
 SCHEMA_PATH = os.path.join(BACKEND_DIR, "schema.sql")
 
-# NOTE: all products use real product photos under assets/images/products/ .
-# The shared placeholder (placeholder.jpg) is only a last-resort fallback.
-IMG = "assets/images/products/"
-PH = IMG + "placeholder.jpg"
-
-# (name, description, price_inr, category, image_url, stock)
+# (id, name, description, price_inr, category, image_url, stock,
+#  brand, old_price_inr, rating, reviews_count, badge)
 PRODUCTS = [
-    # ---- Fashion ------------------------------------------------------
-    ("Men's Oversized Graphic T-Shirt",
-     "Premium cotton oversized t-shirt with a modern relaxed fit. "
-     "Breathable fabric, perfect for everyday streetwear.",
-     899, "fashion", IMG + "mens-oversized-tshirt.jpg", 120),
-
-    ("Classic Denim Jacket",
-     "Classic blue denim jacket designed for everyday styling. "
-     "Durable stitching, comfortable regular fit.",
-     1899, "fashion", IMG + "classic-denim-jacket.jpg", 80),
-
-    ("Slim Fit Casual Shirt",
-     "Comfortable slim-fit shirt suitable for casual and semi-formal "
-     "looks. Soft-touch cotton blend.",
-     1199, "fashion", IMG + "slim-fit-shirt.jpg", 95),
-
-    ("Genuine Leather Wallet",
-     "Genuine leather bifold wallet with 8 card slots and 2 currency "
-     "compartments. Sleek, durable finish.",
-     899, "fashion", IMG + "leather-wallet.jpg", 150),
-
-    # ---- Home ----------------------------------------------------------
-    ("Ceramic Dinner Set (18 pcs)",
-     "Elegant 18-piece ceramic dinner set for 6. Chip-resistant glaze, "
-     "microwave and dishwasher safe.",
-     1999, "home", IMG + "ceramic-dinner-set.jpg", 40),
-
-    ("LED Table Lamp",
-     "Modern touch-control LED desk lamp with 3 brightness levels and a "
-     "warm-to-cool colour range. USB powered.",
-     749, "home", IMG + "led-table-lamp.jpg", 90),
-
-    ("Cotton Bedsheet (King)",
-     "220 TC pure cotton king-size bedsheet with 2 pillow covers. "
-     "Soft, colour-fast and skin friendly.",
-     999, "home", IMG + "cotton-bedsheet-king.jpg", 70),
-
-    ("Stainless Steel Water Bottle 1L",
-     "Double-wall vacuum insulated 1L bottle. Keeps drinks hot for 12 hrs "
-     "or cold for 24 hrs. BPA free.",
-     649, "home", IMG + "steel-water-bottle.jpg", 200),
-
-    # ---- Electronics ----------------------------------------------------
-    ("Wireless Bluetooth Earbuds",
-     "True wireless earbuds with 40-hour total battery, ENC noise "
-     "reduction and low-latency gaming mode.",
-     1799, "electronics", IMG + "bluetooth-earbuds.jpg", 110),
-
-    ("Smart Fitness Band",
-     "Fitness band with heart-rate and SpO2 tracking, 14-day battery, "
-     "100+ sport modes and 1.47-inch display.",
-     2499, "electronics", IMG + "fitness-band.jpg", 75),
-
-    ("Portable Bluetooth Speaker",
-     "Compact Bluetooth speaker with deep bass, 18-hour playtime and "
-     "IPX6 splash resistance.",
-     1599, "electronics", IMG + "bluetooth-speaker.jpg", 65),
-
-    ("USB-C Fast Charger 65W",
-     "65W GaN fast charger with dual USB-C + USB-A ports. Charges "
-     "laptops, phones and tablets at full speed.",
-     1299, "electronics", IMG + "usb-c-charger-65w.jpg", 130),
+    (1, "Premium Oversized T-Shirt",
+     "Premium cotton oversized t-shirt with a modern relaxed fit.",
+     899.0, "men", "assets/images/products/mens-oversized-tshirt.jpg", 47,
+     "StreetWear", 1299.0, 4.6, 128, "Best Seller"),
+    (2, "Classic Denim Jacket",
+     "Classic blue denim jacket designed for everyday styling.",
+     1899.0, "men", "assets/images/products/classic-denim-jacket.jpg", 54,
+     "UrbanStep", 2799.0, 4.7, 94, "Trending"),
+    (3, "Slim Fit Casual Shirt",
+     "Comfortable slim fit shirt suitable for casual and semi-formal looks.",
+     1199.0, "men", "assets/images/products/slim-fit-shirt.jpg", 61,
+     "StreetWear", 1799.0, 4.5, 86, "Popular"),
+    (4, "Premium Cotton Polo",
+     "Soft premium cotton polo shirt with a clean modern design.",
+     999.0, "men", "assets/images/products/premium-polo.jpg", 68,
+     "UrbanStep", 1499.0, 4.4, 72, ""),
+    (5, "Relaxed Fit Cargo Pants",
+     "Relaxed cargo pants with multiple utility pockets.",
+     1499.0, "men", "assets/images/products/cargo-pants.jpg", 75,
+     "StreetWear", 2199.0, 4.6, 113, "New"),
+    (6, "Classic Formal Trousers",
+     "Smart formal trousers with a comfortable tailored fit.",
+     1399.0, "men", "assets/images/products/formal-trousers.jpg", 82,
+     "UrbanStep", 1999.0, 4.3, 58, ""),
+    (7, "Hooded Sweatshirt",
+     "Warm and comfortable hoodie made for everyday wear.",
+     1599.0, "men", "assets/images/products/hooded-sweatshirt.jpg", 89,
+     "StreetWear", 2299.0, 4.7, 147, "Best Seller"),
+    (8, "Linen Casual Shirt",
+     "Breathable linen shirt perfect for warm-weather outfits.",
+     1299.0, "men", "assets/images/products/linen-shirt.jpg", 96,
+     "UrbanStep", 1899.0, 4.5, 67, "New"),
+    (9, "Athletic Track Pants",
+     "Lightweight athletic track pants for workouts and daily use.",
+     1099.0, "men", "assets/images/products/track-pants.jpg", 103,
+     "RunMax", 1599.0, 4.4, 91, ""),
+    (10, "Premium Bomber Jacket",
+     "Stylish bomber jacket with a contemporary streetwear design.",
+     2199.0, "men", "assets/images/products/bomber-jacket.jpg", 110,
+     "UrbanStep", 3299.0, 4.8, 54, "Premium"),
+    (11, "Floral Summer Dress",
+     "Elegant floral dress designed for comfortable summer styling.",
+     1499.0, "women", "assets/images/products/floral-summer-dress.jpg", 117,
+     "UrbanStep", 2199.0, 4.7, 156, "Best Seller"),
+    (12, "Elegant Ribbed Top",
+     "Minimal ribbed top with a stylish contemporary silhouette.",
+     799.0, "women", "assets/images/products/ribbed-top.jpg", 124,
+     "StreetWear", 1199.0, 4.5, 82, "Trending"),
+    (13, "Wide Leg Jeans",
+     "Comfortable wide-leg denim with a modern relaxed fit.",
+     1599.0, "women", "assets/images/products/wide-leg-jeans.jpg", 131,
+     "UrbanStep", 2399.0, 4.6, 119, "Popular"),
+    (14, "Oversized Hoodie",
+     "Soft oversized hoodie with a cozy everyday fit.",
+     1399.0, "women", "assets/images/products/womens-hoodie.jpg", 138,
+     "StreetWear", 1999.0, 4.8, 171, "Best Seller"),
+    (15, "Pleated Midi Skirt",
+     "Elegant pleated midi skirt for casual and formal styling.",
+     1199.0, "women", "assets/images/products/pleated-skirt.jpg", 145,
+     "UrbanStep", 1799.0, 4.4, 63, ""),
+    (16, "Classic Women's Blazer",
+     "Sophisticated blazer designed for polished professional looks.",
+     2299.0, "women", "assets/images/products/womens-blazer.jpg", 152,
+     "UrbanStep", 3499.0, 4.7, 76, "Premium"),
+    (17, "Casual Crop Shirt",
+     "Trendy crop shirt with a comfortable lightweight design.",
+     899.0, "women", "assets/images/products/crop-shirt.jpg", 159,
+     "StreetWear", 1399.0, 4.3, 49, "New"),
+    (18, "Elegant Maxi Dress",
+     "Flowing maxi dress with an elegant feminine silhouette.",
+     1799.0, "women", "assets/images/products/maxi-dress.jpg", 46,
+     "UrbanStep", 2699.0, 4.8, 134, "Trending"),
+    (19, "High Waist Leggings",
+     "Stretchable high-waist leggings for workouts and casual wear.",
+     699.0, "women", "assets/images/products/high-waist-leggings.jpg", 53,
+     "RunMax", 999.0, 4.5, 201, "Best Seller"),
+    (20, "Knitted Cardigan",
+     "Soft knitted cardigan with a timeless everyday design.",
+     1499.0, "women", "assets/images/products/knitted-cardigan.jpg", 60,
+     "UrbanStep", 2199.0, 4.6, 88, ""),
+    (21, "Urban Runner Sneakers",
+     "Lightweight running sneakers with responsive cushioning.",
+     1999.0, "shoes", "assets/images/products/urban-runner.jpg", 67,
+     "RunMax", 2999.0, 4.8, 245, "Best Seller"),
+    (22, "Classic White Sneakers",
+     "Minimal white sneakers designed for everyday outfits.",
+     1799.0, "shoes", "assets/images/products/classic-white-sneakers.jpg", 74,
+     "UrbanStep", 2599.0, 4.7, 198, "Popular"),
+    (23, "Performance Running Shoes",
+     "High-performance running shoes with advanced cushioning.",
+     2499.0, "shoes", "assets/images/products/performance-running.jpg", 81,
+     "RunMax", 3699.0, 4.9, 176, "Premium"),
+    (24, "Casual Canvas Shoes",
+     "Comfortable canvas shoes for casual everyday wear.",
+     1199.0, "shoes", "assets/images/products/canvas-shoes.jpg", 88,
+     "StreetWear", 1799.0, 4.4, 102, ""),
+    (25, "Classic Leather Loafers",
+     "Classic leather loafers with a refined formal finish.",
+     2199.0, "shoes", "assets/images/products/leather-loafers.jpg", 95,
+     "UrbanStep", 3299.0, 4.6, 87, "Premium"),
+    (26, "Street High-Top Sneakers",
+     "Modern high-top sneakers inspired by streetwear fashion.",
+     1899.0, "shoes", "assets/images/products/high-top-sneakers.jpg", 102,
+     "StreetWear", 2799.0, 4.5, 114, "Trending"),
+    (27, "Women's Walking Shoes",
+     "Comfortable walking shoes designed for all-day support.",
+     1599.0, "shoes", "assets/images/products/womens-walking-shoes.jpg", 109,
+     "RunMax", 2299.0, 4.7, 143, "Popular"),
+    (28, "Classic Slip-On Shoes",
+     "Easy slip-on shoes combining comfort and modern style.",
+     1299.0, "shoes", "assets/images/products/slip-on-shoes.jpg", 116,
+     "UrbanStep", 1899.0, 4.3, 71, ""),
+    (29, "Training Sports Shoes",
+     "Durable training shoes designed for gym and athletic activities.",
+     2299.0, "shoes", "assets/images/products/training-shoes.jpg", 123,
+     "RunMax", 3199.0, 4.8, 96, "New"),
+    (30, "Minimal Beige Sneakers",
+     "Minimal beige sneakers that pair easily with any outfit.",
+     1699.0, "shoes", "assets/images/products/beige-sneakers.jpg", 130,
+     "StreetWear", 2499.0, 4.6, 109, "Trending"),
+    (31, "Premium Leather Backpack",
+     "Premium backpack with multiple compartments and laptop storage.",
+     1999.0, "accessories", "assets/images/products/leather-backpack.jpg", 137,
+     "CarryPro", 2999.0, 4.8, 164, "Best Seller"),
+    (32, "Minimal Analog Watch",
+     "Elegant minimalist watch with a sophisticated dial.",
+     1799.0, "accessories", "assets/images/products/minimal-watch.jpg", 144,
+     "UrbanStep", 2699.0, 4.6, 92, "Premium"),
+    (33, "Classic Crossbody Bag",
+     "Compact crossbody bag perfect for everyday essentials.",
+     1299.0, "accessories", "assets/images/products/crossbody-bag.jpg", 151,
+     "CarryPro", 1899.0, 4.5, 118, "Popular"),
+    (34, "UV Protection Sunglasses",
+     "Stylish sunglasses offering reliable UV protection.",
+     899.0, "accessories", "assets/images/products/sunglasses.jpg", 158,
+     "UrbanStep", 1399.0, 4.4, 134, ""),
+    (35, "Travel Laptop Backpack",
+     "Spacious travel backpack with dedicated laptop protection.",
+     2299.0, "accessories", "assets/images/products/laptop-backpack.jpg", 45,
+     "CarryPro", 3499.0, 4.9, 187, "Best Seller"),
+    (36, "Premium Leather Wallet",
+     "Slim leather wallet with multiple card slots.",
+     799.0, "accessories", "assets/images/products/leather-wallet.jpg", 52,
+     "CarryPro", 1199.0, 4.7, 213, "Popular"),
+    (37, "Everyday Canvas Backpack",
+     "Lightweight canvas backpack for college and everyday use.",
+     1099.0, "accessories", "assets/images/products/canvas-backpack.jpg", 59,
+     "StreetWear", 1599.0, 4.4, 75, ""),
+    (38, "Classic Leather Belt",
+     "Classic leather belt with a durable metal buckle.",
+     699.0, "accessories", "assets/images/products/leather-belt.jpg", 66,
+     "CarryPro", 999.0, 4.5, 143, ""),
+    (39, "Premium Baseball Cap",
+     "Adjustable baseball cap with a clean everyday design.",
+     599.0, "accessories", "assets/images/products/baseball-cap.jpg", 73,
+     "StreetWear", 899.0, 4.3, 61, "New"),
+    (40, "Smart Travel Duffel Bag",
+     "Spacious duffel bag designed for weekend trips and travel.",
+     1699.0, "accessories", "assets/images/products/duffel-bag.jpg", 80,
+     "CarryPro", 2499.0, 4.7, 97, "Trending"),
+    (41, "Premium Graphic T-Shirt",
+     "Premium graphic t-shirt with a modern streetwear print.",
+     899.0, "men", "assets/images/products/graphic-tshirt.jpg", 87,
+     "StreetWear", 1299.0, 4.5, 109, "Trending"),
+    (42, "Women's Casual Jumpsuit",
+     "Stylish casual jumpsuit with a comfortable modern fit.",
+     1699.0, "women", "assets/images/products/casual-jumpsuit.jpg", 94,
+     "UrbanStep", 2499.0, 4.6, 84, "New"),
+    (43, "Classic Running Sneakers",
+     "Reliable running sneakers for everyday training.",
+     1999.0, "shoes", "assets/images/products/classic-running.jpg", 101,
+     "RunMax", 2899.0, 4.7, 156, "Popular"),
+    (44, "Premium Shoulder Bag",
+     "Elegant shoulder bag with a spacious practical interior.",
+     1499.0, "accessories", "assets/images/products/shoulder-bag.jpg", 108,
+     "CarryPro", 2199.0, 4.6, 93, "Trending"),
+    (45, "Men's Casual Kurta",
+     "Modern casual kurta combining traditional style with comfort.",
+     1299.0, "men", "assets/images/products/mens-kurta.jpg", 115,
+     "UrbanStep", 1899.0, 4.5, 73, "New"),
+    (46, "Women's Printed Kurti",
+     "Beautiful printed kurti suitable for everyday occasions.",
+     1099.0, "women", "assets/images/products/printed-kurti.jpg", 122,
+     "UrbanStep", 1599.0, 4.7, 127, "Best Seller"),
+    (47, "Sports Training Shorts",
+     "Breathable sports shorts designed for training and workouts.",
+     799.0, "men", "assets/images/products/training-shorts.jpg", 129,
+     "RunMax", 1199.0, 4.4, 65, ""),
+    (48, "Women's Activewear Set",
+     "Comfortable two-piece activewear set for workouts and fitness.",
+     1799.0, "women", "assets/images/products/activewear-set.jpg", 136,
+     "RunMax", 2599.0, 4.8, 142, "Best Seller"),
+    (49, "Premium Travel Sunglasses",
+     "Modern sunglasses designed for travel and outdoor adventures.",
+     999.0, "accessories", "assets/images/products/travel-sunglasses.jpg", 143,
+     "UrbanStep", 1499.0, 4.5, 89, "New"),
+    (50, "Everyday Premium Sneakers",
+     "Premium everyday sneakers combining comfort, durability and style.",
+     1899.0, "shoes", "assets/images/products/everyday-sneakers.jpg", 150,
+     "RunMax", 2799.0, 4.8, 221, "Best Seller"),
+    (51, "Noise Buds Pro",
+     "Wireless earbuds with deep bass, fast pairing, and all-day battery life.",
+     3499.0, "electronics", "assets/images/products/noise-buds-pro.jpg", 157,
+     "Noise", 4999.0, 4.7, 245, "Top Rated"),
+    (52, "OnePlus Nord Buds",
+     "Compact wireless earbuds built for immersive music and clear calls.",
+     2899.0, "electronics", "assets/images/products/nord-buds.jpg", 44,
+     "OnePlus", 3999.0, 4.6, 176, "Popular"),
+    (53, "iPad Air 11-inch",
+     "Lightweight tablet with vibrant display and excellent productivity tools.",
+     54999.0, "electronics", "assets/images/products/tablet-air.jpg", 51,
+     "Apple", 64999.0, 4.8, 203, "New"),
+    (54, "Sony Bravia 4K TV",
+     "Cinematic 4K entertainment with rich contrast and smart streaming.",
+     69999.0, "electronics", "assets/images/products/smart-tv-4k.jpg", 58,
+     "Sony", 89999.0, 4.9, 144, "Premium"),
+    (55, "Smart Air Fryer",
+     "Crispy cooking made easier with a smart airflow design and intuitive controls.",
+     7599.0, "appliances", "assets/images/products/air-fryer.jpg", 65,
+     "Prestige", 9999.0, 4.7, 131, "Fast Selling"),
+    (56, "Aroma Diffuser",
+     "A calming home scent diffuser that fits beautifully into any room.",
+     2499.0, "home", "assets/images/products/aroma-diffuser.jpg", 72,
+     "AromaHome", 3499.0, 4.5, 92, "Popular"),
+    (57, "Minimal Accent Chair",
+     "Contemporary accent chair with elegant form and soft everyday comfort.",
+     8999.0, "home", "assets/images/products/accent-chair.jpg", 79,
+     "HomeNest", 11999.0, 4.6, 88, "New"),
+    (58, "Glow Serum Duo",
+     "Hydrating serum set designed to brighten, smooth and soften skin.",
+     2199.0, "beauty", "assets/images/products/glow-serum.jpg", 86,
+     "GlowLab", 3299.0, 4.8, 204, "Bestseller"),
+    (59, "Hair Straightener Pro",
+     "Salon-style styling with smooth glide and heat control.",
+     3299.0, "beauty", "assets/images/products/hair-straightener.jpg", 93,
+     "Philips", 4599.0, 4.6, 118, "Trend"),
+    (60, "Yoga Mat Premium",
+     "Soft, supportive yoga mat for home workouts, stretching and recovery.",
+     1799.0, "fitness", "assets/images/products/yoga-mat.jpg", 100,
+     "ProFlex", 2499.0, 4.7, 185, "Best Seller"),
+    (61, "Resistance Bands Set",
+     "Travel-friendly bands for quick strength, mobility and posture work.",
+     1299.0, "fitness", "assets/images/products/resistance-bands.jpg", 107,
+     "FitCore", 1999.0, 4.5, 114, "Popular"),
+    (62, "Portable Blender",
+     "Compact smoothie blender with rechargeable power and travel-friendly design.",
+     2999.0, "appliances", "assets/images/products/portable-blender.jpg", 114,
+     "BlendGo", 3999.0, 4.6, 97, "Hot"),
 ]
 
 
 def main():
-    force = "--force" in sys.argv
+    fresh = not os.path.exists(DB_PATH)
     conn = sqlite3.connect(DB_PATH)
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn.row_factory = sqlite3.Row
     with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         conn.executescript(f.read())
-
-    existing = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
-    if existing and not force:
-        print(f"[seed] {existing} products already in database - skipping (use --force to re-seed)")
-        conn.close()
-        return
-
-    if force:
-        conn.execute("DELETE FROM products")
-        print("[seed] cleared existing products")
-
-    conn.executemany(
-        "INSERT INTO products (name, description, price, category, image_url, stock)"
-        " VALUES (?, ?, ?, ?, ?, ?)",
-        PRODUCTS,
-    )
+    # Ensure the display columns exist on pre-existing databases.
+    cols = [r["name"] for r in
+            conn.execute("PRAGMA table_info(products)").fetchall()]
+    for col, ddl in [
+        ("brand", "ALTER TABLE products ADD COLUMN brand TEXT NOT NULL DEFAULT ''"),
+        ("old_price", "ALTER TABLE products ADD COLUMN old_price REAL"),
+        ("rating", "ALTER TABLE products ADD COLUMN rating REAL NOT NULL DEFAULT 0"),
+        ("reviews_count", "ALTER TABLE products ADD COLUMN reviews_count INTEGER NOT NULL DEFAULT 0"),
+        ("badge", "ALTER TABLE products ADD COLUMN badge TEXT NOT NULL DEFAULT ''"),
+    ]:
+        if col not in cols:
+            conn.execute(ddl)
+    cur = conn.cursor()
+    for prod in PRODUCTS:
+        cur.execute("""
+            INSERT INTO products
+                (id, name, description, price, category, image_url, stock,
+                 brand, old_price, rating, reviews_count, badge)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                name=excluded.name, description=excluded.description,
+                price=excluded.price, category=excluded.category,
+                image_url=excluded.image_url, brand=excluded.brand,
+                old_price=excluded.old_price, rating=excluded.rating,
+                reviews_count=excluded.reviews_count, badge=excluded.badge
+        """, prod)
     conn.commit()
-    count = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+    n = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
     conn.close()
-    print(f"[seed] inserted {count} products into {DB_PATH}")
+    print(f"[seed] upserted {len(PRODUCTS)} products (total in db: {n})")
 
 
 if __name__ == "__main__":
