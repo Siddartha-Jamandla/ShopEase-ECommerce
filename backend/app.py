@@ -1108,6 +1108,18 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         if os.path.isdir(full):
             full = os.path.join(full, "index.html")
         if not os.path.isfile(full):
+            # Serve the branded 404 page when it exists.
+            not_found = os.path.join(ROOT_DIR, "404.html")
+            if os.path.isfile(not_found):
+                with open(not_found, "rb") as f:
+                    body = f.read()
+                self.send_response(404)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self._cors_headers()
+                self.end_headers()
+                self.wfile.write(body)
+                return
             self.send_response(404)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self._cors_headers()
