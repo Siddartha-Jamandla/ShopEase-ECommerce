@@ -70,7 +70,14 @@ def init_db():
             conn.executescript(f.read())
         # Backfill columns for DBs created before they existed in schema.sql.
         _ensure_column(conn, "products", "stock", "stock INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "products", "brand", "brand TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "products", "old_price", "old_price REAL")
+        _ensure_column(conn, "products", "rating", "rating REAL NOT NULL DEFAULT 0")
+        _ensure_column(conn, "products", "reviews_count", "reviews_count INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "products", "badge", "badge TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "orders", "status", "status TEXT NOT NULL DEFAULT 'placed'")
+        _ensure_updated_at_column(conn)
+        _backfill_status_history(conn)
         conn.commit()
         conn.close()
     print(f"[shopease] database ready at {DB_PATH}")
@@ -78,6 +85,52 @@ def init_db():
         error_bot.init_error_bot(DB_PATH)
     except Exception:
         pass
+
+
+def _ensure_updated_at_column(conn):
+    """Idempotent migration for orders.updated_at.
+
+    SQLite forbids non-constant DEFAULTs in ALTER TABLE ADD COLUMN, so the
+    column is added nullable and then backfilled from created_at.
+    """
+    cols = [r["name"] for r in conn.execute("PRAGMA table_info(orders)").fetchall()]
+    if "updated_at" not in cols:
+        conn.execute("ALTER TABLE orders ADD COLUMN updated_at TEXT")
+        print("[shopease] migrated: added orders.updated_at")
+    conn.execute("UPDATE orders SET updated_at = created_at WHERE updated_at IS NULL")
+
+
+def _backfill_status_history(conn):
+    """Seed order_status_history for orders that predate the table.
+
+    Every order gets a 'placed' event at its created_at; orders whose current
+    status differs also get an event for that status at updated_at.
+    Runs once — skipped when the table already has rows.
+    """
+    n = conn.execute("SELECT COUNT(*) FROM order_status_history").fetchone()[0]
+    if n:
+        return
+    for o in conn.execute(
+            "SELECT id, status, created_at, COALESCE(updated_at, created_at) AS ts"
+            " FROM orders").fetchall():
+        conn.execute(
+            "INSERT INTO order_status_history (order_id, status, changed_at)"
+            " VALUES (?, 'placed', ?)", (o["id"], o["created_at"]))
+        if o["status"] and o["status"] != "placed":
+            conn.execute(
+                "INSERT INTO order_status_history (order_id, status, changed_at)"
+                " VALUES (?, ?, ?)", (o["id"], o["status"], o["ts"]))
+    print("[shopease] backfilled order_status_history")
+
+
+def _record_status_event(conn, order_id, status):
+    """Append a status event and stamp orders.status/updated_at (call inside a
+    transaction; the caller commits)."""
+    conn.execute(
+        "INSERT INTO order_status_history (order_id, status) VALUES (?, ?)",
+        (order_id, status))
+    conn.execute("UPDATE orders SET status = ?, updated_at = ? WHERE id = ?",
+                 (status, utcnow(), order_id))
 
 
 # ---------------------------------------------------------------- auth
@@ -219,6 +272,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     errs = []
                 return self._ok({"errors": errs})
 
+            if path == "/api/admin/stats" and method == "GET":
+                return self._api_admin_stats(query)
+
             if path == "/api/products":
                 if method == "GET":
                     return self._api_products_list(query)
@@ -290,6 +346,18 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             m = re.fullmatch(r"/api/orders/(\d+)", path)
             if m and method == "GET":
                 return self._api_order_get(int(m.group(1)))
+
+            m = re.fullmatch(r"/api/orders/(\d+)/cancel", path)
+            if m:
+                if method == "POST":
+                    return self._api_order_cancel(int(m.group(1)))
+                raise ApiError(405, "Method not allowed")
+
+            m = re.fullmatch(r"/api/orders/(\d+)/timeline", path)
+            if m:
+                if method == "GET":
+                    return self._api_order_timeline(int(m.group(1)))
+                raise ApiError(405, "Method not allowed")
 
             if path.startswith("/api/"):
                 raise ApiError(404, "Unknown API endpoint")
@@ -869,6 +937,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 "INSERT INTO orders (user_id, total, status) VALUES (?, ?, 'placed')",
                 (user_id, total))
             order_id = cur.lastrowid
+            conn.execute(
+                "INSERT INTO order_status_history (order_id, status) VALUES (?, 'placed')",
+                (order_id,))
             for r in rows:
                 conn.execute(
                     "INSERT INTO order_items (order_id, product_id, quantity, price)"
@@ -912,6 +983,116 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         data = row_to_dict(order)
         data["items"] = items
         self._ok(data)
+
+    def _api_order_cancel(self, order_id):
+        """Cancel the caller's own order while it is still 'placed'.
+
+        Restores product stock from the order's items and records a
+        'cancelled' status event. 401 unauthenticated, 403 another user's
+        order, 404 missing order, 409 already shipped/delivered/cancelled.
+        """
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            order = conn.execute(
+                "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+            if order is None:
+                conn.close()
+                raise ApiError(404, "Order not found")
+            if order["user_id"] != user_id:
+                conn.close()
+                raise ApiError(403, "Not your order")
+            if order["status"] != "placed":
+                conn.close()
+                raise ApiError(
+                    409, f"Order is already '{order['status']}' and cannot be cancelled")
+            for it in conn.execute(
+                    "SELECT product_id, quantity FROM order_items WHERE order_id = ?",
+                    (order_id,)).fetchall():
+                conn.execute("UPDATE products SET stock = stock + ? WHERE id = ?",
+                             (it["quantity"], it["product_id"]))
+            _record_status_event(conn, order_id, "cancelled")
+            conn.commit()
+            updated = row_to_dict(conn.execute(
+                "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone())
+            conn.close()
+        self._ok(updated)
+
+    def _api_order_timeline(self, order_id):
+        """Status timeline for the caller's own order.
+
+        Returns the current status, the recorded status events (oldest first)
+        and the stage list placed → shipped → delivered (or placed →
+        cancelled) with reached flags and timestamps. 401 unauthenticated,
+        403 another user's order, 404 missing order.
+        """
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            order = conn.execute(
+                "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+            if order is None:
+                conn.close()
+                raise ApiError(404, "Order not found")
+            if order["user_id"] != user_id:
+                conn.close()
+                raise ApiError(403, "Not your order")
+            events = [row_to_dict(r) for r in conn.execute(
+                "SELECT status, changed_at FROM order_status_history"
+                " WHERE order_id = ? ORDER BY id", (order_id,)).fetchall()]
+            conn.close()
+        current = order["status"]
+        stages = (["placed", "cancelled"] if current == "cancelled"
+                  else ["placed", "shipped", "delivered"])
+        first_at = {}
+        for e in events:
+            first_at.setdefault(e["status"], e["changed_at"])
+        self._ok({
+            "order_id": order_id,
+            "current_status": current,
+            "events": events,
+            "stages": [{"status": s, "reached": s in first_at,
+                        "at": first_at.get(s)} for s in stages],
+        })
+
+    def _api_admin_stats(self, query):
+        """Store-wide stats for the admin dashboard.
+
+        Same key auth as /api/errors: ?key=<ADMIN_KEY> or X-Admin-Key header.
+        Returns total revenue (non-cancelled orders), order counts by status,
+        top 10 products by units sold (with gross revenue) and the user count.
+        """
+        key = query.get("key", [""])[0] or self.headers.get("X-Admin-Key", "")
+        if key != ADMIN_KEY:
+            raise ApiError(403, "Forbidden")
+        with _db_lock:
+            conn = get_db()
+            total_revenue = conn.execute(
+                "SELECT COALESCE(SUM(total), 0) FROM orders WHERE status != 'cancelled'"
+            ).fetchone()[0]
+            orders_by_status = {
+                r["status"]: r["n"] for r in conn.execute(
+                    "SELECT status, COUNT(*) AS n FROM orders GROUP BY status").fetchall()
+            }
+            top_products = [row_to_dict(r) for r in conn.execute(
+                """SELECT p.id, p.name,
+                          SUM(oi.quantity) AS units_sold,
+                          ROUND(SUM(oi.quantity * oi.price), 2) AS gross_revenue
+                   FROM order_items oi
+                   JOIN orders o ON o.id = oi.order_id
+                   JOIN products p ON p.id = oi.product_id
+                   WHERE o.status != 'cancelled'
+                   GROUP BY p.id, p.name
+                   ORDER BY units_sold DESC
+                   LIMIT 10""").fetchall()]
+            user_count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+            conn.close()
+        self._ok({
+            "total_revenue": round(total_revenue or 0, 2),
+            "orders_by_status": orders_by_status,
+            "top_products": top_products,
+            "user_count": user_count,
+        })
 
     # -- static files ----------------------------------------------------------
 

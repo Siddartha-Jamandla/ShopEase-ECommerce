@@ -1,7 +1,8 @@
 -- ============================================================
 -- ShopEase E-Commerce - SQLite Database Schema
 -- ============================================================
--- Tables: users, products, cart_items, orders, order_items, reviews, wishlist
+-- Tables: users, products, cart_items, orders, order_items, reviews, wishlist,
+--         order_status_history
 -- Run with: sqlite3 shopease.db < schema.sql
 -- (backend/app.py applies this automatically on startup)
 -- ============================================================
@@ -24,6 +25,11 @@ CREATE TABLE IF NOT EXISTS products (
     category    TEXT    NOT NULL DEFAULT 'general',
     image_url   TEXT    NOT NULL DEFAULT '',
     stock       INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    brand       TEXT    NOT NULL DEFAULT '',
+    old_price   REAL,                                  -- original price (for discounts)
+    rating      REAL    NOT NULL DEFAULT 0,            -- average star rating 0-5
+    reviews_count INTEGER NOT NULL DEFAULT 0,
+    badge       TEXT    NOT NULL DEFAULT '',          -- e.g. "Best Seller", "Hot"
     created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -40,7 +46,8 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     total      REAL    NOT NULL CHECK (total >= 0),    -- INR, price snapshot total
     status     TEXT    NOT NULL DEFAULT 'placed',      -- placed | shipped | delivered | cancelled
-    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
@@ -56,6 +63,18 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+
+-- Order status history: one row per status transition (placed → shipped →
+-- delivered, or placed → cancelled). Written by checkout / cancellation;
+-- backfilled for pre-existing orders on startup (see app.py).
+CREATE TABLE IF NOT EXISTS order_status_history (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id   INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    status     TEXT    NOT NULL,                       -- placed | shipped | delivered | cancelled
+    changed_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_status_history_order ON order_status_history(order_id);
 
 -- Product reviews: one review per user per product, rating 1-5.
 CREATE TABLE IF NOT EXISTS reviews (

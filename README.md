@@ -103,6 +103,9 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | POST   | `/api/checkout`       | user | Creates order from cart, snapshots prices, decrements stock, clears cart → order with `items` |
 | GET    | `/api/orders`         | user | Your orders, newest first |
 | GET    | `/api/orders/:id`     | user | One order with items (404 if not yours) |
+| POST   | `/api/orders/:id/cancel` | user | Cancel your own order while `placed`: restores stock, records a `cancelled` status event. 403 for others' orders, 404 missing, 409 if already shipped/delivered/cancelled |
+| GET    | `/api/orders/:id/timeline` | user | Status timeline: `current_status`, `events` (oldest first) and `stages` (placed → shipped → delivered, or placed → cancelled) with reached flags + timestamps |
+| GET    | `/api/admin/stats`    | admin key (`?key=` or `X-Admin-Key`) | Store stats: `total_revenue` (non-cancelled orders), `orders_by_status`, `top_products` (top 10 by units sold + gross revenue), `user_count` |
 
 Any other `GET` path serves the frontend static files from the repo root.
 
@@ -139,8 +142,9 @@ Defined in `backend/schema.sql` (auto-applied on startup). SQLite file:
 users(id, name, email UNIQUE, password_hash, created_at)
 products(id, name, description, price, category, image_url, stock, created_at)
 cart_items(id, user_id → users, product_id → products, quantity, UNIQUE(user_id, product_id))
-orders(id, user_id → users, total, status, created_at)
+orders(id, user_id → users, total, status, created_at, updated_at)
 order_items(id, order_id → orders, product_id → products, quantity, price)
+order_status_history(id, order_id → orders, status, changed_at)
 ```
 
 - `password_hash` = `salt$sha256(salt + password)` (hashlib, per-user salt)
