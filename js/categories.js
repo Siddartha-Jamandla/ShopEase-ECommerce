@@ -95,7 +95,13 @@ function initializeCategoryPage() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    initializeCategoryPage
+    function () {
+        // The catalog loads live from the database (/api/products) with a
+        // static fallback — wait for it before building the page.
+        (window.productsReady || Promise.resolve()).then(function () {
+            initializeCategoryPage();
+        });
+    }
 );
 
 if (document.readyState !== "loading") {

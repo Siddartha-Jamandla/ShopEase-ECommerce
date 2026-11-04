@@ -3,15 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
     setupMobileMenu();
     setupSearch();
     setupNewsletter();
-    setupHeroBestseller();
-    setupPromoBanner();
-    setupCategoryCounts();
 
     updateCartCount();
     updateWishlistCount();
 
-    loadFeaturedProducts();
-    loadProductDetails();
+    // The catalog loads live from the database (/api/products) with a
+    // static fallback — wait for it before rendering product sections.
+    (window.productsReady || Promise.resolve()).then(() => {
+        setupHeroBestseller();
+        setupPromoBanner();
+        setupCategoryCounts();
+
+        loadFeaturedProducts();
+        loadProductDetails();
+    });
 
 });
 

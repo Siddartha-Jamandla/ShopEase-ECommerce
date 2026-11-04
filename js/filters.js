@@ -29,9 +29,13 @@ document.addEventListener(
         }
 
 
-        setupShopFilters();
+        // The catalog loads live from the database (/api/products) with a
+        // static fallback — wait for it before building filters and grid.
+        (window.productsReady || Promise.resolve()).then(function () {
+            setupShopFilters();
 
-        applyShopFilters();
+            applyShopFilters();
+        });
 
     }
 );
