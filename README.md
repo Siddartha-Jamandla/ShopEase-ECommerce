@@ -108,6 +108,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | GET    | `/api/orders/:id`     | user | One order with items, `shipping` and `summary` (404 if not yours) |
 | POST   | `/api/orders/:id/cancel` | user | Cancel your own order while `placed`: restores stock, records a `cancelled` status event. 403 for others' orders, 404 missing, 409 if already shipped/delivered/cancelled |
 | GET    | `/api/orders/:id/timeline` | user | Status timeline: `current_status`, `events` (oldest first) and `stages` (placed → shipped → delivered, or placed → cancelled) with reached flags + timestamps |
+| PUT    | `/api/admin/orders/:id/status` | admin key (`?key=` or `X-Admin-Key`) | Move an order to its next status: `{status}` — allowed moves are placed → shipped → delivered and placed → cancelled (a cancel restores product stock, like a customer cancel). 400 unknown status, 404 missing order, 409 illegal transition; every move records a status-history event and stamps `updated_at` |
 | GET    | `/api/admin/stats`    | admin key (`?key=` or `X-Admin-Key`) | Store stats: `total_revenue` (non-cancelled orders), `orders_by_status`, `top_products` (top 10 by units sold + gross revenue), `user_count` |
 
 Any other `GET` path serves the frontend static files from the repo root.

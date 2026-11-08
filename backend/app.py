@@ -372,6 +372,12 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_order_timeline(int(m.group(1)))
                 raise ApiError(405, "Method not allowed")
 
+            m = re.fullmatch(r"/api/admin/orders/(\d+)/status", path)
+            if m:
+                if method == "PUT":
+                    return self._api_admin_order_status(int(m.group(1)), query)
+                raise ApiError(405, "Method not allowed")
+
             if path.startswith("/api/"):
                 raise ApiError(404, "Unknown API endpoint")
 
@@ -1242,6 +1248,64 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 conn.execute("UPDATE products SET stock = stock + ? WHERE id = ?",
                              (it["quantity"], it["product_id"]))
             _record_status_event(conn, order_id, "cancelled")
+            conn.commit()
+            updated = row_to_dict(conn.execute(
+                "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone())
+            items_count = conn.execute(
+                "SELECT COUNT(*) FROM order_items WHERE order_id = ?",
+                (order_id,)).fetchone()[0]
+            conn.close()
+        self._ok(self._order_view(updated, items_count=items_count))
+
+    # Admin order statuses move forward only: placed -> shipped -> delivered,
+    # or placed -> cancelled (which restores stock, like a customer cancel).
+    _ORDER_TRANSITIONS = {
+        "placed": {"shipped", "cancelled"},
+        "shipped": {"delivered"},
+        "delivered": set(),
+        "cancelled": set(),
+    }
+    _ORDER_STATUSES = ("placed", "shipped", "delivered", "cancelled")
+
+    def _api_admin_order_status(self, order_id, query):
+        """Admin: move any order to its next status.
+
+        Same key auth as /api/admin/stats: ?key=<ADMIN_KEY> or X-Admin-Key
+        header. Body: {"status": "shipped" | "delivered" | "cancelled"}.
+        400 unknown status value, 403 wrong/missing key, 404 missing order,
+        409 illegal transition (e.g. placed -> delivered, or any move out of
+        a delivered/cancelled order). A move to 'cancelled' restores product
+        stock from the order's items, exactly like a customer cancel. Every
+        move records an order_status_history event and stamps updated_at.
+        """
+        key = query.get("key", [""])[0] or self.headers.get("X-Admin-Key", "")
+        if key != ADMIN_KEY:
+            raise ApiError(403, "Forbidden")
+        body = self._read_json()
+        status = str(body.get("status", "")).strip().lower()
+        if status not in self._ORDER_STATUSES:
+            raise ApiError(
+                400, "Field 'status' must be one of: "
+                     + ", ".join(self._ORDER_STATUSES))
+        with _db_lock:
+            conn = get_db()
+            order = conn.execute("SELECT * FROM orders WHERE id = ?",
+                                 (order_id,)).fetchone()
+            if order is None:
+                conn.close()
+                raise ApiError(404, "Order not found")
+            current = order["status"]
+            if status not in self._ORDER_TRANSITIONS.get(current, set()):
+                conn.close()
+                raise ApiError(
+                    409, f"Cannot move order from '{current}' to '{status}'")
+            if status == "cancelled":
+                for it in conn.execute(
+                        "SELECT product_id, quantity FROM order_items"
+                        " WHERE order_id = ?", (order_id,)).fetchall():
+                    conn.execute("UPDATE products SET stock = stock + ? WHERE id = ?",
+                                 (it["quantity"], it["product_id"]))
+            _record_status_event(conn, order_id, status)
             conn.commit()
             updated = row_to_dict(conn.execute(
                 "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone())

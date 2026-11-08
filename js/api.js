@@ -249,6 +249,13 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/orders/" + id);
   },
 
+  /** Admin: move an order to its next status (placed → shipped → delivered,
+   *  or placed → cancelled). Returns the updated order. */
+  async updateOrderStatus(id, status, adminKey) {
+    return this._request("PUT", "/api/admin/orders/" + id + "/status",
+      { status }, { adminKey });
+  },
+
   // ---------------------------------------------------------- wishlist
   /**
    * Wishlist items: [{id, product_id, added_at, name, description, price,
