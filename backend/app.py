@@ -399,7 +399,7 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 return self._api_wishlist_remove(int(m.group(1)))
 
             if path == "/api/orders" and method == "GET":
-                return self._api_orders_list()
+                return self._api_orders_list(query)
 
             m = re.fullmatch(r"/api/orders/(\d+)", path)
             if m and method == "GET":
@@ -1243,19 +1243,66 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         order["items"] = items
         self._ok(self._order_view(order, items_count=len(items)), status=201)
 
-    def _api_orders_list(self):
+    def _api_orders_list(self, query):
+        """The caller's orders, newest first.
+
+        Filters: ?status=placed|shipped|delivered|cancelled. Pagination:
+        ?page=&per_page= (per_page capped at 50). A plain request with no
+        query params returns the plain order array, as before; any filter
+        or pagination param switches to the paginated object
+        {items, page, per_page, total, total_pages}.
+        """
         user_id = self._require_auth()
-        with _db_lock:
-            rows = get_db().execute(
-                """SELECT o.*, (SELECT COUNT(*) FROM order_items oi
+        status = (query.get("status", [""])[0] or "").strip().lower()
+        if status and status not in self._ORDER_STATUSES:
+            raise ApiError(400, "Invalid 'status'. Use one of: "
+                                + ", ".join(self._ORDER_STATUSES))
+        page_raw = (query.get("page", [""])[0] or "").strip()
+        per_page_raw = (query.get("per_page", [""])[0] or "").strip()
+        paginate = bool(status or page_raw or per_page_raw)
+        try:
+            page = int(page_raw) if page_raw else 1
+            per_page = int(per_page_raw) if per_page_raw else 20
+        except ValueError:
+            raise ApiError(400, "'page' and 'per_page' must be integers")
+        if page < 1:
+            raise ApiError(400, "'page' must be >= 1")
+        if per_page < 1:
+            raise ApiError(400, "'per_page' must be >= 1")
+        per_page = min(per_page, 50)  # cap: never return more than 50 per page
+
+        sql = """SELECT o.*, (SELECT COUNT(*) FROM order_items oi
                                WHERE oi.order_id = o.id) AS items_count
-                   FROM orders o WHERE o.user_id = ? ORDER BY o.id DESC""",
-                (user_id,)).fetchall()
+                   FROM orders o WHERE o.user_id = ?"""
+        params = [user_id]
+        if status:
+            sql += " AND o.status = ?"
+            params.append(status)
+        sql += " ORDER BY o.id DESC"
+        with _db_lock:
+            conn = get_db()
+            if not paginate:
+                rows = conn.execute(sql, params).fetchall()
+                conn.close()
+                orders = []
+                for r in rows:
+                    d = row_to_dict(r)
+                    orders.append(self._order_view(d, items_count=d.pop("items_count")))
+                return self._ok(orders)
+            total = conn.execute(
+                "SELECT COUNT(*) FROM orders o WHERE o.user_id = ?"
+                + (" AND o.status = ?" if status else ""),
+                params).fetchone()[0]
+            rows = conn.execute(sql + " LIMIT ? OFFSET ?",
+                                params + [per_page, (page - 1) * per_page]).fetchall()
+            conn.close()
         orders = []
         for r in rows:
             d = row_to_dict(r)
             orders.append(self._order_view(d, items_count=d.pop("items_count")))
-        self._ok(orders)
+        self._ok({"items": orders, "page": page, "per_page": per_page,
+                  "total": total,
+                  "total_pages": (total + per_page - 1) // per_page})
 
     def _api_order_get(self, order_id):
         user_id = self._require_auth()

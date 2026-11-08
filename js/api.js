@@ -235,10 +235,15 @@ const ShopEaseAPI = {
     return order;
   },
 
-  async getOrders() {
+  /** List your orders, newest first. Optional params: {status:
+   *  'placed'|'shipped'|'delivered'|'cancelled', page, per_page (max 50)}.
+   *  Plain call returns the order array; with any param it returns the
+   *  paginated object {items, page, per_page, total, total_pages}. */
+  async getOrders(params = {}) {
     if (!this.isLoggedIn) return [];
+    const qs = new URLSearchParams(params).toString();
     try {
-      return await this._request("GET", "/api/orders");
+      return await this._request("GET", "/api/orders" + (qs ? "?" + qs : ""));
     } catch (e) {
       return [];
     }

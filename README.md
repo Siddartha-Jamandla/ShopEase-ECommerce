@@ -104,7 +104,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | PUT    | `/api/cart/:id`       | user | `{quantity}` — update; `0` removes the item |
 | DELETE | `/api/cart/:id`       | user | Remove item (404 if not yours) |
 | POST   | `/api/checkout`       | user | Creates an order: optional `{shipping: {name, address, city, state, pincode, phone}}` (validated, persisted on the order) and optional `{items: [{product_id, quantity}]}` — the storefront cart lives in localStorage, so the page sends its items explicitly; without `items` the server-side cart is used. Prices are snapshotted from the DB, stock decremented, server cart cleared → order with `items`, `shipping` and `summary` |
-| GET    | `/api/orders`         | user | Your orders, newest first — each with `shipping` and `summary` (`items_count`, `subtotal`) |
+| GET    | `/api/orders`         | user | Your orders, newest first — each with `shipping` and `summary` (`items_count`, `subtotal`). Filter: `?status=placed\|shipped\|delivered\|cancelled` (400 otherwise). Pagination: `?page=&per_page=` (`per_page` capped at 50) → `{items, page, per_page, total, total_pages}`; a plain request still returns the plain order array |
 | GET    | `/api/orders/:id`     | user | One order with items, `shipping` and `summary` (404 if not yours) |
 | POST   | `/api/orders/:id/cancel` | user | Cancel your own order while `placed`: restores stock, records a `cancelled` status event. 403 for others' orders, 404 missing, 409 if already shipped/delivered/cancelled |
 | GET    | `/api/orders/:id/timeline` | user | Status timeline: `current_status`, `events` (oldest first) and `stages` (placed → shipped → delivered, or placed → cancelled) with reached flags + timestamps |
