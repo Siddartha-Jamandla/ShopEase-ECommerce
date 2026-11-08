@@ -113,6 +113,20 @@ const ShopEaseAPI = {
     return this._request("DELETE", "/api/products/" + id, undefined, { adminKey });
   },
 
+  // ---------------------------------------------------------- profile
+  async getProfile() {
+    return this._request("GET", "/api/me");
+  },
+
+  async updateProfile(fields) {
+    return this._request("PUT", "/api/me", fields);
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    return this._request("POST", "/api/me/change-password",
+      { current_password: currentPassword, new_password: newPassword });
+  },
+
   // ---------------------------------------------------------- auth
   async register(name, email, password) {
     const data = await this._request("POST", "/api/register", { name, email, password });

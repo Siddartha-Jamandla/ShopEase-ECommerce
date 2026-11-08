@@ -96,6 +96,9 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | DELETE | `/api/wishlist/:productId` | user | Remove from wishlist (404 if not in your wishlist) |
 | POST   | `/api/register`       | –    | `{name, email, password}` (≥6 chars) → `{user, token}` |
 | POST   | `/api/login`          | –    | `{email, password}` → `{user, token}` |
+| GET    | `/api/me`             | user | Your profile: `{id, name, email, created_at}` (401 without a token) |
+| PUT    | `/api/me`             | user | Update your name/email: `{name, email}` — email must be valid and unique (409 if taken) |
+| POST   | `/api/me/change-password` | user | `{current_password, new_password}` (new password 6–128 chars; 401 if the current password is wrong) |
 | GET    | `/api/cart`           | user | Cart with product details → `{items, total, count}` |
 | POST   | `/api/cart`           | user | `{product_id, quantity?}` — adds or increments (checks stock) |
 | PUT    | `/api/cart/:id`       | user | `{quantity}` — update; `0` removes the item |

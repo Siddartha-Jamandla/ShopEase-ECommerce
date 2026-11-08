@@ -310,6 +310,16 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if path == "/api/login" and method == "POST":
                 return self._api_login()
 
+            if path == "/api/me":
+                if method == "GET":
+                    return self._api_profile_get()
+                if method == "PUT":
+                    return self._api_profile_update()
+                raise ApiError(405, "Method not allowed")
+
+            if path == "/api/me/change-password" and method == "POST":
+                return self._api_change_password()
+
             if path == "/api/cart":
                 if method == "GET":
                     return self._api_cart_get()
@@ -806,6 +816,72 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         user = {"id": row["id"], "name": row["name"],
                 "email": row["email"], "created_at": row["created_at"]}
         self._ok({"user": user, "token": make_token(user["id"])})
+
+    # -- profile -----------------------------------------------------------
+
+    def _api_profile_get(self):
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            user = row_to_dict(conn.execute(
+                "SELECT id, name, email, created_at FROM users WHERE id = ?",
+                (user_id,)).fetchone())
+            conn.close()
+        if user is None:
+            raise ApiError(404, "User not found")
+        self._ok({"user": user})
+
+    def _api_profile_update(self):
+        user_id = self._require_auth()
+        body = self._read_json()
+        name = str(body.get("name", "")).strip()
+        email = str(body.get("email", "")).strip().lower()
+        if not name:
+            raise ApiError(400, "Field 'name' is required and cannot be empty")
+        if len(name) > 100:
+            raise ApiError(400, "Field 'name' must be at most 100 characters")
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email or ""):
+            raise ApiError(400, "A valid 'email' is required")
+        with _db_lock:
+            conn = get_db()
+            clash = conn.execute(
+                "SELECT id FROM users WHERE email = ? AND id != ?",
+                (email, user_id)).fetchone()
+            if clash:
+                conn.close()
+                raise ApiError(409, "An account with this email already exists")
+            conn.execute("UPDATE users SET name = ?, email = ? WHERE id = ?",
+                         (name, email, user_id))
+            conn.commit()
+            user = row_to_dict(conn.execute(
+                "SELECT id, name, email, created_at FROM users WHERE id = ?",
+                (user_id,)).fetchone())
+            conn.close()
+        self._ok({"user": user})
+
+    def _api_change_password(self):
+        user_id = self._require_auth()
+        body = self._read_json()
+        current = str(body.get("current_password", ""))
+        new = str(body.get("new_password", ""))
+        if not current or not new:
+            raise ApiError(400, "Fields 'current_password' and 'new_password' are required")
+        if len(new) < 6:
+            raise ApiError(400, "New password must be at least 6 characters")
+        if len(new) > 128:
+            raise ApiError(400, "New password must be at most 128 characters")
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute("SELECT password_hash FROM users WHERE id = ?",
+                               (user_id,)).fetchone()
+            if row is None or not verify_password(current, row["password_hash"]):
+                conn.close()
+                raise ApiError(401, "Current password is incorrect")
+            conn.execute("UPDATE users SET password_hash = ? WHERE id = ?",
+                         (hash_password(new), user_id))
+            conn.commit()
+            conn.close()
+        self._ok({"message": "Password changed successfully"})
 
     # -- cart --------------------------------------------------------------
 
