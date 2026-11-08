@@ -21,6 +21,7 @@ import re
 import secrets
 import sqlite3
 import threading
+import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
@@ -139,6 +140,50 @@ def _record_status_event(conn, order_id, status):
 # ---------------------------------------------------------------- auth
 
 SESSIONS = {}  # token -> user_id  (in-memory; a restart logs everyone out)
+
+# Failed-login tracker: email -> {"failures": [epoch, ...], "locked_until": epoch}
+# In-memory only (a restart clears it), like SESSIONS above.
+_LOGIN_ATTEMPTS = {}
+_LOGIN_LOCK = threading.Lock()
+LOGIN_MAX_FAILURES = 5          # failures inside the window that trigger a lock
+LOGIN_WINDOW_SECONDS = 15 * 60  # failures older than this stop counting
+LOGIN_LOCK_SECONDS = 15 * 60    # how long a locked email is rejected with 429
+
+
+def _login_is_locked(email):
+    """True when the email is inside a 15-minute lockout.
+
+    Also prunes failures older than the window, so an old burst of bad
+    logins never locks the account forever.
+    """
+    now = time.time()
+    with _LOGIN_LOCK:
+        rec = _LOGIN_ATTEMPTS.get(email)
+        if not rec:
+            return False
+        if rec["locked_until"] and now < rec["locked_until"]:
+            return True
+        rec["failures"] = [t for t in rec["failures"]
+                           if now - t < LOGIN_WINDOW_SECONDS]
+        return False
+
+
+def _login_record_failure(email):
+    """Count a failed attempt; lock the email once it hits the limit."""
+    now = time.time()
+    with _LOGIN_LOCK:
+        rec = _LOGIN_ATTEMPTS.setdefault(email, {"failures": [], "locked_until": 0})
+        rec["failures"] = [t for t in rec["failures"]
+                           if now - t < LOGIN_WINDOW_SECONDS]
+        rec["failures"].append(now)
+        if len(rec["failures"]) >= LOGIN_MAX_FAILURES:
+            rec["locked_until"] = now + LOGIN_LOCK_SECONDS
+
+
+def _login_reset(email):
+    """Clear the failure counter after a successful login."""
+    with _LOGIN_LOCK:
+        _LOGIN_ATTEMPTS.pop(email, None)
 
 
 def hash_password(password):
@@ -838,12 +883,22 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         password = str(body.get("password", ""))
         if not email or not password:
             raise ApiError(400, "Fields 'email' and 'password' are required")
+        # Brute-force protection: 5 failures within 15 minutes locks the
+        # email for 15 minutes (429). Checked before the password check, so
+        # a locked account never reveals whether the email exists.
+        if _login_is_locked(email):
+            raise ApiError(429, "Too many failed login attempts. Try again in 15 minutes")
         with _db_lock:
             conn = get_db()
             row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
             conn.close()
         if row is None or not verify_password(password, row["password_hash"]):
+            # Same generic 401 whether the email exists or not, and failed
+            # attempts count for unknown emails too — so the 429 gives
+            # nothing away about which emails are registered.
+            _login_record_failure(email)
             raise ApiError(401, "Invalid email or password")
+        _login_reset(email)
         user = {"id": row["id"], "name": row["name"],
                 "email": row["email"], "created_at": row["created_at"]}
         self._ok({"user": user, "token": make_token(user["id"])})

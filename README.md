@@ -95,7 +95,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | POST   | `/api/wishlist`         | user | `{product_id}` — idempotent add: 201 when added, 200 when already present |
 | DELETE | `/api/wishlist/:productId` | user | Remove from wishlist (404 if not in your wishlist) |
 | POST   | `/api/register`       | –    | `{name, email, password}` (≥6 chars) → `{user, token}` |
-| POST   | `/api/login`          | –    | `{email, password}` → `{user, token}` |
+| POST   | `/api/login`          | –    | `{email, password}` → `{user, token}`. Brute-force protection: 5 failed attempts within 15 minutes lock the email for 15 minutes (429); a successful login resets the counter. Wrong email and wrong password both return the same generic 401, so the lockout never reveals whether an email is registered |
 | GET    | `/api/me`             | user | Your profile: `{id, name, email, created_at}` (401 without a token) |
 | PUT    | `/api/me`             | user | Update your name/email: `{name, email}` — email must be valid and unique (409 if taken) |
 | POST   | `/api/me/change-password` | user | `{current_password, new_password}` (new password 6–128 chars; 401 if the current password is wrong) |
@@ -224,6 +224,9 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
 ## Security notes
 
 - Passwords are salted + SHA-256 hashed; plaintext passwords are never stored.
+- Login is brute-force protected: 5 failed attempts within 15 minutes lock
+  the email for 15 minutes (HTTP 429); a successful login resets the
+  counter. The tracker is in-memory, so a server restart clears it.
 - Product creation requires the `X-Admin-Key` header — change the default key
   before any public deployment (`SHOPEASE_ADMIN_KEY`).
 - Keep `backend/.env` out of git (see `.gitignore`).
