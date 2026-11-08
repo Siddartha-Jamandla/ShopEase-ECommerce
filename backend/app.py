@@ -409,6 +409,14 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         image_url = str(body.get("image_url", current.get("image_url", "")))
         if not name:
             raise ApiError(400, "Field 'name' is required and cannot be empty")
+        if len(name) > 200:
+            raise ApiError(400, "Field 'name' must be at most 200 characters")
+        if len(description) > 10000:
+            raise ApiError(400, "Field 'description' must be at most 10000 characters")
+        if len(category) > 60:
+            raise ApiError(400, "Field 'category' must be at most 60 characters")
+        if len(image_url) > 2000:
+            raise ApiError(400, "Field 'image_url' must be at most 2000 characters")
         if "price" in body or "price" not in current:
             try:
                 price = float(body.get("price"))
@@ -527,6 +535,14 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         description = str(body.get("description", ""))
         category = str(body.get("category", "general")).strip() or "general"
         image_url = str(body.get("image_url", ""))
+        if len(name) > 200:
+            raise ApiError(400, "Field 'name' must be at most 200 characters")
+        if len(description) > 10000:
+            raise ApiError(400, "Field 'description' must be at most 10000 characters")
+        if len(category) > 60:
+            raise ApiError(400, "Field 'category' must be at most 60 characters")
+        if len(image_url) > 2000:
+            raise ApiError(400, "Field 'image_url' must be at most 2000 characters")
         try:
             stock = int(body.get("stock", 0))
         except (TypeError, ValueError):
@@ -733,6 +749,8 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             product_id = int(body.get("product_id"))
         except (TypeError, ValueError):
             raise ApiError(400, "Field 'product_id' must be an integer")
+        if product_id <= 0:
+            raise ApiError(400, "Field 'product_id' must be a positive integer")
         with _db_lock:
             conn = get_db()
             self._require_product(conn, product_id)
@@ -782,8 +800,12 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             raise ApiError(400, "Field 'name' is required")
         if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email or ""):
             raise ApiError(400, "A valid 'email' is required")
+        if len(name) > 100:
+            raise ApiError(400, "Field 'name' must be at most 100 characters")
         if len(password) < 6:
             raise ApiError(400, "Password must be at least 6 characters")
+        if len(password) > 128:
+            raise ApiError(400, "Password must be at most 128 characters")
         with _db_lock:
             conn = get_db()
             if conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone():
@@ -910,12 +932,16 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             product_id = int(body.get("product_id"))
         except (TypeError, ValueError):
             raise ApiError(400, "Field 'product_id' must be an integer")
+        if product_id <= 0:
+            raise ApiError(400, "Field 'product_id' must be a positive integer")
         try:
             quantity = int(body.get("quantity", 1))
         except (TypeError, ValueError):
             raise ApiError(400, "Field 'quantity' must be an integer")
         if quantity <= 0:
             raise ApiError(400, "Field 'quantity' must be > 0")
+        if quantity > 99:
+            raise ApiError(400, "Field 'quantity' must be at most 99")
         with _db_lock:
             conn = get_db()
             product = conn.execute("SELECT id, stock FROM products WHERE id = ?",
@@ -955,6 +981,8 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             quantity = int(body.get("quantity"))
         except (TypeError, ValueError):
             raise ApiError(400, "Field 'quantity' must be an integer")
+        if quantity > 99:
+            raise ApiError(400, "Field 'quantity' must be at most 99")
         with _db_lock:
             conn = get_db()
             item = conn.execute(

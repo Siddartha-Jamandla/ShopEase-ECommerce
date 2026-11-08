@@ -116,6 +116,15 @@ Any other `GET` path serves the frontend static files from the repo root.
 the admin key (kept only for the browser session), then list, add, edit and
 delete products from the catalogue. Wrong or missing keys get a 403.
 
+### Input validation
+
+Write endpoints reject bad input with 400 before touching the database:
+product names ≤200 chars, descriptions ≤10000, categories ≤60, image URLs
+≤2000; register names ≤100 chars and passwords 6–128 chars; cart quantities
+1–99; cart/wishlist `product_id` must be a positive integer; review ratings
+1–5 with titles ≤120 and comments ≤2000 chars. Prices must be numbers ≥0 and
+stock an integer ≥0.
+
 ### Example session (curl)
 
 ```bash
