@@ -112,6 +112,10 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 
 Any other `GET` path serves the frontend static files from the repo root.
 
+`admin.html` is the product-management UI wired to the CRUD API above: enter
+the admin key (kept only for the browser session), then list, add, edit and
+delete products from the catalogue. Wrong or missing keys get a 403.
+
 ### Example session (curl)
 
 ```bash

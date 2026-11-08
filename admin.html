@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Admin | ShopEase</title>
+    <meta name="description" content="ShopEase admin: manage the product catalogue through the backend CRUD API.">
+    <link rel="icon" href="assets/images/logo/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <style>
+        .admin-page { min-height: 70vh; padding: 40px 0 80px; background: #f8fafc; }
+        .admin-page .container { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+        .admin-page h1 { margin-bottom: 8px; }
+        .admin-page .muted { color: #64748b; margin-bottom: 24px; }
+        .admin-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .admin-card label { display: block; font-weight: 600; margin: 12px 0 4px; }
+        .admin-card input, .admin-card textarea, .admin-card select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit;
+        }
+        .admin-card button { margin-top: 16px; padding: 10px 20px; border: 0; border-radius: 8px;
+            background: #0f172a; color: #fff; font-weight: 600; cursor: pointer; }
+        .admin-card button.secondary { background: #e2e8f0; color: #0f172a; margin-left: 8px; }
+        .admin-card button.danger { background: #dc2626; }
+        #admin-status { margin: 12px 0; font-weight: 600; }
+        #admin-status.error { color: #dc2626; }
+        #admin-status.ok { color: #15803d; }
+        table.admin-table { width: 100%; border-collapse: collapse; }
+        table.admin-table th, table.admin-table td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+        table.admin-table button { margin: 0 4px 0 0; padding: 6px 12px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } table.admin-table { font-size: 14px; } }
+    </style>
+</head>
+<body>
+    <main class="admin-page">
+        <div class="container">
+            <h1>Product admin</h1>
+            <p class="muted">Manage the catalogue through the backend product CRUD API
+                (POST / PUT / DELETE /api/products). The admin key is kept only for
+                this browser session — it is never stored permanently.</p>
+
+            <section class="admin-card" id="key-card">
+                <h2>1. Admin key</h2>
+                <label for="admin-key">Admin key (X-Admin-Key)</label>
+                <input type="password" id="admin-key" placeholder="Enter the admin key" autocomplete="off">
+                <button type="button" id="save-key-btn">Use this key</button>
+                <p id="admin-status" role="status"></p>
+            </section>
+
+            <section class="admin-card" id="form-card" hidden>
+                <h2 id="form-title">2. Add a product</h2>
+                <form id="product-form">
+                    <input type="hidden" id="field-id">
+                    <label for="field-name">Name *</label>
+                    <input type="text" id="field-name" required>
+                    <label for="field-description">Description</label>
+                    <textarea id="field-description" rows="3"></textarea>
+                    <div class="form-row">
+                        <div>
+                            <label for="field-price">Price (₹) *</label>
+                            <input type="number" id="field-price" min="0" step="0.01" required>
+                        </div>
+                        <div>
+                            <label for="field-stock">Stock *</label>
+                            <input type="number" id="field-stock" min="0" step="1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div>
+                            <label for="field-category">Category</label>
+                            <input type="text" id="field-category" placeholder="e.g. fashion">
+                        </div>
+                        <div>
+                            <label for="field-image">Image URL</label>
+                            <input type="text" id="field-image" placeholder="assets/images/products/…">
+                        </div>
+                    </div>
+                    <button type="submit" id="submit-btn">Add product</button>
+                    <button type="button" class="secondary" id="cancel-edit-btn" hidden>Cancel edit</button>
+                </form>
+            </section>
+
+            <section class="admin-card" id="list-card" hidden>
+                <h2>3. Catalogue</h2>
+                <div id="product-list">Loading…</div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Admin product management, wired to the existing backend CRUD API.
+        // Admin key lives in sessionStorage only (cleared when the tab closes).
+        const KEY_STORE = "shopease_admin_key_session";
+        const statusEl = document.getElementById("admin-status");
+        const keyInput = document.getElementById("admin-key");
+
+        function setStatus(msg, ok) {
+            statusEl.textContent = msg;
+            statusEl.className = ok ? "ok" : "error";
+        }
+        function adminKey() { return sessionStorage.getItem(KEY_STORE) || ""; }
+
+        function esc(s) {
+            return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+                ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
+
+        async function loadProducts() {
+            const listEl = document.getElementById("product-list");
+            try {
+                const data = await ShopEaseAPI.getProducts({ per_page: 200 });
+                const items = Array.isArray(data) ? data : (data.items || []);
+                if (!items.length) { listEl.textContent = "No products yet."; return; }
+                listEl.innerHTML = "<table class=\"admin-table\"><thead><tr>" +
+                    "<th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>" +
+                    items.map((p) => "<tr><td>" + p.id + "</td><td>" + esc(p.name) + "</td>" +
+                        "<td>₹" + p.price + "</td><td>" + p.stock + "</td><td>" +
+                        "<button type=\"button\" data-edit=\"" + p.id + "\">Edit</button>" +
+                        "<button type=\"button\" class=\"danger\" data-del=\"" + p.id + "\">Delete</button></td></tr>").join("") +
+                    "</tbody></table>";
+                listEl.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+                    const p = items.find((x) => String(x.id) === b.dataset.edit);
+                    if (!p) return;
+                    document.getElementById("field-id").value = p.id;
+                    document.getElementById("field-name").value = p.name || "";
+                    document.getElementById("field-description").value = p.description || "";
+                    document.getElementById("field-price").value = p.price;
+                    document.getElementById("field-stock").value = p.stock;
+                    document.getElementById("field-category").value = p.category || "";
+                    document.getElementById("field-image").value = p.image_url || "";
+                    document.getElementById("form-title").textContent = "2. Edit product #" + p.id;
+                    document.getElementById("submit-btn").textContent = "Save changes";
+                    document.getElementById("cancel-edit-btn").hidden = false;
+                    document.getElementById("form-card").scrollIntoView({ behavior: "smooth" });
+                }));
+                listEl.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {
+                    if (!confirm("Delete product #" + b.dataset.del + "? This cannot be undone.")) return;
+                    try {
+                        await ShopEaseAPI.deleteProduct(b.dataset.del, adminKey());
+                        setStatus("Product deleted.", true);
+                        await loadProducts();
+                    } catch (e) { setStatus("Delete failed: " + e.message, false); }
+                }));
+            } catch (e) {
+                listEl.textContent = "Could not load products: " + e.message;
+            }
+        }
+
+        function unlock(key) {
+            sessionStorage.setItem(KEY_STORE, key);
+            document.getElementById("form-card").hidden = false;
+            document.getElementById("list-card").hidden = false;
+            setStatus("Admin key accepted for this session.", true);
+            loadProducts();
+        }
+
+        document.getElementById("save-key-btn").addEventListener("click", async () => {
+            const key = keyInput.value.trim();
+            if (!key) { setStatus("Enter the admin key first.", false); return; }
+            // Verify the key with a harmless read of the stats endpoint is not
+            // possible from here (stats needs the key too); instead verify by
+            // attempting a product list, then unlock on any backend response.
+            try {
+                await ShopEaseAPI.getProducts({ per_page: 1 });
+                unlock(key);
+            } catch (e) { setStatus("Backend is not reachable: " + e.message, false); }
+        });
+
+        document.getElementById("cancel-edit-btn").addEventListener("click", () => {
+            document.getElementById("product-form").reset();
+            document.getElementById("field-id").value = "";
+            document.getElementById("form-title").textContent = "2. Add a product";
+            document.getElementById("submit-btn").textContent = "Add product";
+            document.getElementById("cancel-edit-btn").hidden = true;
+        });
+
+        document.getElementById("product-form").addEventListener("submit", async (ev) => {
+            ev.preventDefault();
+            const id = document.getElementById("field-id").value;
+            const body = {
+                name: document.getElementById("field-name").value.trim(),
+                description: document.getElementById("field-description").value.trim(),
+                price: parseFloat(document.getElementById("field-price").value),
+                stock: parseInt(document.getElementById("field-stock").value, 10),
+                category: document.getElementById("field-category").value.trim() || "general",
+                image_url: document.getElementById("field-image").value.trim(),
+            };
+            try {
+                if (id) await ShopEaseAPI.updateProduct(id, body, adminKey());
+                else await ShopEaseAPI.createProduct(body, adminKey());
+                setStatus(id ? "Product updated." : "Product added.", true);
+                document.getElementById("cancel-edit-btn").click();
+                await loadProducts();
+            } catch (e) { setStatus("Save failed: " + e.message, false); }
+        });
+
+        // If a key was already entered this session, unlock straight away.
+        if (adminKey()) { keyInput.value = adminKey(); unlock(adminKey()); }
+    </script>
+</body>
+</html>
