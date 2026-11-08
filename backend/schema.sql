@@ -125,3 +125,22 @@ CREATE TABLE IF NOT EXISTS promo_codes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
+
+-- Saved shipping addresses: one user can keep several; at most one is
+-- the default (is_default = 1). Checkout can take an address_id and
+-- snapshots the address onto the order.
+CREATE TABLE IF NOT EXISTS addresses (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    label         TEXT    NOT NULL,                   -- e.g. "Home", "Office"
+    full_name     TEXT    NOT NULL,                   -- delivery name
+    address_line1 TEXT    NOT NULL,                   -- street address
+    address_line2 TEXT,                               -- optional (flat, landmark)
+    city          TEXT    NOT NULL,
+    state         TEXT    NOT NULL,
+    pincode       TEXT    NOT NULL,                   -- 6-digit Indian PIN
+    is_default    INTEGER NOT NULL DEFAULT 0 CHECK (is_default IN (0, 1)),
+    created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);

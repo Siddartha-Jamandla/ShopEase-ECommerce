@@ -432,6 +432,19 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_promo_create(query)
                 raise ApiError(405, "Method not allowed")
 
+            if path == "/api/addresses":
+                if method == "GET":
+                    return self._api_addresses_list()
+                if method == "POST":
+                    return self._api_address_create()
+                raise ApiError(405, "Method not allowed")
+
+            m = re.fullmatch(r"/api/addresses/(\d+)", path)
+            if m:
+                if method == "DELETE":
+                    return self._api_address_delete(int(m.group(1)))
+                raise ApiError(405, "Method not allowed")
+
             if path.startswith("/api/"):
                 raise ApiError(404, "Unknown API endpoint")
 
@@ -1168,6 +1181,13 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         shipping = self._validate_shipping(body)
         with _db_lock:
             conn = get_db()
+            # A saved address can supply the shipping details; an explicit
+            # `shipping` object wins when both are sent.
+            try:
+                address_shipping = self._resolve_checkout_address(conn, user_id, body)
+            except ApiError:
+                conn.close()
+                raise
             # The storefront cart lives in the browser's localStorage, so a
             # checkout may carry its own explicit `items` list
             # [{product_id, quantity}]. Without one, the server-side cart
@@ -1236,7 +1256,7 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 _promo, discount = self._apply_promo_code(conn, promo_code, subtotal)
                 applied_code = _promo["code"]
             total = round(subtotal - discount, 2)
-            ship = shipping or {}
+            ship = shipping or address_shipping or {}
             cur = conn.execute(
                 "INSERT INTO orders (user_id, total, status, shipping_name,"
                 " shipping_address, shipping_city, shipping_state,"
@@ -1628,6 +1648,147 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         conn.execute("UPDATE promo_codes SET uses = uses + 1 WHERE id = ?",
                      (row["id"],))
         return row, discount
+
+    # -- saved addresses -----------------------------------------------------
+
+    def _validate_address_fields(self, body):
+        """Validate a saved-address body. Returns the cleaned field dict."""
+        label = str(body.get("label", "")).strip()
+        full_name = str(body.get("full_name", "")).strip()
+        address_line1 = str(body.get("address_line1", "")).strip()
+        address_line2 = body.get("address_line2")
+        address_line2 = "" if address_line2 is None else str(address_line2).strip()
+        city = str(body.get("city", "")).strip()
+        state = str(body.get("state", "")).strip()
+        pincode = str(body.get("pincode", "")).strip()
+        if not label:
+            raise ApiError(400, "Field 'label' is required")
+        if len(label) > 30:
+            raise ApiError(400, "Field 'label' must be at most 30 characters")
+        if not full_name:
+            raise ApiError(400, "Field 'full_name' is required")
+        if len(full_name) > 100:
+            raise ApiError(400, "Field 'full_name' must be at most 100 characters")
+        if len(address_line1) < 5:
+            raise ApiError(400, "Field 'address_line1' must be at least 5 characters")
+        if len(address_line1) > 500:
+            raise ApiError(400, "Field 'address_line1' must be at most 500 characters")
+        if len(address_line2) > 500:
+            raise ApiError(400, "Field 'address_line2' must be at most 500 characters")
+        if not city:
+            raise ApiError(400, "Field 'city' is required")
+        if len(city) > 60:
+            raise ApiError(400, "Field 'city' must be at most 60 characters")
+        if not state:
+            raise ApiError(400, "Field 'state' is required")
+        if len(state) > 60:
+            raise ApiError(400, "Field 'state' must be at most 60 characters")
+        if not re.fullmatch(r"\d{6}", pincode):
+            raise ApiError(400, "Field 'pincode' must be a 6-digit PIN code")
+        is_default = body.get("is_default", False)
+        if isinstance(is_default, str):
+            is_default = is_default.strip().lower() in ("1", "true", "yes")
+        return {"label": label, "full_name": full_name,
+                "address_line1": address_line1,
+                "address_line2": address_line2 or None,
+                "city": city, "state": state, "pincode": pincode,
+                "is_default": bool(is_default)}
+
+    def _api_addresses_list(self):
+        """Your saved addresses, default first, then newest first."""
+        user_id = self._require_auth()
+        with _db_lock:
+            rows = get_db().execute(
+                "SELECT * FROM addresses WHERE user_id = ?"
+                " ORDER BY is_default DESC, id DESC",
+                (user_id,)).fetchall()
+        self._ok([row_to_dict(r) for r in rows])
+
+    def _api_address_create(self):
+        """Save a new address. Setting is_default clears the default flag
+        on your other addresses; your very first address becomes the
+        default automatically."""
+        user_id = self._require_auth()
+        fields = self._validate_address_fields(self._read_json())
+        with _db_lock:
+            conn = get_db()
+            existing = conn.execute(
+                "SELECT COUNT(*) FROM addresses WHERE user_id = ?",
+                (user_id,)).fetchone()[0]
+            if fields["is_default"]:
+                conn.execute("UPDATE addresses SET is_default = 0 WHERE user_id = ?",
+                             (user_id,))
+            elif existing == 0:
+                fields["is_default"] = True  # first address is the default
+            cur = conn.execute(
+                "INSERT INTO addresses (user_id, label, full_name, address_line1,"
+                " address_line2, city, state, pincode, is_default)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (user_id, fields["label"], fields["full_name"],
+                 fields["address_line1"], fields["address_line2"],
+                 fields["city"], fields["state"], fields["pincode"],
+                 1 if fields["is_default"] else 0))
+            conn.commit()
+            row = conn.execute("SELECT * FROM addresses WHERE id = ?",
+                               (cur.lastrowid,)).fetchone()
+            conn.close()
+        self._ok(row_to_dict(row), status=201)
+
+    def _api_address_delete(self, address_id):
+        """Delete one of your addresses. Deleting the default promotes your
+        oldest remaining address to default. 403 for someone else's
+        address, 404 when missing."""
+        user_id = self._require_auth()
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute("SELECT * FROM addresses WHERE id = ?",
+                               (address_id,)).fetchone()
+            if row is None:
+                conn.close()
+                raise ApiError(404, "Address not found")
+            if row["user_id"] != user_id:
+                conn.close()
+                raise ApiError(403, "Not your address")
+            was_default = row["is_default"]
+            conn.execute("DELETE FROM addresses WHERE id = ?", (address_id,))
+            if was_default:
+                nxt = conn.execute(
+                    "SELECT id FROM addresses WHERE user_id = ? ORDER BY id LIMIT 1",
+                    (user_id,)).fetchone()
+                if nxt is not None:
+                    conn.execute("UPDATE addresses SET is_default = 1 WHERE id = ?",
+                                 (nxt["id"],))
+            conn.commit()
+            conn.close()
+        self._ok({"deleted": True, "id": address_id})
+
+    def _resolve_checkout_address(self, conn, user_id, body):
+        """Resolve an optional checkout `address_id` to a shipping dict.
+
+        Returns None when no address_id was sent. The address must exist
+        (404) and belong to the caller (403). The saved address has no
+        phone number, so shipping_phone is empty — send an explicit
+        `shipping` object as well when a phone is needed.
+        """
+        address_id = body.get("address_id")
+        if address_id is None:
+            return None
+        try:
+            address_id = int(address_id)
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'address_id' must be an integer")
+        row = conn.execute("SELECT * FROM addresses WHERE id = ?",
+                           (address_id,)).fetchone()
+        if row is None:
+            raise ApiError(404, "Address not found")
+        if row["user_id"] != user_id:
+            raise ApiError(403, "Not your address")
+        address = row["address_line1"]
+        if row["address_line2"]:
+            address += ", " + row["address_line2"]
+        return {"name": row["full_name"], "address": address,
+                "city": row["city"], "state": row["state"],
+                "pincode": row["pincode"], "phone": ""}
 
     # -- static files ----------------------------------------------------------
 

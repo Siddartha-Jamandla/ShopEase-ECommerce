@@ -298,6 +298,28 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/admin/promo-codes", undefined, { adminKey });
   },
 
+  // ---------------------------------------------------------- saved addresses
+  /** Your saved shipping addresses (default first, then newest first). */
+  async getAddresses() {
+    if (!this.isLoggedIn) throw new Error("Please log in to view addresses");
+    return this._request("GET", "/api/addresses");
+  },
+
+  /** Save an address {label, full_name, address_line1, address_line2?,
+   *  city, state, pincode, is_default?}. Your first address becomes the
+   *  default automatically; setting is_default clears your other defaults. */
+  async addAddress(address) {
+    if (!this.isLoggedIn) throw new Error("Please log in to save addresses");
+    return this._request("POST", "/api/addresses", address);
+  },
+
+  /** Delete one of your saved addresses. Deleting the default promotes
+   *  your oldest remaining address to default. */
+  async deleteAddress(id) {
+    if (!this.isLoggedIn) throw new Error("Please log in to manage addresses");
+    return this._request("DELETE", "/api/addresses/" + id);
+  },
+
   // ---------------------------------------------------------- wishlist
   /**
    * Wishlist items: [{id, product_id, added_at, name, description, price,
