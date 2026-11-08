@@ -80,6 +80,8 @@ def init_db():
         for _col in ("shipping_name", "shipping_address", "shipping_city",
                      "shipping_state", "shipping_pincode", "shipping_phone"):
             _ensure_column(conn, "orders", _col, f"{_col} TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "orders", "promo_code", "promo_code TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "orders", "discount_amount", "discount_amount REAL NOT NULL DEFAULT 0")
         _ensure_updated_at_column(conn)
         _backfill_status_history(conn)
         conn.commit()
@@ -421,6 +423,13 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if m:
                 if method == "PUT":
                     return self._api_admin_order_status(int(m.group(1)), query)
+                raise ApiError(405, "Method not allowed")
+
+            if path == "/api/admin/promo-codes":
+                if method == "GET":
+                    return self._api_promo_list(query)
+                if method == "POST":
+                    return self._api_promo_create(query)
                 raise ApiError(405, "Method not allowed")
 
             if path.startswith("/api/"):
@@ -1148,7 +1157,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
              "phone": order.get("shipping_phone", "")}
             if has_shipping else None)
         order["summary"] = {"items_count": items_count if items_count is not None else 0,
-                            "subtotal": order.get("total", 0)}
+                            "subtotal": round(order.get("total", 0)
+                                            + order.get("discount_amount", 0), 2),
+                            "discount_amount": order.get("discount_amount", 0)}
         return order
 
     def _api_checkout(self):
@@ -1210,16 +1221,31 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     if r["quantity"] > r["stock"]:
                         conn.close()
                         raise ApiError(400, f"Insufficient stock for '{r['name']}'")
-            total = round(sum(r["price"] * r["quantity"] for r in rows), 2)
+            subtotal = round(sum(r["price"] * r["quantity"] for r in rows), 2)
+            # Optional promo code: validated against the subtotal; the
+            # percentage discount comes off the total and the code + amount
+            # are stored on the order (uses is incremented in the same
+            # transaction, so a failed checkout never consumes a use).
+            promo_code = body.get("promo_code")
+            discount = 0.0
+            applied_code = ""
+            if promo_code:
+                if not isinstance(promo_code, str):
+                    conn.close()
+                    raise ApiError(400, "Field 'promo_code' must be a string")
+                _promo, discount = self._apply_promo_code(conn, promo_code, subtotal)
+                applied_code = _promo["code"]
+            total = round(subtotal - discount, 2)
             ship = shipping or {}
             cur = conn.execute(
                 "INSERT INTO orders (user_id, total, status, shipping_name,"
                 " shipping_address, shipping_city, shipping_state,"
-                " shipping_pincode, shipping_phone)"
-                " VALUES (?, ?, 'placed', ?, ?, ?, ?, ?, ?)",
+                " shipping_pincode, shipping_phone, promo_code, discount_amount)"
+                " VALUES (?, ?, 'placed', ?, ?, ?, ?, ?, ?, ?, ?)",
                 (user_id, total, ship.get("name", ""), ship.get("address", ""),
                  ship.get("city", ""), ship.get("state", ""),
-                 ship.get("pincode", ""), ship.get("phone", "")))
+                 ship.get("pincode", ""), ship.get("phone", ""),
+                 applied_code, discount))
             order_id = cur.lastrowid
             conn.execute(
                 "INSERT INTO order_status_history (order_id, status) VALUES (?, 'placed')",
@@ -1492,6 +1518,116 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             "top_products": top_products,
             "user_count": user_count,
         })
+
+    # -- promo codes ---------------------------------------------------------
+
+    def _require_admin_key(self, query):
+        """Admin-key auth, same as /api/admin/stats: ?key=<ADMIN_KEY> or
+        X-Admin-Key header. Raises ApiError(403) otherwise."""
+        key = query.get("key", [""])[0] or self.headers.get("X-Admin-Key", "")
+        if key != ADMIN_KEY:
+            raise ApiError(403, "Forbidden")
+
+    def _validate_promo_fields(self, body):
+        """Validate a promo-code body. Returns the cleaned field dict.
+
+        code: 3-30 chars, letters/digits/hyphen/underscore, stored upper-case.
+        discount_percent: 1-90. min_order_amount: >= 0 (default 0).
+        expires_at: optional ISO timestamp; a plain YYYY-MM-DD date means
+        the end of that day. max_uses: optional int >= 1 (None = unlimited).
+        """
+        code = str(body.get("code", "")).strip().upper()
+        if not re.fullmatch(r"[A-Z0-9][A-Z0-9_\-]{2,29}", code):
+            raise ApiError(400, "Field 'code' must be 3-30 characters"
+                                " (letters, digits, hyphen, underscore)")
+        try:
+            discount_percent = float(body.get("discount_percent"))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'discount_percent' must be a number")
+        if not 1 <= discount_percent <= 90:
+            raise ApiError(400, "Field 'discount_percent' must be between 1 and 90")
+        try:
+            min_order_amount = float(body.get("min_order_amount", 0))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'min_order_amount' must be a number")
+        if min_order_amount < 0:
+            raise ApiError(400, "Field 'min_order_amount' must be >= 0")
+        expires_at = body.get("expires_at")
+        if expires_at is not None:
+            expires_at = str(expires_at).strip()
+            if not expires_at:
+                expires_at = None
+            elif re.fullmatch(r"\d{4}-\d{2}-\d{2}", expires_at):
+                expires_at += "T23:59:59Z"  # a date means the end of that day
+            elif not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",
+                                  expires_at):
+                raise ApiError(400, "Field 'expires_at' must be an ISO timestamp"
+                                    " (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)")
+        max_uses = body.get("max_uses")
+        if max_uses is not None:
+            try:
+                max_uses = int(max_uses)
+            except (TypeError, ValueError):
+                raise ApiError(400, "Field 'max_uses' must be an integer")
+            if max_uses < 1:
+                raise ApiError(400, "Field 'max_uses' must be >= 1")
+        return {"code": code, "discount_percent": discount_percent,
+                "min_order_amount": min_order_amount,
+                "expires_at": expires_at, "max_uses": max_uses}
+
+    def _api_promo_create(self, query):
+        """Admin: create a promo code. 400 bad fields, 403 wrong/missing key,
+        409 when the code already exists."""
+        self._require_admin_key(query)
+        fields = self._validate_promo_fields(self._read_json())
+        with _db_lock:
+            conn = get_db()
+            try:
+                cur = conn.execute(
+                    "INSERT INTO promo_codes (code, discount_percent,"
+                    " min_order_amount, expires_at, max_uses)"
+                    " VALUES (?, ?, ?, ?, ?)",
+                    (fields["code"], fields["discount_percent"],
+                     fields["min_order_amount"], fields["expires_at"],
+                     fields["max_uses"]))
+                conn.commit()
+            except sqlite3.IntegrityError:
+                conn.close()
+                raise ApiError(409, f"Promo code '{fields['code']}' already exists")
+            row = conn.execute("SELECT * FROM promo_codes WHERE id = ?",
+                               (cur.lastrowid,)).fetchone()
+            conn.close()
+        self._ok(row_to_dict(row), status=201)
+
+    def _api_promo_list(self, query):
+        """Admin: list all promo codes, newest first."""
+        self._require_admin_key(query)
+        with _db_lock:
+            rows = get_db().execute(
+                "SELECT * FROM promo_codes ORDER BY id DESC").fetchall()
+        self._ok([row_to_dict(r) for r in rows])
+
+    def _apply_promo_code(self, conn, code, subtotal):
+        """Validate a promo code against an order subtotal and return
+        (promo_row, discount_amount). Raises ApiError(400) when the code is
+        unknown, expired, fully used, or the subtotal is below its minimum.
+        Call inside the checkout transaction; the caller commits (which also
+        persists the incremented uses count)."""
+        row = conn.execute("SELECT * FROM promo_codes WHERE code = ?",
+                           (code.strip().upper(),)).fetchone()
+        if row is None:
+            raise ApiError(400, f"Promo code '{code}' is not valid")
+        if row["expires_at"] and row["expires_at"] < utcnow():
+            raise ApiError(400, f"Promo code '{row['code']}' has expired")
+        if row["max_uses"] is not None and row["uses"] >= row["max_uses"]:
+            raise ApiError(400, f"Promo code '{row['code']}' has reached its usage limit")
+        if subtotal < row["min_order_amount"]:
+            raise ApiError(400, "Promo code requires a minimum order of "
+                                f"₹{row['min_order_amount']:g}")
+        discount = round(subtotal * row["discount_percent"] / 100, 2)
+        conn.execute("UPDATE promo_codes SET uses = uses + 1 WHERE id = ?",
+                     (row["id"],))
+        return row, discount
 
     # -- static files ----------------------------------------------------------
 

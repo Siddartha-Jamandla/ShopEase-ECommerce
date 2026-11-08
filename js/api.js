@@ -225,13 +225,38 @@ const ShopEaseAPI = {
   },
 
   // ---------------------------------------------------------- orders
-  async checkout(shipping = null, items = null) {
+  /** Promo code held for the next checkout (set with applyPromo). The
+   *  server validates it at checkout time and rejects the order with a
+   *  clear 400 when the code is unknown, expired, fully used, or the
+   *  subtotal is below its minimum. */
+  _pendingPromoCode: null,
+
+  /** Remember a promo code for the next checkout. Returns the code
+   *  (upper-cased); the discount itself is applied server-side. */
+  applyPromo(code) {
+    const clean = String(code || "").trim().toUpperCase();
+    if (!clean) throw new Error("Please enter a promo code");
+    this._pendingPromoCode = clean;
+    return clean;
+  },
+
+  clearPromo() {
+    this._pendingPromoCode = null;
+  },
+
+  /** options: {promoCode, addressId} — a promo code and/or a saved
+   *  address (see getAddresses) to ship to. */
+  async checkout(shipping = null, items = null, options = {}) {
     if (!this.isLoggedIn) throw new Error("Please log in to place an order");
     const body = {};
     if (shipping) body.shipping = shipping; // {name, address, city, state, pincode, phone}
     if (items) body.items = items; // [{product_id, quantity}] — prices snapshotted server-side
+    const promoCode = options.promoCode || this._pendingPromoCode;
+    if (promoCode) body.promo_code = promoCode;
+    if (options.addressId) body.address_id = options.addressId;
     const order = await this._request("POST", "/api/checkout", body);
     LocalStore.clearCart(); // local cart is obsolete after a real order
+    this._pendingPromoCode = null; // a code is spent once the order lands
     return order;
   },
 
@@ -259,6 +284,18 @@ const ShopEaseAPI = {
   async updateOrderStatus(id, status, adminKey) {
     return this._request("PUT", "/api/admin/orders/" + id + "/status",
       { status }, { adminKey });
+  },
+
+  // ---------------------------------------------------------- promo codes
+  /** Admin: create a promo code {code, discount_percent (1-90),
+   *  min_order_amount?, expires_at? (YYYY-MM-DD or ISO), max_uses?}. */
+  async createPromoCode(promo, adminKey) {
+    return this._request("POST", "/api/admin/promo-codes", promo, { adminKey });
+  },
+
+  /** Admin: list all promo codes, newest first. */
+  async listPromoCodes(adminKey) {
+    return this._request("GET", "/api/admin/promo-codes", undefined, { adminKey });
   },
 
   // ---------------------------------------------------------- wishlist

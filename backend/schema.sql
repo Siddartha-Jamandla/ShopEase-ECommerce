@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS orders (
     shipping_state   TEXT NOT NULL DEFAULT '',
     shipping_pincode TEXT NOT NULL DEFAULT '',         -- 6-digit Indian PIN
     shipping_phone   TEXT NOT NULL DEFAULT '',         -- 10-digit Indian mobile
+    promo_code       TEXT NOT NULL DEFAULT '',         -- applied promo code ('' = none)
+    discount_amount  REAL    NOT NULL DEFAULT 0,      -- INR saved via the promo code
     created_at TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
@@ -107,3 +109,19 @@ CREATE TABLE IF NOT EXISTS wishlist (
 );
 
 CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id);
+
+-- Promo codes: percentage discounts applied at checkout.
+-- code is stored upper-case and unique; expires_at is an ISO timestamp
+-- (or NULL = never expires); max_uses NULL = unlimited.
+CREATE TABLE IF NOT EXISTS promo_codes (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    code             TEXT    NOT NULL UNIQUE,          -- e.g. "WELCOME10"
+    discount_percent REAL    NOT NULL CHECK (discount_percent >= 1 AND discount_percent <= 90),
+    min_order_amount REAL    NOT NULL DEFAULT 0 CHECK (min_order_amount >= 0),  -- INR subtotal
+    expires_at       TEXT,                             -- ISO timestamp, NULL = never expires
+    max_uses         INTEGER CHECK (max_uses IS NULL OR max_uses >= 1),
+    uses             INTEGER NOT NULL DEFAULT 0 CHECK (uses >= 0),
+    created_at       TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes(code);
