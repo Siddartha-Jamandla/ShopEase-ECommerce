@@ -76,6 +76,9 @@ def init_db():
         _ensure_column(conn, "products", "reviews_count", "reviews_count INTEGER NOT NULL DEFAULT 0")
         _ensure_column(conn, "products", "badge", "badge TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "orders", "status", "status TEXT NOT NULL DEFAULT 'placed'")
+        for _col in ("shipping_name", "shipping_address", "shipping_city",
+                     "shipping_state", "shipping_pincode", "shipping_phone"):
+            _ensure_column(conn, "orders", _col, f"{_col} TEXT NOT NULL DEFAULT ''")
         _ensure_updated_at_column(conn)
         _backfill_status_history(conn)
         conn.commit()
@@ -1024,22 +1027,138 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
 
     # -- checkout & orders ---------------------------------------------------
 
+    def _validate_shipping(self, body):
+        """Validate the optional `shipping` object from a checkout request.
+
+        Returns a cleaned dict, or None when no shipping was sent (legacy
+        checkouts without an address keep working). Raises ApiError(400).
+        Phone accepts an optional +91/91 prefix; it is stored as 10 digits.
+        """
+        shipping = body.get("shipping")
+        if shipping is None:
+            return None
+        if not isinstance(shipping, dict):
+            raise ApiError(400, "Field 'shipping' must be an object")
+        name = str(shipping.get("name", "")).strip()
+        address = str(shipping.get("address", "")).strip()
+        city = str(shipping.get("city", "")).strip()
+        state = str(shipping.get("state", "")).strip()
+        pincode = str(shipping.get("pincode", "")).strip()
+        phone = re.sub(r"[\s\-]", "", str(shipping.get("phone", "")).strip())
+        if phone.startswith("+91"):
+            phone = phone[3:]
+        elif phone.startswith("91") and len(phone) == 12:
+            phone = phone[2:]
+        if not name:
+            raise ApiError(400, "Field 'shipping.name' is required")
+        if len(name) > 100:
+            raise ApiError(400, "Field 'shipping.name' must be at most 100 characters")
+        if len(address) < 5:
+            raise ApiError(400, "Field 'shipping.address' must be at least 5 characters")
+        if len(address) > 500:
+            raise ApiError(400, "Field 'shipping.address' must be at most 500 characters")
+        if not city:
+            raise ApiError(400, "Field 'shipping.city' is required")
+        if len(city) > 60:
+            raise ApiError(400, "Field 'shipping.city' must be at most 60 characters")
+        if not state:
+            raise ApiError(400, "Field 'shipping.state' is required")
+        if len(state) > 60:
+            raise ApiError(400, "Field 'shipping.state' must be at most 60 characters")
+        if not re.fullmatch(r"\d{6}", pincode):
+            raise ApiError(400, "Field 'shipping.pincode' must be a 6-digit PIN code")
+        if not re.fullmatch(r"[6-9]\d{9}", phone):
+            raise ApiError(400, "Field 'shipping.phone' must be a valid 10-digit mobile number")
+        return {"name": name, "address": address, "city": city,
+                "state": state, "pincode": pincode, "phone": phone}
+
+    def _order_view(self, order, items_count=None):
+        """Attach the persisted shipping address + order summary to an order
+        dict. `shipping` is None when the order was placed without one."""
+        has_shipping = any(order.get(f"shipping_{f}")
+                           for f in ("name", "address", "city", "state",
+                                     "pincode", "phone"))
+        order["shipping"] = (
+            {"name": order.get("shipping_name", ""),
+             "address": order.get("shipping_address", ""),
+             "city": order.get("shipping_city", ""),
+             "state": order.get("shipping_state", ""),
+             "pincode": order.get("shipping_pincode", ""),
+             "phone": order.get("shipping_phone", "")}
+            if has_shipping else None)
+        order["summary"] = {"items_count": items_count if items_count is not None else 0,
+                            "subtotal": order.get("total", 0)}
+        return order
+
     def _api_checkout(self):
         user_id = self._require_auth()
+        body = self._read_json()
+        shipping = self._validate_shipping(body)
         with _db_lock:
             conn = get_db()
-            rows = self._cart_rows(conn, user_id)
-            if not rows:
-                conn.close()
-                raise ApiError(400, "Cart is empty")
-            for r in rows:
-                if r["quantity"] > r["stock"]:
+            # The storefront cart lives in the browser's localStorage, so a
+            # checkout may carry its own explicit `items` list
+            # [{product_id, quantity}]. Without one, the server-side cart
+            # (used by the API client) is the source. Prices are always
+            # snapshotted from the products table — never trusted from the
+            # client.
+            if "items" in body and body.get("items") is not None:
+                items_arg = body.get("items")
+                if not isinstance(items_arg, list) or not items_arg:
                     conn.close()
-                    raise ApiError(400, f"Insufficient stock for '{r['name']}'")
+                    raise ApiError(400, "Field 'items' must be a non-empty list")
+                rows = []
+                for entry in items_arg:
+                    if not isinstance(entry, dict):
+                        conn.close()
+                        raise ApiError(400, "Each item must be an object with product_id and quantity")
+                    try:
+                        product_id = int(entry.get("product_id"))
+                    except (TypeError, ValueError):
+                        conn.close()
+                        raise ApiError(400, "Field 'product_id' must be an integer")
+                    if product_id <= 0:
+                        conn.close()
+                        raise ApiError(400, "Field 'product_id' must be a positive integer")
+                    try:
+                        quantity = int(entry.get("quantity", 1))
+                    except (TypeError, ValueError):
+                        conn.close()
+                        raise ApiError(400, "Field 'quantity' must be an integer")
+                    if quantity <= 0 or quantity > 99:
+                        conn.close()
+                        raise ApiError(400, "Field 'quantity' must be between 1 and 99")
+                    product = conn.execute(
+                        "SELECT id, name, price, stock FROM products WHERE id = ?",
+                        (product_id,)).fetchone()
+                    if product is None:
+                        conn.close()
+                        raise ApiError(404, f"Product {product_id} not found")
+                    if quantity > product["stock"]:
+                        conn.close()
+                        raise ApiError(400, f"Insufficient stock for '{product['name']}'")
+                    rows.append({"product_id": product["id"], "quantity": quantity,
+                                 "price": product["price"], "name": product["name"],
+                                 "stock": product["stock"]})
+            else:
+                rows = self._cart_rows(conn, user_id)
+                if not rows:
+                    conn.close()
+                    raise ApiError(400, "Cart is empty")
+                for r in rows:
+                    if r["quantity"] > r["stock"]:
+                        conn.close()
+                        raise ApiError(400, f"Insufficient stock for '{r['name']}'")
             total = round(sum(r["price"] * r["quantity"] for r in rows), 2)
+            ship = shipping or {}
             cur = conn.execute(
-                "INSERT INTO orders (user_id, total, status) VALUES (?, ?, 'placed')",
-                (user_id, total))
+                "INSERT INTO orders (user_id, total, status, shipping_name,"
+                " shipping_address, shipping_city, shipping_state,"
+                " shipping_pincode, shipping_phone)"
+                " VALUES (?, ?, 'placed', ?, ?, ?, ?, ?, ?)",
+                (user_id, total, ship.get("name", ""), ship.get("address", ""),
+                 ship.get("city", ""), ship.get("state", ""),
+                 ship.get("pincode", ""), ship.get("phone", "")))
             order_id = cur.lastrowid
             conn.execute(
                 "INSERT INTO order_status_history (order_id, status) VALUES (?, 'placed')",
@@ -1061,14 +1180,21 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                    WHERE oi.order_id = ?""", (order_id,)).fetchall()]
             conn.close()
         order["items"] = items
-        self._ok(order, status=201)
+        self._ok(self._order_view(order, items_count=len(items)), status=201)
 
     def _api_orders_list(self):
         user_id = self._require_auth()
         with _db_lock:
             rows = get_db().execute(
-                "SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC", (user_id,)).fetchall()
-        self._ok([row_to_dict(r) for r in rows])
+                """SELECT o.*, (SELECT COUNT(*) FROM order_items oi
+                               WHERE oi.order_id = o.id) AS items_count
+                   FROM orders o WHERE o.user_id = ? ORDER BY o.id DESC""",
+                (user_id,)).fetchall()
+        orders = []
+        for r in rows:
+            d = row_to_dict(r)
+            orders.append(self._order_view(d, items_count=d.pop("items_count")))
+        self._ok(orders)
 
     def _api_order_get(self, order_id):
         user_id = self._require_auth()
@@ -1086,7 +1212,7 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             conn.close()
         data = row_to_dict(order)
         data["items"] = items
-        self._ok(data)
+        self._ok(self._order_view(data, items_count=len(items)))
 
     def _api_order_cancel(self, order_id):
         """Cancel the caller's own order while it is still 'placed'.
@@ -1119,8 +1245,11 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             conn.commit()
             updated = row_to_dict(conn.execute(
                 "SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone())
+            items_count = conn.execute(
+                "SELECT COUNT(*) FROM order_items WHERE order_id = ?",
+                (order_id,)).fetchone()[0]
             conn.close()
-        self._ok(updated)
+        self._ok(self._order_view(updated, items_count=items_count))
 
     def _api_order_timeline(self, order_id):
         """Status timeline for the caller's own order.

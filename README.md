@@ -103,9 +103,9 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | POST   | `/api/cart`           | user | `{product_id, quantity?}` — adds or increments (checks stock) |
 | PUT    | `/api/cart/:id`       | user | `{quantity}` — update; `0` removes the item |
 | DELETE | `/api/cart/:id`       | user | Remove item (404 if not yours) |
-| POST   | `/api/checkout`       | user | Creates order from cart, snapshots prices, decrements stock, clears cart → order with `items` |
-| GET    | `/api/orders`         | user | Your orders, newest first |
-| GET    | `/api/orders/:id`     | user | One order with items (404 if not yours) |
+| POST   | `/api/checkout`       | user | Creates an order: optional `{shipping: {name, address, city, state, pincode, phone}}` (validated, persisted on the order) and optional `{items: [{product_id, quantity}]}` — the storefront cart lives in localStorage, so the page sends its items explicitly; without `items` the server-side cart is used. Prices are snapshotted from the DB, stock decremented, server cart cleared → order with `items`, `shipping` and `summary` |
+| GET    | `/api/orders`         | user | Your orders, newest first — each with `shipping` and `summary` (`items_count`, `subtotal`) |
+| GET    | `/api/orders/:id`     | user | One order with items, `shipping` and `summary` (404 if not yours) |
 | POST   | `/api/orders/:id/cancel` | user | Cancel your own order while `placed`: restores stock, records a `cancelled` status event. 403 for others' orders, 404 missing, 409 if already shipped/delivered/cancelled |
 | GET    | `/api/orders/:id/timeline` | user | Status timeline: `current_status`, `events` (oldest first) and `stages` (placed → shipped → delivered, or placed → cancelled) with reached flags + timestamps |
 | GET    | `/api/admin/stats`    | admin key (`?key=` or `X-Admin-Key`) | Store stats: `total_revenue` (non-cancelled orders), `orders_by_status`, `top_products` (top 10 by units sold + gross revenue), `user_count` |
@@ -123,7 +123,10 @@ product names ≤200 chars, descriptions ≤10000, categories ≤60, image URLs
 ≤2000; register names ≤100 chars and passwords 6–128 chars; cart quantities
 1–99; cart/wishlist `product_id` must be a positive integer; review ratings
 1–5 with titles ≤120 and comments ≤2000 chars. Prices must be numbers ≥0 and
-stock an integer ≥0.
+stock an integer ≥0. Checkout shipping: name ≤100 chars, address 5–500 chars,
+city/state ≤60 chars, pincode exactly 6 digits, phone a valid 10-digit Indian
+mobile (an optional `+91`/`91` prefix is accepted); an explicit checkout
+`items` list needs a positive `product_id` and quantity 1–99 per line.
 
 ### Example session (curl)
 
@@ -143,7 +146,9 @@ TOKEN="<paste token>"
 curl -X POST http://localhost:8000/api/cart -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' -d '{"product_id":1,"quantity":2}'
 curl http://localhost:8000/api/cart -H "Authorization: Bearer $TOKEN"
-curl -X POST http://localhost:8000/api/checkout -H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8000/api/checkout -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"shipping":{"name":"Test User","address":"1-2-3 Main Road","city":"Warangal","state":"Telangana","pincode":"506002","phone":"9876543210"},"items":[{"product_id":1,"quantity":2}]}'
 curl http://localhost:8000/api/orders -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -158,7 +163,7 @@ Defined in `backend/schema.sql` (auto-applied on startup). SQLite file:
 users(id, name, email UNIQUE, password_hash, created_at)
 products(id, name, description, price, category, image_url, stock, created_at)
 cart_items(id, user_id → users, product_id → products, quantity, UNIQUE(user_id, product_id))
-orders(id, user_id → users, total, status, created_at, updated_at)
+orders(id, user_id → users, total, status, shipping_name, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_phone, created_at, updated_at)
 order_items(id, order_id → orders, product_id → products, quantity, price)
 order_status_history(id, order_id → orders, status, changed_at)
 ```

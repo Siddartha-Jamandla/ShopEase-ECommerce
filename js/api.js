@@ -225,9 +225,12 @@ const ShopEaseAPI = {
   },
 
   // ---------------------------------------------------------- orders
-  async checkout() {
+  async checkout(shipping = null, items = null) {
     if (!this.isLoggedIn) throw new Error("Please log in to place an order");
-    const order = await this._request("POST", "/api/checkout", {});
+    const body = {};
+    if (shipping) body.shipping = shipping; // {name, address, city, state, pincode, phone}
+    if (items) body.items = items; // [{product_id, quantity}] — prices snapshotted server-side
+    const order = await this._request("POST", "/api/checkout", body);
     LocalStore.clearCart(); // local cart is obsolete after a real order
     return order;
   },

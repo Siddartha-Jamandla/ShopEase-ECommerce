@@ -46,6 +46,12 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     total      REAL    NOT NULL CHECK (total >= 0),    -- INR, price snapshot total
     status     TEXT    NOT NULL DEFAULT 'placed',      -- placed | shipped | delivered | cancelled
+    shipping_name    TEXT NOT NULL DEFAULT '',         -- delivery name (checkout)
+    shipping_address TEXT NOT NULL DEFAULT '',         -- street address
+    shipping_city    TEXT NOT NULL DEFAULT '',
+    shipping_state   TEXT NOT NULL DEFAULT '',
+    shipping_pincode TEXT NOT NULL DEFAULT '',         -- 6-digit Indian PIN
+    shipping_phone   TEXT NOT NULL DEFAULT '',         -- 10-digit Indian mobile
     created_at TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );

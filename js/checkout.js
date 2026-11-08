@@ -718,7 +718,7 @@ function removeFieldError(field) {
    PLACE ORDER
 ========================================= */
 
-function placeOrder() {
+async function placeOrder() {
 
     const cart =
         JSON.parse(
@@ -745,6 +745,40 @@ function placeOrder() {
 
     const formData =
         new FormData(form);
+
+
+    /* Delivery address, as typed on the form - sent to the backend so the
+       order persists with its shipping address (see POST /api/checkout). */
+    const shipping = {
+
+        name:
+            `${formData.get("firstName") || ""} ${formData.get("lastName") || ""}`.trim(),
+
+        address:
+            formData.get("address"),
+
+        city:
+            formData.get("city"),
+
+        state:
+            formData.get("state"),
+
+        pincode:
+            formData.get("pincode"),
+
+        phone:
+            formData.get("phone")
+
+    };
+
+
+    /* The storefront cart lives in localStorage, so the order is placed
+       with an explicit items list (prices snapshotted server-side). */
+    const items =
+        cart.map(item => ({
+            product_id: Number(item.id),
+            quantity: Number(item.quantity) || 1
+        }));
 
 
     const orderId =
@@ -814,6 +848,64 @@ function placeOrder() {
             "Confirmed"
 
     };
+
+
+    /* Persist the order to the backend when signed in, so the order
+       (with its shipping address and item summary) lives in the
+       database and shows up in My Orders. Guests / offline checkouts
+       keep the previous device-only behaviour. */
+    const token =
+        localStorage.getItem("shopease_token");
+
+
+    if (token) {
+
+        try {
+
+            const apiBase =
+                (window.location.hostname === "localhost" ||
+                    window.location.hostname === "127.0.0.1")
+                    ? "http://localhost:8000"
+                    : "";
+
+
+            const res = await fetch(apiBase + "/api/checkout", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+
+                body: JSON.stringify({ shipping, items })
+
+            });
+
+
+            const payload = await res.json();
+
+
+            if (!res.ok || payload.ok === false) {
+                throw new Error(
+                    (payload && payload.error) ||
+                        ("Checkout failed (" + res.status + ")")
+                );
+            }
+
+
+            order.id = "SE" + payload.data.id;
+            order.backend_order_id = payload.data.id;
+
+        } catch (e) {
+
+            showToast(
+                "Could not save this order to your account - saved on this device only."
+            );
+
+        }
+
+    }
 
 
     /* Save order */
