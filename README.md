@@ -56,7 +56,7 @@ Requirements: Python 3.8+ (no packages to install).
 run.bat
 
 # ...or manually, from the repo root:
-python3 backend/seed.py      # create DB + insert 12 demo products (skips if seeded)
+python3 backend/seed.py      # create DB + upsert the 70-product catalog (idempotent)
 python3 backend/app.py       # start API + frontend server
 ```
 
@@ -167,9 +167,10 @@ order_status_history(id, order_id → orders, status, changed_at)
 - `order_items.price` snapshots the unit price at checkout
 - Foreign keys with `ON DELETE CASCADE`; indexes on category, cart user, order user
 
-Seed data: `python3 backend/seed.py` inserts 12 products
-(4 fashion with real photos, 4 home, 4 electronics, INR prices).
-Re-run with `--force` to wipe and re-seed products.
+Seed data: `python3 backend/seed.py` upserts the 70-product catalog
+(men, women, shoes, accessories, electronics, appliances, home, beauty,
+fitness — INR prices, real local photos). Safe to re-run: products are
+matched by id and updated in place.
 
 ---
 
@@ -183,7 +184,7 @@ ShopEase-ECommerce/
 ├── backend/
 │   ├── app.py              # NEW: REST API + static server (stdlib only)
 │   ├── schema.sql          # NEW: SQLite schema
-│   ├── seed.py             # NEW: 12 demo products
+│   ├── seed.py             # NEW: 70-product catalog seed (idempotent upsert)
 │   ├── requirements.txt    # empty - stdlib only
 │   ├── .env.example        # config template
 │   └── shopease.db         # created at runtime (git-ignored)

@@ -2,7 +2,7 @@
 """
 ShopEase E-Commerce - Database seed script (stdlib only)
 =======================================================
-Creates the tables (from schema.sql) and upserts the full 62-product
+Creates the tables (from schema.sql) and upserts the full 70-product
 catalog with INR prices, brands, ratings and real product photos.
 Idempotent: safe to run multiple times — products are matched by id
 and updated in place (INSERT ... ON CONFLICT DO UPDATE).
@@ -270,6 +270,38 @@ PRODUCTS = [
      "Compact smoothie blender with rechargeable power and travel-friendly design.",
      2999.0, "appliances", "assets/images/products/portable-blender.jpg", 114,
      "BlendGo", 3999.0, 4.6, 97, "Hot"),
+    (63, "Wireless Bluetooth Earbuds",
+     "Compact wireless earbuds with clear sound and all-day comfort.",
+     1499.0, "electronics", "assets/images/products/bluetooth-earbuds.jpg", 58,
+     "boAt", 2499.0, 4.5, 132, "Popular"),
+    (64, "Portable Bluetooth Speaker",
+     "Room-filling sound in a compact, travel-ready speaker.",
+     1999.0, "electronics", "assets/images/products/bluetooth-speaker.jpg", 64,
+     "boAt", 2999.0, 4.6, 98, "Trending"),
+    (65, "65W USB-C Fast Charger",
+     "Rapid 65W charging for phones, tablets and laptops.",
+     1299.0, "electronics", "assets/images/products/usb-c-charger-65w.jpg", 72,
+     "OnePlus", 1999.0, 4.5, 87, ""),
+    (66, "Ceramic Dinner Set (16 pc)",
+     "Elegant ceramic dinner set for everyday meals and hosting.",
+     3499.0, "home", "assets/images/products/ceramic-dinner-set.jpg", 45,
+     "HomeNest", 4999.0, 4.7, 76, "New"),
+    (67, "King Cotton Bedsheet Set",
+     "Soft breathable cotton bedsheet set with pillow covers.",
+     1799.0, "home", "assets/images/products/cotton-bedsheet-king.jpg", 68,
+     "HomeNest", 2599.0, 4.6, 143, "Best Seller"),
+    (68, "LED Table Lamp",
+     "Warm LED table lamp with adjustable brightness for reading.",
+     1199.0, "home", "assets/images/products/led-table-lamp.jpg", 81,
+     "AromaHome", 1799.0, 4.5, 64, ""),
+    (69, "Smart Fitness Band",
+     "Track steps, heart rate and sleep with this slim fitness band.",
+     2499.0, "fitness", "assets/images/products/fitness-band.jpg", 76,
+     "FitCore", 3499.0, 4.6, 158, "Popular"),
+    (70, "Insulated Steel Water Bottle 1L",
+     "Keeps drinks cold for 24 hours or hot for 12, leak-proof design.",
+     899.0, "fitness", "assets/images/products/steel-water-bottle.jpg", 120,
+     "ProFlex", 1299.0, 4.7, 211, "Best Seller"),
 ]
 
 
