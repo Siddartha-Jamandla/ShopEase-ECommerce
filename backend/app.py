@@ -425,6 +425,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_admin_order_status(int(m.group(1)), query)
                 raise ApiError(405, "Method not allowed")
 
+            if path == "/api/admin/orders" and method == "GET":
+                return self._api_admin_orders_list(query)
+
             if path == "/api/admin/promo-codes":
                 if method == "GET":
                     return self._api_promo_list(query)
@@ -1462,6 +1465,59 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                 (order_id,)).fetchone()[0]
             conn.close()
         self._ok(self._order_view(updated, items_count=items_count))
+
+    def _api_admin_orders_list(self, query):
+        """Admin: every order, newest first, with the buyer's email.
+
+        Filters: ?status=placed|shipped|delivered|cancelled (400 otherwise).
+        Pagination: ?page=&per_page= (per_page capped at 50) — always the
+        paginated object {items, page, per_page, total, total_pages}. Each
+        item carries user_email, items_count, total and the shipping
+        snapshot (via _order_view). Admin-key auth (?key= or X-Admin-Key).
+        """
+        self._require_admin_key(query)
+        status = (query.get("status", [""])[0] or "").strip().lower()
+        if status and status not in self._ORDER_STATUSES:
+            raise ApiError(400, "Invalid 'status'. Use one of: "
+                                + ", ".join(self._ORDER_STATUSES))
+        page_raw = (query.get("page", [""])[0] or "").strip()
+        per_page_raw = (query.get("per_page", [""])[0] or "").strip()
+        try:
+            page = int(page_raw) if page_raw else 1
+            per_page = int(per_page_raw) if per_page_raw else 20
+        except ValueError:
+            raise ApiError(400, "'page' and 'per_page' must be integers")
+        if page < 1:
+            raise ApiError(400, "'page' must be >= 1")
+        if per_page < 1:
+            raise ApiError(400, "'per_page' must be >= 1")
+        per_page = min(per_page, 50)  # cap: never return more than 50 per page
+
+        sql = """SELECT o.*, u.email AS user_email,
+                        (SELECT COUNT(*) FROM order_items oi
+                         WHERE oi.order_id = o.id) AS items_count
+                 FROM orders o JOIN users u ON u.id = o.user_id"""
+        params = []
+        if status:
+            sql += " WHERE o.status = ?"
+            params.append(status)
+        sql += " ORDER BY o.id DESC"
+        with _db_lock:
+            conn = get_db()
+            total = conn.execute(
+                "SELECT COUNT(*) FROM orders o"
+                + (" WHERE o.status = ?" if status else ""),
+                params).fetchone()[0]
+            rows = conn.execute(sql + " LIMIT ? OFFSET ?",
+                                params + [per_page, (page - 1) * per_page]).fetchall()
+            conn.close()
+        orders = []
+        for r in rows:
+            d = row_to_dict(r)
+            orders.append(self._order_view(d, items_count=d.pop("items_count")))
+        self._ok({"items": orders, "page": page, "per_page": per_page,
+                  "total": total,
+                  "total_pages": (total + per_page - 1) // per_page})
 
     def _api_order_timeline(self, order_id):
         """Status timeline for the caller's own order.

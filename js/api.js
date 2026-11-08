@@ -298,6 +298,17 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/admin/promo-codes", undefined, { adminKey });
   },
 
+  // ---------------------------------------------------------- admin orders
+  /** Admin: list every order, newest first. Optional params: {status:
+   *  'placed'|'shipped'|'delivered'|'cancelled', page, per_page (max 50)}.
+   *  Always returns {items, page, per_page, total, total_pages}; each
+   *  item has user_email, items_count, total and the shipping snapshot. */
+  async adminListOrders(params = {}, key) {
+    const qs = new URLSearchParams(params).toString();
+    return this._request("GET", "/api/admin/orders" + (qs ? "?" + qs : ""),
+      undefined, { adminKey: key });
+  },
+
   // ---------------------------------------------------------- saved addresses
   /** Your saved shipping addresses (default first, then newest first). */
   async getAddresses() {
