@@ -5,6 +5,7 @@
 let checkoutSubtotalValue = 0;
 let checkoutDiscountValue = 0;
 let checkoutShippingValue = 0;
+let checkoutPromoCode = "";
 
 
 /* =========================================
@@ -18,6 +19,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPaymentOptions();
 
     setupCheckoutForm();
+
+    loadSavedAddresses();
 
 });
 
@@ -364,78 +367,24 @@ function applyCoupon() {
     }
 
 
-    /*
-        Demo coupon codes:
+    /* No hardcoded demo codes: promo codes live on the server (an admin
+       creates them at /api/admin/promo-codes). The code is remembered
+       here and validated by POST /api/checkout when the order is placed
+       — an unknown, expired or fully-used code, or a subtotal below its
+       minimum, is rejected there and the order is not placed. Any local
+       preview discount is cleared so the summary never shows money the
+       server has not confirmed. */
+    checkoutPromoCode = coupon;
 
-        SHOPEASE10 = 10% discount
-        SAVE200 = ₹200 discount
-    */
+    checkoutDiscountValue = 0;
 
-
-    if (coupon === "SHOPEASE10") {
-
-        checkoutDiscountValue =
-            Math.round(
-                checkoutSubtotalValue * 0.10
-            );
-
-
-        message.textContent =
-            "Coupon applied! You saved 10%.";
-
-        message.className =
-            "coupon-message coupon-success";
-
-
-        input.disabled = true;
-
-        calculateCheckoutTotal();
-
-        return;
-
-    }
-
-
-    if (coupon === "SAVE200") {
-
-        if (checkoutSubtotalValue < 1000) {
-
-            message.textContent =
-                "SAVE200 requires a minimum order of ₹1,000.";
-
-            message.className =
-                "coupon-message coupon-error";
-
-            return;
-
-        }
-
-
-        checkoutDiscountValue =
-            200;
-
-
-        message.textContent =
-            "Coupon applied! You saved ₹200.";
-
-        message.className =
-            "coupon-message coupon-success";
-
-
-        input.disabled = true;
-
-        calculateCheckoutTotal();
-
-        return;
-
-    }
-
+    calculateCheckoutTotal();
 
     message.textContent =
-        "Invalid coupon code.";
+        "Code " + coupon + " saved — it will be verified when you place the order.";
 
     message.className =
-        "coupon-message coupon-error";
+        "coupon-message coupon-success";
 
 }
 
@@ -715,6 +664,138 @@ function removeFieldError(field) {
 
 
 /* =========================================
+   SAVED ADDRESSES
+========================================= */
+
+/* Signed-in shoppers can pick one of their saved addresses
+   (GET /api/addresses) instead of typing it again. Choosing one
+   fills the contact + delivery fields; typing stays available. */
+function loadSavedAddresses() {
+
+    const select =
+        document.getElementById(
+            "savedAddressSelect"
+        );
+
+    const row =
+        document.getElementById(
+            "savedAddressRow"
+        );
+
+    if (!select || !row) {
+        return;
+    }
+
+
+    const token =
+        localStorage.getItem("shopease_token");
+
+    if (!token) {
+        return;
+    }
+
+
+    const apiBase =
+        (window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1")
+            ? "http://localhost:8000"
+            : "";
+
+
+    fetch(apiBase + "/api/addresses", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    })
+        .then(function (res) { return res.json(); })
+        .then(function (payload) {
+
+            const list =
+                (payload && Array.isArray(payload.data))
+                    ? payload.data
+                    : [];
+
+            if (!list.length) {
+                return;
+            }
+
+            list.forEach(function (a) {
+
+                const opt =
+                    document.createElement("option");
+
+                opt.value = a.id;
+
+                opt.textContent =
+                    (a.label ? a.label + " — " : "") +
+                    (a.full_name || "") + ", " +
+                    (a.city || "");
+
+                opt.dataset.address =
+                    JSON.stringify(a);
+
+                select.appendChild(opt);
+
+            });
+
+            row.hidden = false;
+
+            select.addEventListener("change", function () {
+
+                const chosen =
+                    select.options[select.selectedIndex];
+
+                if (!chosen || !chosen.dataset.address) {
+                    return;
+                }
+
+                fillAddressForm(
+                    JSON.parse(chosen.dataset.address)
+                );
+
+            });
+
+        })
+        .catch(function () {
+            /* Addresses stay hidden; typing still works. */
+        });
+
+}
+
+
+function fillAddressForm(a) {
+
+    const setValue = function (id, value) {
+
+        const el = document.getElementById(id);
+
+        if (el && value !== undefined && value !== null) {
+            el.value = value;
+        }
+
+    };
+
+    const parts =
+        String(a.full_name || "").trim().split(/\s+/);
+
+    setValue("firstName", parts[0] || "");
+    setValue("lastName", parts.slice(1).join(" "));
+
+    setValue(
+        "address",
+        [a.address_line1, a.address_line2]
+            .filter(Boolean)
+            .join(", ")
+    );
+
+    setValue("city", a.city);
+    setValue("state", a.state);
+    setValue("pincode", a.pincode);
+
+}
+
+
+/* =========================================
    PLACE ORDER
 ========================================= */
 
@@ -869,6 +950,13 @@ async function placeOrder() {
                     : "";
 
 
+            const checkoutBody = { shipping, items };
+
+            if (checkoutPromoCode) {
+                checkoutBody.promo_code = checkoutPromoCode;
+            }
+
+
             const res = await fetch(apiBase + "/api/checkout", {
 
                 method: "POST",
@@ -878,7 +966,7 @@ async function placeOrder() {
                     "Authorization": "Bearer " + token
                 },
 
-                body: JSON.stringify({ shipping, items })
+                body: JSON.stringify(checkoutBody)
 
             });
 
@@ -887,15 +975,56 @@ async function placeOrder() {
 
 
             if (!res.ok || payload.ok === false) {
-                throw new Error(
+
+                const errMsg =
                     (payload && payload.error) ||
-                        ("Checkout failed (" + res.status + ")")
-                );
+                        ("Checkout failed (" + res.status + ")");
+
+                /* A rejected promo code stops the order here: saving it
+                   locally and redirecting to "success" would pretend the
+                   server accepted a code it refused. */
+                if (checkoutPromoCode && /promo/i.test(errMsg)) {
+
+                    const couponMessage =
+                        document.getElementById("couponMessage");
+
+                    if (couponMessage) {
+
+                        couponMessage.textContent = errMsg;
+
+                        couponMessage.className =
+                            "coupon-message coupon-error";
+
+                    }
+
+                    showToast(errMsg);
+
+                    return;
+
+                }
+
+                throw new Error(errMsg);
+
             }
 
 
             order.id = "SE" + payload.data.id;
             order.backend_order_id = payload.data.id;
+
+            /* The server is the authority on the discount: use its
+               figures, not the local preview. */
+            if (payload.data) {
+
+                order.discount =
+                    Number(payload.data.discount_amount || 0);
+
+                order.total =
+                    Number(payload.data.total || order.total);
+
+                order.promo_code =
+                    payload.data.promo_code || checkoutPromoCode || "";
+
+            }
 
         } catch (e) {
 

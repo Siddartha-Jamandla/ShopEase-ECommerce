@@ -219,6 +219,11 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   (server wins), saving writes `PUT /api/me`, and the Change Password card
   calls `POST /api/me/change-password`. Phone/address stay local-only — the
   API stores name/email only. Offline, the page falls back to localStorage.
+- `checkout.html` + `js/checkout.js`: the coupon box sends the code as
+  `promo_code` to `POST /api/checkout` (no hardcoded demo codes — the server
+  validates it and the order stores the server-confirmed discount); a
+  rejected code stops the order instead of saving it locally. Signed-in
+  shoppers can pick a saved address (`GET /api/addresses`) to fill the form.
 
 ## Deployment notes
 
