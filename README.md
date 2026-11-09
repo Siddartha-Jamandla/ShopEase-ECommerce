@@ -225,6 +225,11 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   rejected code stops the order instead of saving it locally. Signed-in
   shoppers can pick a saved address (`GET /api/addresses`) to fill the form.
 
+- `my-orders.html` loads `js/api.js` and reads `GET /api/orders` first
+  (with the persisted shipping snapshot, promo code and discount per order)
+  — device-only localStorage orders are the offline fallback. Placed orders
+  get a Cancel button (`POST /api/orders/:id/cancel`, stock restored).
+
 ## Deployment notes
 
 - **Local / VPS:** `python3 backend/app.py` (set `SHOPEASE_ADMIN_KEY` in the

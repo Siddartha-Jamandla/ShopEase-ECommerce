@@ -931,6 +931,8 @@
          JAVASCRIPT
     ========================================== -->
 
+    <script src="js/api.js"></script>
+
     <script src="js/products.js"></script>
     <script src="js/main.js"></script>
 
@@ -940,6 +942,11 @@
         /* =========================================
            MY ORDERS
         ========================================== */
+
+        /* Orders shown on this page: backend orders when signed in,
+           merged over the device-only (localStorage) ones. */
+        let backendOrders = null;
+
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1026,10 +1033,57 @@
            LOAD ORDERS
         ========================================== */
 
-        function loadOrders() {
+        async function loadOrders() {
+
+            /* Signed in: the server is the source of truth
+               (GET /api/orders, then GET /api/orders/:id per order for
+               its items). A failure — offline, expired token — falls
+               back to the device-only orders, so the page never breaks. */
+            if (
+                typeof ShopEaseAPI !== "undefined" &&
+                ShopEaseAPI.isLoggedIn
+            ) {
+
+                try {
+
+                    const data =
+                        await ShopEaseAPI.getOrders();
+
+                    const rows =
+                        Array.isArray(data) ? data : (data.items || []);
+
+                    backendOrders = await Promise.all(
+                        rows.map(async function (row) {
+
+                            try {
+
+                                const full =
+                                    await ShopEaseAPI.getOrder(row.id);
+
+                                return normalizeBackendOrder(
+                                    (full && full.order) || full || row
+                                );
+
+                            } catch (error) {
+
+                                return normalizeBackendOrder(row);
+
+                            }
+
+                        })
+                    );
+
+                } catch (error) {
+
+                    backendOrders = null;
+
+                }
+
+            }
+
 
             const orders =
-                getOrders();
+                backendOrders || getOrders();
 
 
             const ordersList =
@@ -1389,7 +1443,7 @@
                                             <div class="order-summary-row">
 
                                                 <span>
-                                                    Discount
+                                                    Discount${order.promo_code ? " (" + order.promo_code + ")" : ""}
                                                 </span>
 
                                                 <strong>
@@ -1449,6 +1503,23 @@
                             </button>
 
 
+                            ${order._backend && order.status === "placed"
+                                ? `
+                            <button
+                                type="button"
+                                class="order-action-button"
+                                onclick="cancelBackendOrder(${order.id})"
+                            >
+
+                                <i class="fa-solid fa-xmark"></i>
+
+                                Cancel Order
+
+                            </button>
+                                `
+                                : ""}
+
+
                             <a
                                 href="shop.html"
                                 class="order-action-button"
@@ -1472,13 +1543,111 @@
 
 
         /* =========================================
+           BACKEND ORDER SHAPE
+        ========================================== */
+
+        /* Convert one API order into the shape this page renders:
+           the persisted shipping snapshot becomes the delivery
+           address, summary.subtotal / discount_amount the money
+           rows, promo_code is kept for the discount label. The API
+           charges no delivery fee, so shipping renders as FREE. */
+        function normalizeBackendOrder(o) {
+
+            const ship = o.shipping || {};
+
+            const summary = o.summary || {};
+
+            const subtotal =
+                Number(summary.subtotal !== undefined
+                    ? summary.subtotal
+                    : o.total || 0);
+
+            const discount =
+                Number(summary.discount_amount !== undefined
+                    ? summary.discount_amount
+                    : (o.discount_amount || 0));
+
+            return {
+
+                id: o.id,
+
+                date: o.created_at,
+
+                customer: {
+                    firstName: (ship.name || "").split(" ")[0] || "",
+                    lastName: (ship.name || "").split(" ").slice(1).join(" "),
+                    address: ship.address || "",
+                    city: ship.city || "",
+                    state: ship.state || "",
+                    pincode: ship.pincode || "",
+                    phone: ship.phone || ""
+                },
+
+                items: (o.items || []).map(function (it) {
+                    return {
+                        id: it.product_id,
+                        quantity: it.quantity,
+                        price: it.price
+                    };
+                }),
+
+                subtotal: subtotal,
+                shipping: 0,
+                discount: discount,
+                total: Number(o.total || 0),
+                status: o.status || "placed",
+                promo_code: o.promo_code || "",
+                _backend: true
+
+            };
+
+        }
+
+
+        /* Cancel one of your own still-placed orders
+           (POST /api/orders/:id/cancel restores stock server-side),
+           then reload the list from the server. */
+        async function cancelBackendOrder(orderId) {
+
+            if (!confirm("Cancel this order? Stock will be restored.")) {
+                return;
+            }
+
+            if (
+                typeof ShopEaseAPI === "undefined" ||
+                !ShopEaseAPI.isLoggedIn
+            ) {
+                showOrderToast("Please log in again to cancel orders.");
+                return;
+            }
+
+            try {
+
+                await ShopEaseAPI.cancelOrder(orderId);
+
+                showOrderToast("Order cancelled.");
+
+                loadOrders();
+
+            } catch (error) {
+
+                showOrderToast(
+                    error.message || "Could not cancel the order."
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
            VIEW ORDER
         ========================================== */
 
         function viewOrder(orderId) {
 
             const orders =
-                getOrders();
+                backendOrders || getOrders();
 
 
             const order =
@@ -1520,7 +1689,7 @@
         function printOrder(orderId) {
 
             const orders =
-                getOrders();
+                backendOrders || getOrders();
 
 
             const order =

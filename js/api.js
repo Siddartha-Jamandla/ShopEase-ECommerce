@@ -279,6 +279,13 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/orders/" + id);
   },
 
+  /** Cancel one of your own still-placed orders
+   *  (POST /api/orders/:id/cancel — restores stock server-side).
+   *  409 when it already shipped / was delivered / was cancelled. */
+  async cancelOrder(id) {
+    return this._request("POST", "/api/orders/" + id + "/cancel");
+  },
+
   /** Admin: move an order to its next status (placed → shipped → delivered,
    *  or placed → cancelled). Returns the updated order. */
   async updateOrderStatus(id, status, adminKey) {
