@@ -1351,6 +1351,102 @@
                     </div>
 
 
+                    <!-- Change Password -->
+
+                    <div class="profile-card">
+
+                        <div class="profile-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Change Password
+                                </h2>
+
+                                <p>
+                                    Update the password for your ShopEase account.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="profile-card-body">
+
+                            <form id="passwordForm">
+
+                                <div class="profile-form-group full">
+
+                                    <label for="currentPassword">
+                                        Current Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        id="currentPassword"
+                                        placeholder="Enter current password"
+                                        autocomplete="current-password"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group full">
+
+                                    <label for="newPassword">
+                                        New Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        id="newPassword"
+                                        placeholder="At least 6 characters"
+                                        autocomplete="new-password"
+                                    >
+
+                                </div>
+
+
+                                <div class="profile-form-group full">
+
+                                    <label for="confirmPassword">
+                                        Confirm New Password
+                                    </label>
+
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        placeholder="Repeat new password"
+                                        autocomplete="new-password"
+                                    >
+
+                                </div>
+
+                            </form>
+
+
+                            <div class="profile-save-row">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-primary"
+                                    id="changePasswordButton"
+                                >
+
+                                    <i class="fa-solid fa-key"></i>
+
+                                    Change Password
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
                     <!-- Quick Links -->
 
                     <div class="profile-card">
@@ -1700,6 +1796,8 @@
          JAVASCRIPT
     ========================================== -->
 
+    <script src="js/api.js"></script>
+
     <script src="js/products.js"></script>
 
     <script src="js/main.js"></script>
@@ -1748,13 +1846,68 @@
 
 
         /* =========================================
+           SERVER PROFILE
+        ========================================== */
+
+        /* Fetch the server profile (GET /api/me) and merge it over the
+           local copy: the server wins for name + email, the local copy
+           wins for the phone/address fields the API does not store.
+           Returns the local copy unchanged when not signed in through
+           the API or when the request fails, so the page never breaks
+           offline. */
+        async function mergeServerProfile(localUser) {
+
+            if (
+                typeof ShopEaseAPI === "undefined" ||
+                !ShopEaseAPI.isLoggedIn
+            ) {
+                return localUser || null;
+            }
+
+
+            try {
+
+                const data =
+                    await ShopEaseAPI.getProfile();
+
+                const serverUser =
+                    (data && data.user) || data || {};
+
+                const parts =
+                    String(serverUser.name || "").trim().split(/\s+/);
+
+                const merged =
+                    localUser || {};
+
+                merged.firstName =
+                    parts[0] || merged.firstName || "";
+
+                merged.lastName =
+                    parts.slice(1).join(" ") || merged.lastName || "";
+
+                if (serverUser.email) {
+                    merged.email = serverUser.email;
+                }
+
+                return merged;
+
+            } catch (error) {
+
+                return localUser || null;
+
+            }
+
+        }
+
+
+        /* =========================================
            LOAD PROFILE
         ========================================== */
 
-        function loadProfile() {
+        async function loadProfile() {
 
-            const user =
-                getProfileUser();
+            let user =
+                await mergeServerProfile(getProfileUser());
 
 
             const profileLayout =
@@ -1919,6 +2072,12 @@
                 );
 
 
+            const changePasswordButton =
+                document.getElementById(
+                    "changePasswordButton"
+                );
+
+
             if (saveButton) {
 
                 saveButton.addEventListener(
@@ -1938,6 +2097,16 @@
 
             }
 
+
+            if (changePasswordButton) {
+
+                changePasswordButton.addEventListener(
+                    "click",
+                    changePasswordProfile
+                );
+
+            }
+
         }
 
 
@@ -1945,10 +2114,10 @@
            SAVE PROFILE
         ========================================== */
 
-        function saveProfile() {
+        async function saveProfile() {
 
-            const user =
-                getProfileUser();
+            let user =
+                await mergeServerProfile(getProfileUser());
 
 
             if (!user) {
@@ -2070,6 +2239,42 @@
                 pincode;
 
 
+            /* Sync name + email to the server (PUT /api/me) when signed
+               in through the API. The local copy still keeps the phone
+               and address fields, which the API does not store. A server
+               rejection (e.g. the email is taken) stops the save so the
+               page never claims success the server disagrees with. */
+            if (
+                typeof ShopEaseAPI !== "undefined" &&
+                ShopEaseAPI.isLoggedIn
+            ) {
+
+                try {
+
+                    const email =
+                        document.getElementById(
+                            "profileEmailInput"
+                        ).value.trim();
+
+                    await ShopEaseAPI.updateProfile({
+                        name: firstName + " " + lastName,
+                        email: email
+                    });
+
+                } catch (error) {
+
+                    showProfileToast(
+                        "Could not save to your account: " +
+                            (error.message || "server unreachable.")
+                    );
+
+                    return;
+
+                }
+
+            }
+
+
             localStorage.setItem(
                 "user",
                 JSON.stringify(user)
@@ -2082,6 +2287,106 @@
             showProfileToast(
                 "Profile updated successfully."
             );
+
+        }
+
+
+        /* =========================================
+           CHANGE PASSWORD
+        ========================================== */
+
+        async function changePasswordProfile() {
+
+            const current =
+                document.getElementById(
+                    "currentPassword"
+                ).value;
+
+            const next =
+                document.getElementById(
+                    "newPassword"
+                ).value;
+
+            const confirm =
+                document.getElementById(
+                    "confirmPassword"
+                ).value;
+
+
+            if (!current || !next) {
+
+                showProfileToast(
+                    "Enter your current and new password."
+                );
+
+                return;
+
+            }
+
+
+            if (next.length < 6) {
+
+                showProfileToast(
+                    "The new password must be at least 6 characters."
+                );
+
+                return;
+
+            }
+
+
+            if (next !== confirm) {
+
+                showProfileToast(
+                    "The new passwords do not match."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                typeof ShopEaseAPI === "undefined" ||
+                !ShopEaseAPI.isLoggedIn
+            ) {
+
+                showProfileToast(
+                    "Please log in again to change your password."
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                await ShopEaseAPI.changePassword(current, next);
+
+                document.getElementById(
+                    "currentPassword"
+                ).value = "";
+
+                document.getElementById(
+                    "newPassword"
+                ).value = "";
+
+                document.getElementById(
+                    "confirmPassword"
+                ).value = "";
+
+                showProfileToast(
+                    "Password changed successfully."
+                );
+
+            } catch (error) {
+
+                showProfileToast(
+                    error.message || "Could not change the password."
+                );
+
+            }
 
         }
 
@@ -2121,6 +2426,15 @@
 
             localStorage.removeItem(
                 "user"
+            );
+
+
+            localStorage.removeItem(
+                "shopease_token"
+            );
+
+            localStorage.removeItem(
+                "shopease_user"
             );
 
 

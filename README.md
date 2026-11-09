@@ -215,6 +215,11 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
 <script src="js/api.js"></script>
 ```
 
+- `profile.html` loads `js/api.js`: name + email come from `GET /api/me`
+  (server wins), saving writes `PUT /api/me`, and the Change Password card
+  calls `POST /api/me/change-password`. Phone/address stay local-only — the
+  API stores name/email only. Offline, the page falls back to localStorage.
+
 ## Deployment notes
 
 - **Local / VPS:** `python3 backend/app.py` (set `SHOPEASE_ADMIN_KEY` in the
