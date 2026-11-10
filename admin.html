@@ -3,96 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Admin | ShopEase</title>
-    <meta name="description" content="ShopEase admin: manage the product catalogue through the backend CRUD API.">
+    <title>Admin Dashboard | ShopEase</title>
+    <meta name="description" content="ShopEase admin dashboard: sales, products, orders, customers, promotions and revenue.">
     <link rel="icon" href="assets/images/logo/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/design-system.css">
     <style>
-        .admin-page { min-height: 70vh; padding: 40px 0 80px; background: #f8fafc; }
-        .admin-page .container { max-width: 1000px; margin: 0 auto; padding: 0 16px; }
-        .admin-page h1 { margin-bottom: 8px; }
-        .admin-page .muted { color: #64748b; margin-bottom: 24px; }
-        .admin-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-        .admin-card label { display: block; font-weight: 600; margin: 12px 0 4px; }
-        .admin-card input, .admin-card textarea, .admin-card select {
-            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit;
-        }
-        .admin-card button { margin-top: 16px; padding: 10px 20px; border: 0; border-radius: 8px;
-            background: #0f172a; color: #fff; font-weight: 600; cursor: pointer; }
-        .admin-card button.secondary { background: #e2e8f0; color: #0f172a; margin-left: 8px; }
-        .admin-card button.danger { background: #dc2626; }
-        #admin-status { margin: 12px 0; font-weight: 600; }
+        /* ShopEase Admin Dashboard — navy/orange design system */
+        :root { --admin-navy: #0f172a; --admin-orange: #f97316; }
+        body { background: #f8fafc; }
+        .admin-topbar { background: var(--admin-navy); color: #fff; padding: 12px 0; position: sticky; top: 0; z-index: 20; }
+        .admin-topbar .container { max-width: 1280px; margin: 0 auto; padding: 0 16px; display: flex; align-items: center; gap: 16px; }
+        .admin-topbar .brand { font-size: 1.25rem; font-weight: 800; }
+        .admin-topbar .brand span { color: var(--admin-orange); }
+        .admin-topbar a.store-link { color: #cbd5e1; text-decoration: none; margin-left: auto; font-size: 0.9rem; }
+        .admin-topbar a.store-link:hover { color: #fff; }
+        .admin-topbar button.lock-btn { background: transparent; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 0.85rem; }
+        .admin-shell { max-width: 1280px; margin: 0 auto; padding: 24px 16px 80px; display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
+        .admin-nav { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; position: sticky; top: 76px; }
+        .admin-nav button { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 11px 12px; border-radius: 8px; font: inherit; font-size: 0.95rem; cursor: pointer; color: #334155; }
+        .admin-nav button:hover { background: #f1f5f9; }
+        .admin-nav button.active { background: var(--admin-navy); color: #fff; font-weight: 700; }
+        .admin-nav button.active span { color: #fff; }
+        .admin-nav button span { float: right; color: #94a3b8; font-size: 0.8rem; }
+        .admin-main h1 { font-size: 1.5rem; margin-bottom: 4px; }
+        .admin-main .muted { color: #64748b; margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; }
+        .stat-card .label { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .stat-card .value { font-size: 1.7rem; font-weight: 800; margin-top: 6px; color: var(--admin-navy); }
+        .stat-card .sub { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+        .stat-card.accent { border-top: 4px solid var(--admin-orange); }
+        .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .panel h2 { font-size: 1.15rem; margin-bottom: 4px; }
+        .panel .muted { margin-bottom: 14px; }
+        .panel h3 { font-size: 1rem; margin: 18px 0 8px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        table.admin-table { width: 100%; border-collapse: collapse; }
+        table.admin-table th, table.admin-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        table.admin-table th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
+        table.admin-table img.thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+        .badge.placed { background: #f0f9ff; color: #0284c7; }
+        .badge.shipped { background: #fffbeb; color: #b45309; }
+        .badge.delivered { background: #f0fdf4; color: #15803d; }
+        .badge.cancelled { background: #fef2f2; color: #dc2626; }
+        .badge.low { background: #fffbeb; color: #b45309; }
+        .badge.out { background: #fef2f2; color: #dc2626; }
+        .badge.ok { background: #f0fdf4; color: #15803d; }
+        .badge.new { background: #fff7ed; color: #ea580c; }
+        .btn { padding: 8px 16px; border: 0; border-radius: 8px; background: var(--admin-navy); color: #fff; font-weight: 600; cursor: pointer; font: inherit; }
+        .btn.primary { background: var(--admin-orange); }
+        .btn.secondary { background: #e2e8f0; color: var(--admin-navy); }
+        .btn.danger { background: #dc2626; }
+        .btn.small { padding: 6px 12px; font-size: 0.85rem; margin-right: 6px; }
+        .btn:disabled { opacity: 0.55; cursor: default; }
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+        .toolbar input, .toolbar select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+        .toolbar input[type="search"] { flex: 1; min-width: 180px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+        .form-grid label { display: block; font-weight: 600; margin: 12px 0 4px; font-size: 0.9rem; }
+        .form-grid input, .form-grid textarea, .form-grid select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+        .form-grid .full { grid-column: 1 / -1; }
+        #admin-status { margin: 12px 0 0; font-weight: 600; }
         #admin-status.error { color: #dc2626; }
         #admin-status.ok { color: #15803d; }
-        table.admin-table { width: 100%; border-collapse: collapse; }
-        table.admin-table th, table.admin-table td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
-        table.admin-table button { margin: 0 4px 0 0; padding: 6px 12px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } table.admin-table { font-size: 14px; } }
+        .bar-row { display: grid; grid-template-columns: 110px 1fr 90px; gap: 10px; align-items: center; padding: 6px 0; font-size: 0.9rem; }
+        .bar-track { background: #f1f5f9; border-radius: 999px; height: 12px; overflow: hidden; }
+        .bar-fill { background: var(--admin-orange); height: 100%; border-radius: 999px; }
+        .bar-fill.navy { background: var(--admin-navy); }
+        .bar-row .num { text-align: right; font-weight: 700; }
+        .pager { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+        .pager span { color: #64748b; font-size: 0.9rem; }
+        .order-detail { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-top: 16px; }
+        .order-detail h3 { margin-top: 0; }
+        .kv { display: grid; grid-template-columns: 140px 1fr; gap: 4px 12px; font-size: 0.92rem; margin: 8px 0; }
+        .kv dt { color: #64748b; font-weight: 600; }
+        .kv dd { margin: 0; }
+        .timeline { list-style: none; padding: 0; margin: 8px 0; }
+        .timeline li { padding: 4px 0; font-size: 0.92rem; }
+        .timeline li::before { content: "✓ "; color: #15803d; font-weight: 700; }
+        .empty { color: #64748b; padding: 12px 0; }
+        @media (max-width: 900px) {
+            .admin-shell { grid-template-columns: 1fr; }
+            .admin-nav { position: static; display: flex; flex-wrap: wrap; gap: 6px; }
+            .admin-nav button { width: auto; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+            .two-col, .form-grid { grid-template-columns: 1fr; }
+            table.admin-table { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
-    <main class="admin-page">
+    <header class="admin-topbar">
         <div class="container">
-            <h1>Product admin</h1>
-            <p class="muted">Manage the catalogue through the backend product CRUD API
-                (POST / PUT / DELETE /api/products). The admin key is kept only for
-                this browser session — it is never stored permanently.</p>
+            <div class="brand">ShopEase <span>Admin</span></div>
+            <a class="store-link" href="index.html">← Back to store</a>
+            <button type="button" class="lock-btn" id="lock-btn" hidden>Lock admin</button>
+        </div>
+    </header>
 
-            <section class="admin-card" id="key-card">
-                <h2>1. Admin key</h2>
-                <label for="admin-key">Admin key (X-Admin-Key)</label>
-                <input type="password" id="admin-key" placeholder="Enter the admin key" autocomplete="off">
-                <button type="button" id="save-key-btn">Use this key</button>
+    <div class="admin-shell">
+        <nav class="admin-nav" id="admin-nav" hidden aria-label="Admin sections">
+            <button type="button" data-section="dashboard" class="active">📊 Dashboard</button>
+            <button type="button" data-section="products">🛍️ Products</button>
+            <button type="button" data-section="orders">📦 Orders <span id="nav-orders-count"></span></button>
+            <button type="button" data-section="customers">👥 Customers</button>
+            <button type="button" data-section="promotions">🎟️ Promotions</button>
+            <button type="button" data-section="revenue">💰 Revenue</button>
+        </nav>
+
+        <main class="admin-main">
+            <!-- Key gate -->
+            <section class="panel" id="key-card">
+                <h1>Admin dashboard</h1>
+                <p class="muted">Sales, products, orders, customers, promotions and revenue — all in one place.
+                    Enter the admin key once; it is kept only for this browser session and never stored permanently.</p>
+                <label for="admin-key" style="font-weight:600;display:block;margin-bottom:4px;">Admin key (X-Admin-Key)</label>
+                <input type="password" id="admin-key" placeholder="Enter the admin key" autocomplete="off"
+                    style="width:100%;max-width:420px;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;">
+                <div style="margin-top:12px;">
+                    <button type="button" class="btn primary" id="save-key-btn">Unlock dashboard</button>
+                </div>
                 <p id="admin-status" role="status"></p>
             </section>
 
-            <section class="admin-card" id="form-card" hidden>
-                <h2 id="form-title">2. Add a product</h2>
-                <form id="product-form">
-                    <input type="hidden" id="field-id">
-                    <label for="field-name">Name *</label>
-                    <input type="text" id="field-name" required>
-                    <label for="field-description">Description</label>
-                    <textarea id="field-description" rows="3"></textarea>
-                    <div class="form-row">
-                        <div>
-                            <label for="field-price">Price (₹) *</label>
-                            <input type="number" id="field-price" min="0" step="0.01" required>
-                        </div>
-                        <div>
-                            <label for="field-stock">Stock *</label>
-                            <input type="number" id="field-stock" min="0" step="1" required>
-                        </div>
+            <!-- Dashboard -->
+            <section id="section-dashboard" hidden>
+                <h1>Dashboard</h1>
+                <p class="muted">Store at a glance — updated live from the backend.</p>
+                <div class="stat-grid" id="stat-cards"></div>
+                <div class="two-col">
+                    <div class="panel">
+                        <h2>⚠️ Low stock alerts</h2>
+                        <p class="muted">Products with 5 or fewer items left.</p>
+                        <div id="low-stock-list">Loading…</div>
                     </div>
-                    <div class="form-row">
-                        <div>
-                            <label for="field-category">Category</label>
-                            <input type="text" id="field-category" placeholder="e.g. fashion">
-                        </div>
-                        <div>
-                            <label for="field-image">Image URL</label>
-                            <input type="text" id="field-image" placeholder="assets/images/products/…">
-                        </div>
+                    <div class="panel">
+                        <h2>🏆 Top-selling products</h2>
+                        <p class="muted">By units sold (non-cancelled orders).</p>
+                        <div id="top-products-list">Loading…</div>
                     </div>
-                    <button type="submit" id="submit-btn">Add product</button>
-                    <button type="button" class="secondary" id="cancel-edit-btn" hidden>Cancel edit</button>
-                </form>
+                </div>
+                <div class="panel">
+                    <h2>🕒 Recent orders</h2>
+                    <p class="muted">Latest 8 orders.</p>
+                    <div id="recent-orders-list">Loading…</div>
+                </div>
             </section>
 
-            <section class="admin-card" id="list-card" hidden>
-                <h2>3. Catalogue</h2>
-                <div id="product-list">Loading…</div>
+            <!-- Products -->
+            <section id="section-products" hidden>
+                <h1>Products</h1>
+                <p class="muted">Manage the catalogue — add, edit, delete and watch stock levels.</p>
+                <div class="panel">
+                    <h2 id="product-form-title">Add a product</h2>
+                    <form id="product-form">
+                        <input type="hidden" id="field-id">
+                        <div class="form-grid">
+                            <div><label for="field-name">Name *</label><input type="text" id="field-name" required></div>
+                            <div><label for="field-brand">Brand</label><input type="text" id="field-brand"></div>
+                            <div class="full"><label for="field-description">Description</label><textarea id="field-description" rows="2"></textarea></div>
+                            <div><label for="field-price">Price (₹) *</label><input type="number" id="field-price" min="0" step="0.01" required></div>
+                            <div><label for="field-old-price">Old price (₹)</label><input type="number" id="field-old-price" min="0" step="0.01"></div>
+                            <div><label for="field-stock">Stock *</label><input type="number" id="field-stock" min="0" step="1" required></div>
+                            <div><label for="field-category">Category</label><input type="text" id="field-category" placeholder="e.g. men, women, electronics"></div>
+                            <div><label for="field-badge">Badge</label><input type="text" id="field-badge" placeholder="e.g. Best Seller"></div>
+                            <div class="full"><label for="field-image">Image URL</label><input type="text" id="field-image" placeholder="assets/images/products/…"></div>
+                        </div>
+                        <div style="margin-top:16px;">
+                            <button type="submit" class="btn primary" id="submit-btn">Add product</button>
+                            <button type="button" class="btn secondary" id="cancel-edit-btn" hidden>Cancel edit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="panel">
+                    <h2>Catalogue</h2>
+                    <div class="toolbar">
+                        <input type="search" id="product-search" placeholder="Search products by name…">
+                        <select id="product-category"><option value="">All categories</option></select>
+                        <select id="product-stock-filter">
+                            <option value="">All stock levels</option>
+                            <option value="low">Low stock (≤ 5)</option>
+                            <option value="out">Out of stock (0)</option>
+                        </select>
+                    </div>
+                    <div id="product-list">Loading…</div>
+                    <div class="pager" id="product-pager"></div>
+                </div>
             </section>
-        </div>
-    </main>
+
+            <!-- Orders -->
+            <section id="section-orders" hidden>
+                <h1>Orders</h1>
+                <p class="muted">Every order, newest first — view details, change status or cancel.</p>
+                <div class="panel">
+                    <div class="toolbar">
+                        <select id="order-status-filter">
+                            <option value="">All statuses</option>
+                            <option value="placed">Placed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <input type="search" id="order-search" placeholder="Search by order # or customer email…">
+                    </div>
+                    <div id="order-list">Loading…</div>
+                    <div class="pager" id="order-pager"></div>
+                    <div id="order-detail"></div>
+                </div>
+            </section>
+
+            <!-- Customers -->
+            <section id="section-customers" hidden>
+                <h1>Customers</h1>
+                <p class="muted">Registered shoppers, with their orders and total spent.</p>
+                <div class="panel">
+                    <div class="toolbar">
+                        <input type="search" id="customer-search" placeholder="Search by name or email…">
+                    </div>
+                    <div id="customer-list">Loading…</div>
+                    <div class="pager" id="customer-pager"></div>
+                </div>
+            </section>
+
+            <!-- Promotions -->
+            <section id="section-promotions" hidden>
+                <h1>Promotions</h1>
+                <p class="muted">Discount codes shoppers can use at checkout.</p>
+                <div class="panel">
+                    <h2>Create a promo code</h2>
+                    <form id="promo-form">
+                        <div class="form-grid">
+                            <div><label for="promo-code">Code *</label><input type="text" id="promo-code" placeholder="e.g. WELCOME10" required></div>
+                            <div><label for="promo-discount">Discount % (1–90) *</label><input type="number" id="promo-discount" min="1" max="90" required></div>
+                            <div><label for="promo-min">Min order (₹)</label><input type="number" id="promo-min" min="0" step="0.01" value="0"></div>
+                            <div><label for="promo-max-uses">Max uses (blank = unlimited)</label><input type="number" id="promo-max-uses" min="1"></div>
+                            <div class="full"><label for="promo-expires">Expires on (blank = never)</label><input type="date" id="promo-expires"></div>
+                        </div>
+                        <div style="margin-top:16px;"><button type="submit" class="btn primary">Create promo code</button></div>
+                    </form>
+                </div>
+                <div class="panel">
+                    <h2>Active promo codes</h2>
+                    <div id="promo-list">Loading…</div>
+                </div>
+            </section>
+
+            <!-- Revenue -->
+            <section id="section-revenue" hidden>
+                <h1>Revenue</h1>
+                <p class="muted">What the store earned — by day and by category (cancelled orders excluded).</p>
+                <div class="panel">
+                    <div class="toolbar">
+                        <label for="revenue-days" style="font-weight:600;">Period:</label>
+                        <select id="revenue-days">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                    <div class="stat-grid" id="revenue-cards" style="grid-template-columns:repeat(2,1fr);"></div>
+                    <h3>Revenue by day</h3>
+                    <div id="revenue-by-day">Loading…</div>
+                    <h3>Revenue by category</h3>
+                    <div id="revenue-by-category">Loading…</div>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <script src="js/api.js"></script>
     <script>
-        // Admin product management, wired to the existing backend CRUD API.
-        // Admin key lives in sessionStorage only (cleared when the tab closes).
+        // ShopEase Admin Dashboard — vanilla JS, admin-key auth (session only).
         const KEY_STORE = "shopease_admin_key_session";
+        const LOW_STOCK_AT = 5;
         const statusEl = document.getElementById("admin-status");
         const keyInput = document.getElementById("admin-key");
 
@@ -101,90 +286,173 @@
             statusEl.className = ok ? "ok" : "error";
         }
         function adminKey() { return sessionStorage.getItem(KEY_STORE) || ""; }
-
+        function inr(n) { return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
         function esc(s) {
             return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
                 ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
         }
+        function fmtDate(s) { return s ? String(s).slice(0, 10) : "—"; }
+        function statusBadge(s) { return '<span class="badge ' + esc(s) + '">' + esc(s) + "</span>"; }
+        function stockBadge(stock) {
+            if (stock <= 0) return '<span class="badge out">Out of stock</span>';
+            if (stock <= LOW_STOCK_AT) return '<span class="badge low">Low (' + stock + ")</span>";
+            return '<span class="badge ok">' + stock + "</span>";
+        }
 
-        async function loadProducts() {
-            const listEl = document.getElementById("product-list");
+        // ---- section switching ----
+        function showSection(name) {
+            document.querySelectorAll("#admin-nav button").forEach((b) =>
+                b.classList.toggle("active", b.dataset.section === name));
+            ["dashboard", "products", "orders", "customers", "promotions", "revenue"].forEach((s) => {
+                document.getElementById("section-" + s).hidden = s !== name;
+            });
+            ({ dashboard: loadDashboard, products: loadProducts, orders: loadOrders,
+               customers: loadCustomers, promotions: loadPromos, revenue: loadRevenue })[name]();
+            window.scrollTo({ top: 0 });
+        }
+        document.querySelectorAll("#admin-nav button").forEach((b) =>
+            b.addEventListener("click", () => showSection(b.dataset.section)));
+
+        // ---- dashboard ----
+        let cachedStats = null, cachedProducts = [];
+        async function loadDashboard() {
             try {
-                const data = await ShopEaseAPI.getProducts({ per_page: 200 });
-                const items = Array.isArray(data) ? data : (data.items || []);
-                if (!items.length) { listEl.textContent = "No products yet."; return; }
-                listEl.innerHTML = "<table class=\"admin-table\"><thead><tr>" +
-                    "<th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>" +
-                    items.map((p) => "<tr><td>" + p.id + "</td><td>" + esc(p.name) + "</td>" +
-                        "<td>₹" + p.price + "</td><td>" + p.stock + "</td><td>" +
-                        "<button type=\"button\" data-edit=\"" + p.id + "\">Edit</button>" +
-                        "<button type=\"button\" class=\"danger\" data-del=\"" + p.id + "\">Delete</button></td></tr>").join("") +
-                    "</tbody></table>";
-                listEl.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
-                    const p = items.find((x) => String(x.id) === b.dataset.edit);
-                    if (!p) return;
-                    document.getElementById("field-id").value = p.id;
-                    document.getElementById("field-name").value = p.name || "";
-                    document.getElementById("field-description").value = p.description || "";
-                    document.getElementById("field-price").value = p.price;
-                    document.getElementById("field-stock").value = p.stock;
-                    document.getElementById("field-category").value = p.category || "";
-                    document.getElementById("field-image").value = p.image_url || "";
-                    document.getElementById("form-title").textContent = "2. Edit product #" + p.id;
-                    document.getElementById("submit-btn").textContent = "Save changes";
-                    document.getElementById("cancel-edit-btn").hidden = false;
-                    document.getElementById("form-card").scrollIntoView({ behavior: "smooth" });
-                }));
-                listEl.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {
-                    if (!confirm("Delete product #" + b.dataset.del + "? This cannot be undone.")) return;
-                    try {
-                        await ShopEaseAPI.deleteProduct(b.dataset.del, adminKey());
-                        setStatus("Product deleted.", true);
-                        await loadProducts();
-                    } catch (e) { setStatus("Delete failed: " + e.message, false); }
-                }));
+                const stats = await ShopEaseAPI.adminStats(adminKey());
+                cachedStats = stats;
+                const byStatus = stats.orders_by_status || {};
+                const totalOrders = Object.values(byStatus).reduce((a, b) => a + b, 0);
+                const rev = await ShopEaseAPI.adminRevenue({ days: 7 }, adminKey());
+                document.getElementById("stat-cards").innerHTML =
+                    '<div class="stat-card accent"><div class="label">Total revenue</div><div class="value">' + inr(stats.total_revenue) + '</div><div class="sub">Non-cancelled orders</div></div>' +
+                    '<div class="stat-card"><div class="label">Orders</div><div class="value">' + totalOrders + '</div><div class="sub">' +
+                    ["placed", "shipped", "delivered", "cancelled"].map((s) => (byStatus[s] || 0) + " " + s).join(" · ") + '</div></div>' +
+                    '<div class="stat-card"><div class="label">Customers</div><div class="value">' + stats.user_count + '</div><div class="sub">Registered shoppers</div></div>' +
+                    '<div class="stat-card"><div class="label">This week</div><div class="value">' + inr(rev.week.revenue) + '</div><div class="sub">' + rev.week.orders + " orders · today " + inr(rev.today.revenue) + "</div></div>";
+                document.getElementById("nav-orders-count").textContent = totalOrders ? "(" + totalOrders + ")" : "";
+                const products = await fetchAllProducts();
+                cachedProducts = products;
+                const low = products.filter((p) => (p.stock || 0) <= LOW_STOCK_AT)
+                    .sort((a, b) => a.stock - b.stock);
+                document.getElementById("low-stock-list").innerHTML = low.length
+                    ? '<table class="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Price</th></tr></thead><tbody>' +
+                      low.slice(0, 10).map((p) => "<tr><td>" + esc(p.name) + "</td><td>" + stockBadge(p.stock) + "</td><td>" + inr(p.price) + "</td></tr>").join("") + "</tbody></table>" +
+                      (low.length > 10 ? '<p class="muted">…and ' + (low.length - 10) + " more — see Products.</p>" : "")
+                    : '<p class="empty">No low-stock products. 🎉</p>';
+                document.getElementById("top-products-list").innerHTML = (stats.top_products || []).length
+                    ? '<table class="admin-table"><thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead><tbody>' +
+                      stats.top_products.slice(0, 8).map((p) => "<tr><td>" + esc(p.name) + "</td><td>" + p.units_sold + "</td><td>" + inr(p.gross_revenue) + "</td></tr>").join("") + "</tbody></table>"
+                    : '<p class="empty">No sales yet — top products will appear after the first orders.</p>';
+                const recent = await ShopEaseAPI.adminListOrders({ per_page: 8 }, adminKey());
+                document.getElementById("recent-orders-list").innerHTML = recent.items.length
+                    ? '<table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>' +
+                      recent.items.map((o) => "<tr><td>#" + o.id + "</td><td>" + esc(o.user_email) + "</td><td>" + (o.summary ? o.summary.items_count : "—") + "</td><td>" + inr(o.total) + "</td><td>" + statusBadge(o.status) + "</td><td>" + fmtDate(o.created_at) + "</td></tr>").join("") + "</tbody></table>"
+                    : '<p class="empty">No orders yet.</p>';
             } catch (e) {
-                listEl.textContent = "Could not load products: " + e.message;
+                setStatus("Dashboard failed to load: " + e.message, false);
             }
         }
 
-        function unlock(key) {
-            sessionStorage.setItem(KEY_STORE, key);
-            document.getElementById("form-card").hidden = false;
-            document.getElementById("list-card").hidden = false;
-            setStatus("Admin key accepted for this session.", true);
-            loadProducts();
+        async function fetchAllProducts() {
+            // Products list caps per_page at 100; page through it.
+            let all = [], page = 1;
+            for (;;) {
+                const data = await ShopEaseAPI._request("GET", "/api/products?page=" + page + "&per_page=100", undefined, { adminKey: adminKey() });
+                const items = Array.isArray(data) ? data : (data.items || []);
+                all = all.concat(items);
+                if (!data.total_pages || page >= data.total_pages || items.length < 100) break;
+                page++;
+            }
+            return all;
         }
 
-        document.getElementById("save-key-btn").addEventListener("click", async () => {
-            const key = keyInput.value.trim();
-            if (!key) { setStatus("Enter the admin key first.", false); return; }
-            // Verify the key with a harmless read of the stats endpoint is not
-            // possible from here (stats needs the key too); instead verify by
-            // attempting a product list, then unlock on any backend response.
+        // ---- products ----
+        let productPage = 1, productTotalPages = 1;
+        async function loadProducts() {
+            const listEl = document.getElementById("product-list");
+            const q = document.getElementById("product-search").value.trim();
+            const cat = document.getElementById("product-category").value;
+            const stockF = document.getElementById("product-stock-filter").value;
             try {
-                await ShopEaseAPI.getProducts({ per_page: 1 });
-                unlock(key);
-            } catch (e) { setStatus("Backend is not reachable: " + e.message, false); }
-        });
+                const params = { page: productPage, per_page: 20 };
+                if (q) params.q = q;
+                if (cat) params.category = cat;
+                const data = await ShopEaseAPI._request("GET", "/api/products?" + new URLSearchParams(params), undefined, { adminKey: adminKey() });
+                let items = Array.isArray(data) ? data : (data.items || []);
+                productTotalPages = data.total_pages || 1;
+                if (stockF === "low") items = items.filter((p) => (p.stock || 0) <= LOW_STOCK_AT && (p.stock || 0) > 0);
+                if (stockF === "out") items = items.filter((p) => (p.stock || 0) === 0);
+                if (!items.length) { listEl.innerHTML = '<p class="empty">No products match.</p>'; }
+                else {
+                    listEl.innerHTML = '<table class="admin-table"><thead><tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>' +
+                        items.map((p) => "<tr><td>" + (p.image_url ? '<img class="thumb" src="' + esc(p.image_url) + '" alt="">' : "") + "</td><td>" + esc(p.name) + "</td><td>" + esc(p.category || "") + "</td><td>" + inr(p.price) + "</td><td>" + stockBadge(p.stock) + "</td><td>" +
+                            '<button type="button" class="btn small" data-edit="' + p.id + '">Edit</button>' +
+                            '<button type="button" class="btn small danger" data-del="' + p.id + '">Delete</button></td></tr>').join("") + "</tbody></table>";
+                    listEl.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+                        const p = items.find((x) => String(x.id) === b.dataset.edit);
+                        if (!p) return;
+                        document.getElementById("field-id").value = p.id;
+                        document.getElementById("field-name").value = p.name || "";
+                        document.getElementById("field-brand").value = p.brand || "";
+                        document.getElementById("field-description").value = p.description || "";
+                        document.getElementById("field-price").value = p.price;
+                        document.getElementById("field-old-price").value = p.old_price || "";
+                        document.getElementById("field-stock").value = p.stock;
+                        document.getElementById("field-category").value = p.category || "";
+                        document.getElementById("field-badge").value = p.badge || "";
+                        document.getElementById("field-image").value = p.image_url || "";
+                        document.getElementById("product-form-title").textContent = "Edit product #" + p.id;
+                        document.getElementById("submit-btn").textContent = "Save changes";
+                        document.getElementById("cancel-edit-btn").hidden = false;
+                        document.getElementById("product-form").scrollIntoView({ behavior: "smooth" });
+                    }));
+                    listEl.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {
+                        if (!confirm("Delete product #" + b.dataset.del + "? This cannot be undone.")) return;
+                        try {
+                            await ShopEaseAPI.deleteProduct(b.dataset.del, adminKey());
+                            setStatus("Product deleted.", true);
+                            await loadProducts();
+                        } catch (e) { setStatus("Delete failed: " + e.message, false); }
+                    }));
+                }
+                document.getElementById("product-pager").innerHTML =
+                    '<button type="button" class="btn small secondary" id="prod-prev" ' + (productPage <= 1 ? "disabled" : "") + '>← Prev</button>' +
+                    "<span>Page " + productPage + " of " + productTotalPages + "</span>" +
+                    '<button type="button" class="btn small secondary" id="prod-next" ' + (productPage >= productTotalPages ? "disabled" : "") + '>Next →</button>';
+                document.getElementById("prod-prev").addEventListener("click", () => { productPage--; loadProducts(); });
+                document.getElementById("prod-next").addEventListener("click", () => { productPage++; loadProducts(); });
+                // Category options (once).
+                const sel = document.getElementById("product-category");
+                if (sel.options.length <= 1) {
+                    const all = await fetchAllProducts();
+                    [...new Set(all.map((p) => p.category).filter(Boolean))].sort().forEach((c) => {
+                        const o = document.createElement("option"); o.value = c; o.textContent = c; sel.appendChild(o);
+                    });
+                }
+            } catch (e) { listEl.innerHTML = '<p class="empty">Could not load products: ' + esc(e.message) + "</p>"; }
+        }
+        ["product-search", "product-category", "product-stock-filter"].forEach((id) =>
+            document.getElementById(id).addEventListener("change", () => { productPage = 1; loadProducts(); }));
+        document.getElementById("product-search").addEventListener("input", () => { productPage = 1; loadProducts(); });
 
         document.getElementById("cancel-edit-btn").addEventListener("click", () => {
             document.getElementById("product-form").reset();
             document.getElementById("field-id").value = "";
-            document.getElementById("form-title").textContent = "2. Add a product";
+            document.getElementById("product-form-title").textContent = "Add a product";
             document.getElementById("submit-btn").textContent = "Add product";
             document.getElementById("cancel-edit-btn").hidden = true;
         });
-
         document.getElementById("product-form").addEventListener("submit", async (ev) => {
             ev.preventDefault();
             const id = document.getElementById("field-id").value;
             const body = {
                 name: document.getElementById("field-name").value.trim(),
+                brand: document.getElementById("field-brand").value.trim(),
                 description: document.getElementById("field-description").value.trim(),
                 price: parseFloat(document.getElementById("field-price").value),
+                old_price: document.getElementById("field-old-price").value ? parseFloat(document.getElementById("field-old-price").value) : null,
                 stock: parseInt(document.getElementById("field-stock").value, 10),
                 category: document.getElementById("field-category").value.trim() || "general",
+                badge: document.getElementById("field-badge").value.trim(),
                 image_url: document.getElementById("field-image").value.trim(),
             };
             try {
@@ -194,6 +462,185 @@
                 document.getElementById("cancel-edit-btn").click();
                 await loadProducts();
             } catch (e) { setStatus("Save failed: " + e.message, false); }
+        });
+
+        // ---- orders ----
+        let orderPage = 1, orderTotalPages = 1, allOrdersCache = [];
+        async function loadOrders() {
+            const listEl = document.getElementById("order-list");
+            const status = document.getElementById("order-status-filter").value;
+            const q = document.getElementById("order-search").value.trim().toLowerCase();
+            try {
+                const params = { page: orderPage, per_page: 20 };
+                if (status) params.status = status;
+                const data = await ShopEaseAPI.adminListOrders(params, adminKey());
+                let items = data.items || [];
+                orderTotalPages = data.total_pages || 1;
+                allOrdersCache = items;
+                if (q) items = items.filter((o) => String(o.id) === q || (o.user_email || "").toLowerCase().includes(q));
+                listEl.innerHTML = items.length
+                    ? '<table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>' +
+                      items.map((o) => "<tr><td>#" + o.id + "</td><td>" + esc(o.user_email) + "</td><td>" + (o.summary ? o.summary.items_count : "—") + "</td><td>" + inr(o.total) + "</td><td>" + statusBadge(o.status) + "</td><td>" + fmtDate(o.created_at) + '</td><td><button type="button" class="btn small" data-view="' + o.id + '">View</button></td></tr>').join("") + "</tbody></table>"
+                    : '<p class="empty">No orders match.</p>';
+                listEl.querySelectorAll("[data-view]").forEach((b) =>
+                    b.addEventListener("click", () => viewOrder(b.dataset.view)));
+                document.getElementById("order-pager").innerHTML =
+                    '<button type="button" class="btn small secondary" id="ord-prev" ' + (orderPage <= 1 ? "disabled" : "") + '>← Prev</button>' +
+                    "<span>Page " + orderPage + " of " + orderTotalPages + " (" + (data.total || 0) + " orders)</span>" +
+                    '<button type="button" class="btn small secondary" id="ord-next" ' + (orderPage >= orderTotalPages ? "disabled" : "") + '>Next →</button>';
+                document.getElementById("ord-prev").addEventListener("click", () => { orderPage--; loadOrders(); });
+                document.getElementById("ord-next").addEventListener("click", () => { orderPage++; loadOrders(); });
+            } catch (e) { listEl.innerHTML = '<p class="empty">Could not load orders: ' + esc(e.message) + "</p>"; }
+        }
+        document.getElementById("order-status-filter").addEventListener("change", () => { orderPage = 1; loadOrders(); });
+        document.getElementById("order-search").addEventListener("input", () => loadOrders());
+
+        async function viewOrder(id) {
+            const box = document.getElementById("order-detail");
+            box.innerHTML = "<p>Loading order #" + esc(id) + "…</p>";
+            try {
+                const o = await ShopEaseAPI.adminOrderGet(id, adminKey());
+                const items = (o.items || []).map((it) => "<tr><td>" + esc(it.name) + "</td><td>" + it.quantity + "</td><td>" + inr(it.price) + "</td><td>" + inr(it.price * it.quantity) + "</td></tr>").join("");
+                const ship = o.shipping;
+                box.innerHTML = '<div class="order-detail"><h3>Order #' + o.id + " " + statusBadge(o.status) + "</h3>" +
+                    '<dl class="kv"><dt>Customer</dt><dd>' + esc(o.customer.name) + " (" + esc(o.customer.email) + ")</dd>" +
+                    "<dt>Placed</dt><dd>" + esc(o.created_at) + "</dd>" +
+                    "<dt>Deliver to</dt><dd>" + (ship ? esc(ship.name) + ", " + esc(ship.address) + ", " + esc(ship.city) + ", " + esc(ship.state) + " " + esc(ship.pincode) + " · " + esc(ship.phone) : "—") + "</dd>" +
+                    "<dt>Promo</dt><dd>" + (o.promo_code ? esc(o.promo_code) + " (saved " + inr(o.discount_amount) + ")" : "—") + "</dd></dl>" +
+                    '<table class="admin-table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead><tbody>' + items + '</tbody></table>' +
+                    "<p><strong>Total: " + inr(o.total) + "</strong></p>" +
+                    '<h3>Status history</h3><ul class="timeline">' + (o.timeline || []).map((t) => "<li>" + esc(t.status) + " — " + esc(t.changed_at) + "</li>").join("") + "</ul>" +
+                    '<div style="margin-top:12px;">' +
+                    (o.status === "placed" ? '<button type="button" class="btn small primary" data-status="shipped">Mark shipped</button>' : "") +
+                    (o.status === "shipped" ? '<button type="button" class="btn small primary" data-status="delivered">Mark delivered</button>' : "") +
+                    (o.status === "placed" ? '<button type="button" class="btn small danger" data-status="cancelled">Cancel order</button>' : "") +
+                    "</div></div>";
+                box.querySelectorAll("[data-status]").forEach((b) => b.addEventListener("click", async () => {
+                    if (b.dataset.status === "cancelled" && !confirm("Cancel order #" + o.id + "? Stock will be restored.")) return;
+                    try {
+                        await ShopEaseAPI.updateOrderStatus(o.id, b.dataset.status, adminKey());
+                        setStatus("Order #" + o.id + " → " + b.dataset.status + ".", true);
+                        await loadOrders();
+                        await viewOrder(o.id);
+                    } catch (e) { setStatus("Status update failed: " + e.message, false); }
+                }));
+                box.scrollIntoView({ behavior: "smooth" });
+            } catch (e) { box.innerHTML = '<p class="empty">Could not load order: ' + esc(e.message) + "</p>"; }
+        }
+
+        // ---- customers ----
+        let customerPage = 1, customerTotalPages = 1;
+        async function loadCustomers() {
+            const listEl = document.getElementById("customer-list");
+            const q = document.getElementById("customer-search").value.trim();
+            try {
+                const data = await ShopEaseAPI.adminCustomers({ q, page: customerPage, per_page: 20 }, adminKey());
+                const items = data.items || [];
+                customerTotalPages = data.total_pages || 1;
+                listEl.innerHTML = items.length
+                    ? '<table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Orders</th><th>Total spent</th><th>Last order</th></tr></thead><tbody>' +
+                      items.map((c) => "<tr><td>" + esc(c.name) + "</td><td>" + esc(c.email) + "</td><td>" + fmtDate(c.created_at) + "</td><td>" + c.order_count + "</td><td>" + inr(c.total_spent) + "</td><td>" + fmtDate(c.last_order_at) + "</td></tr>").join("") + "</tbody></table>"
+                    : '<p class="empty">No customers match.</p>';
+                document.getElementById("customer-pager").innerHTML =
+                    '<button type="button" class="btn small secondary" id="cust-prev" ' + (customerPage <= 1 ? "disabled" : "") + '>← Prev</button>' +
+                    "<span>Page " + customerPage + " of " + customerTotalPages + " (" + (data.total || 0) + " customers)</span>" +
+                    '<button type="button" class="btn small secondary" id="cust-next" ' + (customerPage >= customerTotalPages ? "disabled" : "") + '>Next →</button>';
+                document.getElementById("cust-prev").addEventListener("click", () => { customerPage--; loadCustomers(); });
+                document.getElementById("cust-next").addEventListener("click", () => { customerPage++; loadCustomers(); });
+            } catch (e) { listEl.innerHTML = '<p class="empty">Could not load customers: ' + esc(e.message) + "</p>"; }
+        }
+        document.getElementById("customer-search").addEventListener("input", () => { customerPage = 1; loadCustomers(); });
+
+        // ---- promotions ----
+        function promoStatus(p) {
+            const now = new Date();
+            if (p.expires_at && new Date(p.expires_at) < now) return '<span class="badge cancelled">Expired</span>';
+            if (p.max_uses != null && p.uses >= p.max_uses) return '<span class="badge cancelled">Used up</span>';
+            return '<span class="badge ok">Active</span>';
+        }
+        async function loadPromos() {
+            const listEl = document.getElementById("promo-list");
+            try {
+                const promos = await ShopEaseAPI.listPromoCodes(adminKey());
+                listEl.innerHTML = promos.length
+                    ? '<table class="admin-table"><thead><tr><th>Code</th><th>Discount</th><th>Min order</th><th>Expires</th><th>Uses</th><th>Status</th><th></th></tr></thead><tbody>' +
+                      promos.map((p) => "<tr><td><strong>" + esc(p.code) + "</strong></td><td>" + p.discount_percent + "%</td><td>" + inr(p.min_order_amount) + "</td><td>" + fmtDate(p.expires_at) + "</td><td>" + p.uses + (p.max_uses != null ? " / " + p.max_uses : "") + "</td><td>" + promoStatus(p) + '</td><td><button type="button" class="btn small danger" data-deact="' + p.id + '" data-code="' + esc(p.code) + '">Deactivate</button></td></tr>').join("") + "</tbody></table>"
+                    : '<p class="empty">No promo codes yet.</p>';
+                listEl.querySelectorAll("[data-deact]").forEach((b) => b.addEventListener("click", async () => {
+                    if (!confirm("Deactivate promo code " + b.dataset.code + "? Shoppers will no longer be able to use it.")) return;
+                    try {
+                        await ShopEaseAPI.deletePromoCode(b.dataset.deact, adminKey());
+                        setStatus("Promo code " + b.dataset.code + " deactivated.", true);
+                        await loadPromos();
+                    } catch (e) { setStatus("Deactivate failed: " + e.message, false); }
+                }));
+            } catch (e) { listEl.innerHTML = '<p class="empty">Could not load promo codes: ' + esc(e.message) + "</p>"; }
+        }
+        document.getElementById("promo-form").addEventListener("submit", async (ev) => {
+            ev.preventDefault();
+            const body = {
+                code: document.getElementById("promo-code").value.trim(),
+                discount_percent: parseFloat(document.getElementById("promo-discount").value),
+                min_order_amount: parseFloat(document.getElementById("promo-min").value) || 0,
+                max_uses: document.getElementById("promo-max-uses").value ? parseInt(document.getElementById("promo-max-uses").value, 10) : null,
+                expires_at: document.getElementById("promo-expires").value || null,
+            };
+            try {
+                await ShopEaseAPI.createPromoCode(body, adminKey());
+                setStatus("Promo code " + body.code.toUpperCase() + " created.", true);
+                document.getElementById("promo-form").reset();
+                await loadPromos();
+            } catch (e) { setStatus("Create failed: " + e.message, false); }
+        });
+
+        // ---- revenue ----
+        async function loadRevenue() {
+            const days = parseInt(document.getElementById("revenue-days").value, 10);
+            try {
+                const rev = await ShopEaseAPI.adminRevenue({ days }, adminKey());
+                const periodTotal = rev.by_day.reduce((a, d) => a + d.revenue, 0);
+                const periodOrders = rev.by_day.reduce((a, d) => a + d.orders, 0);
+                document.getElementById("revenue-cards").innerHTML =
+                    '<div class="stat-card accent"><div class="label">Revenue · last ' + days + ' days</div><div class="value">' + inr(periodTotal) + '</div><div class="sub">' + periodOrders + ' orders</div></div>' +
+                    '<div class="stat-card"><div class="label">Today</div><div class="value">' + inr(rev.today.revenue) + '</div><div class="sub">' + rev.today.orders + ' orders</div></div>';
+                const maxDay = Math.max(1, ...rev.by_day.map((d) => d.revenue));
+                document.getElementById("revenue-by-day").innerHTML = rev.by_day.length
+                    ? rev.by_day.map((d) => '<div class="bar-row"><span>' + esc(d.day) + '</span><div class="bar-track"><div class="bar-fill" style="width:' + Math.round((d.revenue / maxDay) * 100) + '%"></div></div><span class="num">' + inr(d.revenue) + "</span></div>").join("")
+                    : '<p class="empty">No revenue in this period.</p>';
+                const maxCat = Math.max(1, ...rev.by_category.map((c) => c.revenue));
+                document.getElementById("revenue-by-category").innerHTML = rev.by_category.length
+                    ? rev.by_category.map((c) => '<div class="bar-row"><span>' + esc(c.category) + '</span><div class="bar-track"><div class="bar-fill navy" style="width:' + Math.round((c.revenue / maxCat) * 100) + '%"></div></div><span class="num">' + inr(c.revenue) + " · " + c.orders + ' orders</span></div>').join("")
+                    : '<p class="empty">No revenue by category in this period.</p>';
+            } catch (e) {
+                document.getElementById("revenue-by-day").innerHTML = '<p class="empty">Could not load revenue: ' + esc(e.message) + "</p>";
+            }
+        }
+        document.getElementById("revenue-days").addEventListener("change", loadRevenue);
+
+        // ---- key gate / lock ----
+        async function unlock(key) {
+            try {
+                await ShopEaseAPI.adminStats(key); // verifies the key
+            } catch (e) {
+                setStatus("Invalid admin key — check the key and try again. (" + e.message + ")", false);
+                return;
+            }
+            sessionStorage.setItem(KEY_STORE, key);
+            document.getElementById("key-card").hidden = true;
+            document.getElementById("admin-nav").hidden = false;
+            document.getElementById("lock-btn").hidden = false;
+            setStatus("");
+            showSection("dashboard");
+        }
+        document.getElementById("save-key-btn").addEventListener("click", () => {
+            const key = keyInput.value.trim();
+            if (!key) { setStatus("Enter the admin key first.", false); return; }
+            unlock(key);
+        });
+        keyInput.addEventListener("keydown", (ev) => { if (ev.key === "Enter") document.getElementById("save-key-btn").click(); });
+        document.getElementById("lock-btn").addEventListener("click", () => {
+            sessionStorage.removeItem(KEY_STORE);
+            location.reload();
         });
 
         // If a key was already entered this session, unlock straight away.

@@ -123,9 +123,15 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 
 Any other `GET` path serves the frontend static files from the repo root.
 
-`admin.html` is the product-management UI wired to the CRUD API above: enter
-the admin key (kept only for the browser session), then list, add, edit and
-delete products from the catalogue. Wrong or missing keys get a 403.
+`admin.html` is the full admin dashboard: enter the admin key (kept only for
+the browser session, verified against `GET /api/admin/stats`), then use the
+sidebar sections — Dashboard (revenue/orders/customers totals, today + this
+week, low-stock alerts, top sellers, recent orders), Products (search, category
+and stock filters, pagination, add/edit/delete with brand, old price and badge),
+Orders (status filter, pagination, full order detail with items/customer/address,
+mark shipped/delivered or cancel), Customers (search, order counts, total spent),
+Promotions (create/list/deactivate promo codes) and Revenue (by-day and
+by-category bars for the last 7/30/90 days). Wrong or missing keys get a 403.
 
 ### Input validation
 
