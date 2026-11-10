@@ -305,6 +305,39 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/admin/promo-codes", undefined, { adminKey });
   },
 
+  /** Admin: deactivate (delete) a promo code by id. */
+  async deletePromoCode(id, adminKey) {
+    return this._request("DELETE", "/api/admin/promo-codes/" + id, undefined, { adminKey });
+  },
+
+  // ---------------------------------------------------------- admin dashboard
+  /** Admin: store-wide stats — total revenue, orders by status, top
+   *  products by units sold, user count. */
+  async adminStats(adminKey) {
+    return this._request("GET", "/api/admin/stats", undefined, { adminKey });
+  },
+
+  /** Admin: one order in full — items, customer, shipping, timeline. */
+  async adminOrderGet(id, adminKey) {
+    return this._request("GET", "/api/admin/orders/" + id, undefined, { adminKey });
+  },
+
+  /** Admin: customers with order counts and total spent. Optional params:
+   *  {q: search name/email, page, per_page (max 50)}. */
+  async adminCustomers(params = {}, adminKey) {
+    const qs = new URLSearchParams(params).toString();
+    return this._request("GET", "/api/admin/customers" + (qs ? "?" + qs : ""),
+      undefined, { adminKey });
+  },
+
+  /** Admin: revenue breakdown. Optional params: {days (1-90, default 30)}.
+   *  Returns {by_day, by_category, today, week}. */
+  async adminRevenue(params = {}, adminKey) {
+    const qs = new URLSearchParams(params).toString();
+    return this._request("GET", "/api/admin/revenue" + (qs ? "?" + qs : ""),
+      undefined, { adminKey });
+  },
+
   // ---------------------------------------------------------- admin orders
   /** Admin: list every order, newest first. Optional params: {status:
    *  'placed'|'shipped'|'delivered'|'cancelled', page, per_page (max 50)}.

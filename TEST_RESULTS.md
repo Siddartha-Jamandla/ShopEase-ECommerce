@@ -102,3 +102,25 @@ cart emptied; product 1 stock 120 → 117.
   re-seeded with the clean 12 products (0 users, 0 orders).
 - `js/api.js` passed a Node syntax check; browser behaviour not tested here
   (no live-browser access in this environment).
+
+## Re-test — 2026-11-10 (IST)
+
+Admin-endpoint batch (`GET /api/admin/orders/:id`,
+`GET /api/admin/customers`, `GET /api/admin/revenue`,
+`DELETE /api/admin/promo-codes/:id`) tested on a scratch DB from this
+commit's `backend/app.py` (port 8131, seeded 70 products).
+**31 checks, all passing.**
+
+- Register → checkout with a server promo code (TEST10, 10% off) → order
+  placed with the discount stored; admin order detail returns items, the
+  customer (name/email) and the timeline (placed); 404 for an unknown id,
+  403 without a key or with a wrong key.
+- Admin customers lists the buyer with `order_count` 1 and `total_spent`
+  above 0; `?q=` filters by email; 403 without a key.
+- Admin revenue returns `by_day` (zero-filled), `by_category`, and
+  `today`/`week` as `{revenue, orders}`; `?days=7` returns 7 rows;
+  403 without a key.
+- Deleting the promo code returns 200; checkout with it then fails 400;
+  deleting it again or an unknown id returns 404; 403 without a key.
+- Regressions: `/api/admin/stats`, `/api/admin/orders`, `/api/orders`
+  and order cancel still pass.

@@ -22,7 +22,7 @@ import secrets
 import sqlite3
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -427,6 +427,22 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
 
             if path == "/api/admin/orders" and method == "GET":
                 return self._api_admin_orders_list(query)
+
+            m = re.fullmatch(r"/api/admin/orders/(\d+)", path)
+            if m and method == "GET":
+                return self._api_admin_order_get(int(m.group(1)), query)
+
+            if path == "/api/admin/customers" and method == "GET":
+                return self._api_admin_customers(query)
+
+            if path == "/api/admin/revenue" and method == "GET":
+                return self._api_admin_revenue(query)
+
+            m = re.fullmatch(r"/api/admin/promo-codes/(\d+)", path)
+            if m:
+                if method == "DELETE":
+                    return self._api_promo_delete(int(m.group(1)), query)
+                raise ApiError(405, "Method not allowed")
 
             if path == "/api/admin/promo-codes":
                 if method == "GET":
@@ -1518,6 +1534,183 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         self._ok({"items": orders, "page": page, "per_page": per_page,
                   "total": total,
                   "total_pages": (total + per_page - 1) // per_page})
+
+    def _api_admin_order_get(self, order_id, query):
+        """Admin: one order in full — items, customer and timeline.
+
+        Admin-key auth (?key= or X-Admin-Key). 404 when the order does not
+        exist. Returns the order (with shipping snapshot + summary) plus
+        customer {id, name, email}, items [{product_id, name, image_url,
+        quantity, price}] and timeline events (oldest first).
+        """
+        self._require_admin_key(query)
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute(
+                """SELECT o.*, u.id AS customer_id, u.name AS customer_name,
+                          u.email AS customer_email
+                   FROM orders o JOIN users u ON u.id = o.user_id
+                   WHERE o.id = ?""", (order_id,)).fetchone()
+            if row is None:
+                conn.close()
+                raise ApiError(404, "Order not found")
+            data = row_to_dict(row)
+            items = [row_to_dict(r) for r in conn.execute(
+                """SELECT oi.id, oi.product_id, oi.quantity, oi.price,
+                          p.name, p.image_url
+                   FROM order_items oi JOIN products p ON p.id = oi.product_id
+                   WHERE oi.order_id = ?""", (order_id,)).fetchall()]
+            events = [row_to_dict(r) for r in conn.execute(
+                "SELECT status, changed_at FROM order_status_history"
+                " WHERE order_id = ? ORDER BY id", (order_id,)).fetchall()]
+            conn.close()
+        customer = {"id": data.pop("customer_id"),
+                    "name": data.pop("customer_name"),
+                    "email": data.pop("customer_email")}
+        data["customer"] = customer
+        data["items"] = items
+        data["timeline"] = events
+        self._ok(self._order_view(data, items_count=len(items)))
+
+    def _api_admin_customers(self, query):
+        """Admin: every registered customer with order stats.
+
+        Admin-key auth (?key= or X-Admin-Key). Filters: ?q= matches name or
+        email (case-insensitive). Pagination: ?page=&per_page= (per_page
+        capped at 50). Each customer carries order_count, total_spent (INR,
+        non-cancelled orders only) and last_order_at (null when never
+        ordered). Ordered by total spent, highest first.
+        """
+        self._require_admin_key(query)
+        search = (query.get("q", [""])[0] or "").strip()
+        page_raw = (query.get("page", [""])[0] or "").strip()
+        per_page_raw = (query.get("per_page", [""])[0] or "").strip()
+        try:
+            page = int(page_raw) if page_raw else 1
+            per_page = int(per_page_raw) if per_page_raw else 20
+        except ValueError:
+            raise ApiError(400, "'page' and 'per_page' must be integers")
+        if page < 1:
+            raise ApiError(400, "'page' must be >= 1")
+        if per_page < 1:
+            raise ApiError(400, "'per_page' must be >= 1")
+        per_page = min(per_page, 50)
+        where, params = "", []
+        if search:
+            where = " WHERE u.name LIKE ? OR u.email LIKE ?"
+            params = [f"%{search}%", f"%{search}%"]
+        base = """FROM users u
+                  LEFT JOIN orders o
+                    ON o.user_id = u.id AND o.status != 'cancelled'"""
+        with _db_lock:
+            conn = get_db()
+            total = conn.execute(
+                "SELECT COUNT(*) FROM users u" + where, params).fetchone()[0]
+            rows = conn.execute(
+                """SELECT u.id, u.name, u.email, u.created_at,
+                          COUNT(o.id) AS order_count,
+                          COALESCE(SUM(o.total), 0) AS total_spent,
+                          MAX(o.created_at) AS last_order_at
+                   """ + base + where +
+                """ GROUP BY u.id
+                    ORDER BY total_spent DESC, u.created_at DESC
+                    LIMIT ? OFFSET ?""",
+                params + [per_page, (page - 1) * per_page]).fetchall()
+            conn.close()
+        customers = []
+        for r in rows:
+            d = row_to_dict(r)
+            d["total_spent"] = round(d["total_spent"] or 0, 2)
+            customers.append(d)
+        self._ok({"items": customers, "page": page, "per_page": per_page,
+                  "total": total,
+                  "total_pages": (total + per_page - 1) // per_page})
+
+    def _api_admin_revenue(self, query):
+        """Admin: revenue breakdown for the dashboard.
+
+        Admin-key auth (?key= or X-Admin-Key). ?days= window (default 30,
+        1-90). Returns by_day [{day, revenue, orders}] for each of the last
+        N days (zero-filled), by_category [{category, revenue, orders}]
+        over the same window, plus today and last-7-days totals. Only
+        non-cancelled orders count as revenue.
+        """
+        self._require_admin_key(query)
+        days_raw = (query.get("days", [""])[0] or "").strip()
+        try:
+            days = int(days_raw) if days_raw else 30
+        except ValueError:
+            raise ApiError(400, "'days' must be an integer")
+        if not 1 <= days <= 90:
+            raise ApiError(400, "'days' must be between 1 and 90")
+        with _db_lock:
+            conn = get_db()
+            day_rows = conn.execute(
+                """SELECT date(created_at) AS day,
+                          COALESCE(SUM(total), 0) AS revenue,
+                          COUNT(*) AS orders
+                   FROM orders
+                   WHERE status != 'cancelled'
+                     AND date(created_at) >= date('now', ?)
+                   GROUP BY day""", (f"-{days - 1} days",)).fetchall()
+            cat_rows = conn.execute(
+                """SELECT p.category AS category,
+                          ROUND(SUM(oi.quantity * oi.price), 2) AS revenue,
+                          COUNT(DISTINCT o.id) AS orders
+                   FROM order_items oi
+                   JOIN orders o ON o.id = oi.order_id
+                   JOIN products p ON p.id = oi.product_id
+                   WHERE o.status != 'cancelled'
+                     AND date(o.created_at) >= date('now', ?)
+                   GROUP BY p.category
+                   ORDER BY revenue DESC""", (f"-{days - 1} days",)).fetchall()
+            today = conn.execute(
+                """SELECT COALESCE(SUM(total), 0) AS revenue, COUNT(*) AS orders
+                   FROM orders
+                   WHERE status != 'cancelled'
+                     AND date(created_at) = date('now')""").fetchone()
+            week = conn.execute(
+                """SELECT COALESCE(SUM(total), 0) AS revenue, COUNT(*) AS orders
+                   FROM orders
+                   WHERE status != 'cancelled'
+                     AND date(created_at) >= date('now', '-6 days')""").fetchone()
+            conn.close()
+        by_day_map = {r["day"]: {"day": r["day"],
+                                 "revenue": round(r["revenue"] or 0, 2),
+                                 "orders": r["orders"]} for r in day_rows}
+        by_day = []
+        for i in range(days - 1, -1, -1):
+            day = (datetime.utcnow() - timedelta(days=i)).date().isoformat()
+            by_day.append(by_day_map.get(day, {"day": day,
+                                               "revenue": 0, "orders": 0}))
+        self._ok({
+            "days": days,
+            "by_day": by_day,
+            "by_category": [row_to_dict(r) for r in cat_rows],
+            "today": {"revenue": round(today["revenue"] or 0, 2),
+                      "orders": today["orders"]},
+            "week": {"revenue": round(week["revenue"] or 0, 2),
+                     "orders": week["orders"]},
+        })
+
+    def _api_promo_delete(self, promo_id, query):
+        """Admin: deactivate (delete) a promo code by id.
+
+        Admin-key auth (?key= or X-Admin-Key). 404 when the code does not
+        exist. Deleted codes can no longer be used at checkout.
+        """
+        self._require_admin_key(query)
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute("SELECT * FROM promo_codes WHERE id = ?",
+                               (promo_id,)).fetchone()
+            if row is None:
+                conn.close()
+                raise ApiError(404, "Promo code not found")
+            conn.execute("DELETE FROM promo_codes WHERE id = ?", (promo_id,))
+            conn.commit()
+            conn.close()
+        self._ok({"deleted": promo_id, "code": row["code"]})
 
     def _api_order_timeline(self, order_id):
         """Status timeline for the caller's own order.
