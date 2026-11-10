@@ -8,7 +8,7 @@
 
     <meta
         name="description"
-        content="ShopEase — shop 62 hand-picked fashion, electronics, home and beauty products with real photos, honest prices and fast checkout."
+        content="ShopEase — shop 70 hand-picked fashion, electronics, home and beauty products with real photos, honest prices and fast checkout."
     >
 
     <meta
@@ -18,7 +18,7 @@
 
     <meta
         property="og:description"
-        content="62 hand-picked products with real photos, honest prices and fast checkout."
+        content="70 hand-picked products with real photos, honest prices and fast checkout."
     >
 
     <meta
@@ -48,6 +48,7 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/design-system.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/footer.css">
@@ -496,6 +497,15 @@
                         >
                             <i class="fa-regular fa-heart"></i>
                         </button>
+                        <button
+                            class="se-icon-btn"
+                            id="productCompareButton"
+                            onclick="if(window.currentProduct) CompareTool.toggle(window.currentProduct.id)"
+                            aria-label="Add to compare"
+                            title="Compare with other products"
+                        >
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </button>
 
                     </div>
 
@@ -740,5 +750,6 @@
 <script src="js/products.js"></script>
 <script src="js/main.js"></script>
 
+    <script src="js/compare.js"></script>
 </body>
 </html>
