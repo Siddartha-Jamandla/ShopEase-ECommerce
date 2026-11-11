@@ -124,3 +124,19 @@ commit's `backend/app.py` (port 8131, seeded 70 products).
   deleting it again or an unknown id returns 404; 403 without a key.
 - Regressions: `/api/admin/stats`, `/api/admin/orders`, `/api/orders`
   and order cancel still pass.
+
+---
+
+## Daily upgrade — 2026-11-11 (IST): compare button on every page
+
+`js/products.js` gains the Compare button on product cards (was local-only
+since the redesign) and `js/compare.js` is now loaded on all 7 pages that
+load `products.js` (categories, checkout, index, my-orders, profile, shop
++ product-details, which already had it), so `CompareTool.toggle` can no
+longer throw on a page without the script.
+
+Tested statically on the snapshot files: `js/products.js` passes
+`node --check` and carries the Compare button; each of the 6 pages has
+exactly one `compare.js` tag placed right after the `products.js` tag;
+`product-details.html` was left untouched (it already loaded compare.js).
+**17 checks, all passing.**

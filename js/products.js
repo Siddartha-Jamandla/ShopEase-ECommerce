@@ -1092,6 +1092,16 @@ function createProductCard(product) {
                         Quick View
                     </button>
 
+                    <button
+                        class="quick-view-btn"
+                        data-compare-id="${product.id}"
+                        onclick="event.stopPropagation(); CompareTool.toggle(${product.id})"
+                        aria-label="Compare ${product.name}"
+                    >
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span class="compare-label">Compare</span>
+                    </button>
+
                 </div>
 
             </div>
