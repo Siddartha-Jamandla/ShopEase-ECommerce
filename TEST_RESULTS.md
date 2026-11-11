@@ -140,3 +140,19 @@ Tested statically on the snapshot files: `js/products.js` passes
 exactly one `compare.js` tag placed right after the `products.js` tag;
 `product-details.html` was left untouched (it already loaded compare.js).
 **17 checks, all passing.**
+
+---
+
+## Daily upgrade — 2026-11-11 (IST): meta copy + design-system sweep
+
+`profile.html`, `checkout.html`, `my-orders.html`, `index.html` and
+`categories.html` now say "70 hand-picked products" (the live catalog grew
+62 → 70 on 8 Nov; only shop + product-details were updated then) and link
+`css/design-system.css` right after `css/style.css`, matching shop.html and
+product-details.html.
+
+Tested statically on the snapshot files: each of the 5 pages has exactly
+one `design-system.css` link placed right after the `style.css` link,
+says "70 hand-picked" in the meta description, og:description (and, on
+index.html, the body copy), and has no remaining "62 hand-picked".
+**20 checks, all passing.**
