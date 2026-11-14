@@ -176,3 +176,23 @@ queries, `limit` 1–8 ok with 400s for 0/9/non-integer), in-stock matches
 rank before out-of-stock ones at the same relevance, and health, products
 list/get/search, register, cart add, checkout and order get still pass.
 **35 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-13 (IST): related products
+
+`GET /api/products/:id/related` returns up to 8 same-category products
+(excluding the product itself), in-stock first, then rating desc, then
+name; `?limit=` 1–8 (default 4), 404 for an unknown product.
+`ShopEaseAPI.relatedProducts()` wraps it; `js/main.js` feeds the
+"You May Also Like" grid on product-details.html from the endpoint first
+(`js/api.js` is now loaded on that page) and falls back to the local
+catalog when the backend is down.
+
+Tested 2026-11-13 on a scratch DB from this commit's `backend/app.py`
+(port 8142, seeded 70 products): related returns same-category only,
+excludes self, defaults to 4, `limit` 1–8 ok with 400s for 0/9/non-integer,
+404 for an unknown product; in-stock beats a higher rating, in-stock items
+rank by rating desc; health, products list/get still pass.
+**29 checks, all passing.**

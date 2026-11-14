@@ -108,6 +108,21 @@ const ShopEaseAPI = {
     }
   },
 
+  /** Related products for the product-details page: same category,
+   *  in-stock first, then by rating. Offline: same-category items
+   *  from the cached catalog. */
+  async relatedProducts(id, limit = 4) {
+    try {
+      const qs = new URLSearchParams({ limit }).toString();
+      return await this._request("GET", "/api/products/" + id + "/related?" + qs);
+    } catch (e) {
+      const self = LocalStore.getProduct(id);
+      return LocalStore.getProducts({ category: self ? self.category : "" })
+        .filter((p) => Number(p.id) !== Number(id))
+        .slice(0, limit);
+    }
+  },
+
   async createProduct(product, adminKey) {
     return this._request("POST", "/api/products", product, { adminKey });
   },

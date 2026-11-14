@@ -335,6 +335,10 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if path == "/api/products/suggest" and method == "GET":
                 return self._api_products_suggest(query)
 
+            m = re.fullmatch(r"/api/products/(\d+)/related", path)
+            if m and method == "GET":
+                return self._api_products_related(int(m.group(1)), query)
+
             m = re.fullmatch(r"/api/products/(\d+)/reviews", path)
             if m:
                 product_id = int(m.group(1))
@@ -638,6 +642,38 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                        (stock <= 0), name COLLATE NOCASE ASC
                    LIMIT ?""",
                 (contains, contains, prefix, contains, limit)).fetchall()
+            conn.close()
+        self._ok([row_to_dict(r) for r in rows])
+
+    def _api_products_related(self, product_id, query):
+        """Related products for the product-details page.
+
+        GET /api/products/:id/related?limit=<1-8, default 4>
+        Same category, excludes the product itself, in-stock first,
+        then by rating desc, then name. 404 for an unknown product.
+        """
+        limit_raw = (query.get("limit", [""])[0] or "").strip()
+        try:
+            limit = int(limit_raw) if limit_raw else 4
+        except ValueError:
+            raise ApiError(400, "'limit' must be an integer")
+        if not 1 <= limit <= 8:
+            raise ApiError(400, "'limit' must be between 1 and 8")
+        with _db_lock:
+            conn = get_db()
+            product = conn.execute(
+                "SELECT id, category FROM products WHERE id = ?",
+                (product_id,)).fetchone()
+            if product is None:
+                conn.close()
+                raise ApiError(404, "Product not found")
+            rows = conn.execute(
+                """SELECT id, name, price, image_url, category, stock, rating
+                   FROM products
+                   WHERE category = ? AND id != ?
+                   ORDER BY (stock <= 0), rating DESC, name COLLATE NOCASE ASC
+                   LIMIT ?""",
+                (product["category"], product_id, limit)).fetchall()
             conn.close()
         self._ok([row_to_dict(r) for r in rows])
 

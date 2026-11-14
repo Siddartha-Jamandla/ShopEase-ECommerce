@@ -841,7 +841,7 @@ function updateCartCount() {
    RELATED PRODUCTS
 ========================================= */
 
-function loadRelatedProducts(product) {
+async function loadRelatedProducts(product) {
 
     const container =
         document.getElementById(
@@ -850,6 +850,48 @@ function loadRelatedProducts(product) {
 
     if (!container || typeof products === "undefined") {
         return;
+    }
+
+
+    // Prefer the backend: same category, in-stock first, rated first.
+    // Falls back to the local catalog when the API is unavailable.
+    if (
+        typeof ShopEaseAPI !== "undefined" &&
+        typeof ShopEaseAPI.relatedProducts === "function"
+    ) {
+
+        try {
+
+            const items =
+                await ShopEaseAPI.relatedProducts(product.id, 4);
+
+            if (Array.isArray(items) && items.length) {
+
+                const mapped = items.map(function (item) {
+
+                    return (typeof mapApiProduct === "function")
+                        ? mapApiProduct(item)
+                        : item;
+
+                });
+
+                container.innerHTML =
+                    mapped
+                        .map(function (item) {
+                            return createHomepageProductCard(item);
+                        })
+                        .join("");
+
+                return;
+
+            }
+
+        } catch (err) {
+
+            // Backend down or slow: use the local catalog below.
+
+        }
+
     }
 
 

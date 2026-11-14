@@ -85,6 +85,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | GET    | `/api/products`       | –    | List products. Filters: `?category=`, `?q=` (alias `?search=`). Sort: `?sort=newest\|price_asc\|price_desc\|name_asc\|name_desc\|rating_asc\|rating_desc` (unrated products sort last). Pagination: `?page=&per_page=` (1–100, default 20) → `{items, page, per_page, total, total_pages}`; plain array otherwise |
 | GET    | `/api/products/:id`   | –    | Single product (404 if missing); includes `average_rating` and `review_count` |
 | GET    | `/api/products/suggest` | –    | Search suggestions for the header autocomplete: `?q=` (empty query → `[]`), `?limit=` (1–8, default 5) → `[{id, name, price, image_url, category, stock}]`, name-prefix first, then name-contains, then description; in-stock first |
+| GET    | `/api/products/:id/related` | – | Related products: same category, excludes the product itself, in-stock first, then rating desc, then name; `?limit=` (1–8, default 4); 404 if the product is missing |
 | GET    | `/api/products/:id/reviews` | – | Reviews for a product (paginated, newest first) → `{items, page, per_page, total, total_pages, average_rating}`; each item has `user_name` |
 | POST   | `/api/products/:id/reviews` | user | Add a review: `{rating}` (int 1–5, required), `{title?, comment?}`; 409 if you already reviewed (use PUT) |
 | PUT    | `/api/products/:id/reviews` | user | Update your own review (404 if you haven't reviewed) |
