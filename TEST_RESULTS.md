@@ -263,3 +263,31 @@ returns exactly the products with stock ≤ 5, sorted ascending, stock 6
 excluded; `?threshold=1` matches the DB count; 0/101/non-integer → 400;
 health, products list and admin stats still pass.
 **34 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-14 (IST): recently viewed products
+
+New `js/recently-viewed.js` (localStorage only, no API calls): every
+product-details visit is recorded by `loadProductDetails()` in
+`js/main.js` (guarded, so the page works if the script is absent) and a
+"Recently viewed" strip renders into `#recentlyViewedGrid` on shop.html
+and product-details.html — at most 8 products, most recent first,
+re-viewing moves a product to the front instead of duplicating it, the
+product being viewed is excluded from its own strip, and the section
+hides itself when the list is empty. Cards reuse
+`createHomepageProductCard`, so the strip matches "You May Also Like".
+README documents the feature. (This replaces the planned orders
+filter + pagination frontend wiring: `GET /api/orders?status=&page=&per_page=`
+already exists live, backend and `ShopEaseAPI.getOrders()` included.)
+
+Tested 2026-11-14: the module was executed in Node with localStorage /
+document stubs — empty storage → `[]`, 3 records in most-recent-first
+order, re-visit dedupes and moves to front, 11 records keep the newest
+8, corrupt stored JSON → `[]`, bad `record()` calls are no-ops, empty
+render returns 0 and hides the section, render returns the count and
+excludes the `?id=` product; both pages pass `node --check` and serve
+200 with the strip from the live backend on a scratch DB (port 8153),
+health and products list still pass.
+**42 checks, all passing.**

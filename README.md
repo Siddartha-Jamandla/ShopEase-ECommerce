@@ -251,6 +251,12 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   `products.js` also loads `compare.js`, so the button works on
   shop, categories, home, product details, checkout, profile and
   my-orders — not just product details.
+- Recently viewed products (`js/recently-viewed.js`): every
+  product-details visit is recorded in localStorage (max 8, deduped,
+  most recent first) and a "Recently viewed" strip renders from that
+  list on shop.html and product-details.html (the product being viewed
+  is excluded; the section hides itself when the list is empty). No API
+  calls — it works fully offline.
 
 ## Deployment notes
 

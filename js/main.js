@@ -214,6 +214,12 @@ function loadProductDetails() {
     }
 
     renderProductDetails(currentProduct);
+    // Record the visit for the "Recently viewed" strip (localStorage,
+    // js/recently-viewed.js) — guarded so the page works when that
+    // script is not loaded.
+    if (typeof RecentlyViewed !== "undefined" && RecentlyViewed.record) {
+        RecentlyViewed.record(currentProduct);
+    }
     loadRelatedProducts(currentProduct);
 }
 
