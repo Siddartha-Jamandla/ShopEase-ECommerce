@@ -347,6 +347,14 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/admin/stats", undefined, { adminKey });
   },
 
+  /** Admin: products at or below a stock threshold (default 5, 1-100),
+   *  lowest stock first. Returns {threshold, count, items}. */
+  async adminLowStock(params = {}, adminKey) {
+    const qs = new URLSearchParams(params).toString();
+    return this._request("GET", "/api/admin/low-stock" + (qs ? "?" + qs : ""),
+      undefined, { adminKey });
+  },
+
   /** Admin: one order in full — items, customer, shipping, timeline. */
   async adminOrderGet(id, adminKey) {
     return this._request("GET", "/api/admin/orders/" + id, undefined, { adminKey });

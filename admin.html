@@ -136,7 +136,11 @@
                 <div class="two-col">
                     <div class="panel">
                         <h2>⚠️ Low stock alerts</h2>
-                        <p class="muted">Products with 5 or fewer items left.</p>
+                        <p class="muted">Products at or below the threshold.
+                            <label for="low-stock-threshold">Threshold</label>
+                            <input type="number" id="low-stock-threshold" min="1" max="100" value="5"
+                                style="width:64px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:6px;font:inherit;">
+                            <button type="button" class="btn small" id="low-stock-refresh">Refresh</button></p>
                         <div id="low-stock-list">Loading…</div>
                     </div>
                     <div class="panel">
@@ -314,7 +318,7 @@
             b.addEventListener("click", () => showSection(b.dataset.section)));
 
         // ---- dashboard ----
-        let cachedStats = null, cachedProducts = [];
+        let cachedStats = null;
         async function loadDashboard() {
             try {
                 const stats = await ShopEaseAPI.adminStats(adminKey());
@@ -329,15 +333,7 @@
                     '<div class="stat-card"><div class="label">Customers</div><div class="value">' + stats.user_count + '</div><div class="sub">Registered shoppers</div></div>' +
                     '<div class="stat-card"><div class="label">This week</div><div class="value">' + inr(rev.week.revenue) + '</div><div class="sub">' + rev.week.orders + " orders · today " + inr(rev.today.revenue) + "</div></div>";
                 document.getElementById("nav-orders-count").textContent = totalOrders ? "(" + totalOrders + ")" : "";
-                const products = await fetchAllProducts();
-                cachedProducts = products;
-                const low = products.filter((p) => (p.stock || 0) <= LOW_STOCK_AT)
-                    .sort((a, b) => a.stock - b.stock);
-                document.getElementById("low-stock-list").innerHTML = low.length
-                    ? '<table class="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Price</th></tr></thead><tbody>' +
-                      low.slice(0, 10).map((p) => "<tr><td>" + esc(p.name) + "</td><td>" + stockBadge(p.stock) + "</td><td>" + inr(p.price) + "</td></tr>").join("") + "</tbody></table>" +
-                      (low.length > 10 ? '<p class="muted">…and ' + (low.length - 10) + " more — see Products.</p>" : "")
-                    : '<p class="empty">No low-stock products. 🎉</p>';
+                await loadLowStock();
                 document.getElementById("top-products-list").innerHTML = (stats.top_products || []).length
                     ? '<table class="admin-table"><thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead><tbody>' +
                       stats.top_products.slice(0, 8).map((p) => "<tr><td>" + esc(p.name) + "</td><td>" + p.units_sold + "</td><td>" + inr(p.gross_revenue) + "</td></tr>").join("") + "</tbody></table>"
@@ -351,6 +347,32 @@
                 setStatus("Dashboard failed to load: " + e.message, false);
             }
         }
+
+        // Low-stock alerts come from the server (GET /api/admin/low-stock)
+        // instead of paging the whole catalogue and filtering in the
+        // browser. A failed fetch shows an inline note — the rest of the
+        // dashboard still loads.
+        async function loadLowStock() {
+            const el = document.getElementById("low-stock-list");
+            const input = document.getElementById("low-stock-threshold");
+            let threshold = parseInt(input.value, 10);
+            if (!Number.isFinite(threshold)) threshold = 5;
+            threshold = Math.min(100, Math.max(1, threshold));
+            input.value = threshold;
+            el.innerHTML = "Loading…";
+            try {
+                const data = await ShopEaseAPI.adminLowStock({ threshold }, adminKey());
+                const low = data.items || [];
+                el.innerHTML = low.length
+                    ? '<table class="admin-table"><thead><tr><th>Product</th><th>Stock</th><th>Price</th></tr></thead><tbody>' +
+                      low.slice(0, 10).map((p) => "<tr><td>" + esc(p.name) + "</td><td>" + stockBadge(p.stock) + "</td><td>" + inr(p.price) + "</td></tr>").join("") + "</tbody></table>" +
+                      (low.length > 10 ? '<p class="muted">…and ' + (low.length - 10) + " more — see Products.</p>" : "")
+                    : '<p class="empty">No low-stock products. 🎉</p>';
+            } catch (e) {
+                el.innerHTML = '<p class="empty">Could not load low-stock alerts: ' + esc(e.message) + '</p>';
+            }
+        }
+        document.getElementById("low-stock-refresh").addEventListener("click", loadLowStock);
 
         async function fetchAllProducts() {
             // Products list caps per_page at 100; page through it.

@@ -122,13 +122,15 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | POST   | `/api/addresses`    | user | Save an address: `{label, full_name, address_line1, address_line2?, city, state, pincode, is_default?}` (pincode must be 6 digits). Setting `is_default` clears your other defaults; your first address becomes the default automatically |
 | DELETE | `/api/addresses/:id` | user | Delete one of your addresses (403 for someone else's, 404 if missing). Deleting the default promotes your oldest remaining address to default |
 | GET    | `/api/admin/stats`    | admin key (`?key=` or `X-Admin-Key`) | Store stats: `total_revenue` (non-cancelled orders), `orders_by_status`, `top_products` (top 10 by units sold + gross revenue), `user_count` |
+| GET    | `/api/admin/low-stock` | admin key (`?key=` or `X-Admin-Key`) | Products with `stock <= threshold`, lowest stock first → `{threshold, count, items: [{id, name, price, category, stock, image_url}]}`. `?threshold=` (default 5, 1–100); 400 outside that range |
 
 Any other `GET` path serves the frontend static files from the repo root.
 
 `admin.html` is the full admin dashboard: enter the admin key (kept only for
 the browser session, verified against `GET /api/admin/stats`), then use the
 sidebar sections — Dashboard (revenue/orders/customers totals, today + this
-week, low-stock alerts, top sellers, recent orders), Products (search, category
+week, low-stock alerts from `GET /api/admin/low-stock` with an adjustable
+threshold, top sellers, recent orders), Products (search, category
 and stock filters, pagination, add/edit/delete with brand, old price and badge),
 Orders (status filter, pagination, full order detail with items/customer/address,
 mark shipped/delivered or cancel), Customers (search, order counts, total spent),

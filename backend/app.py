@@ -325,6 +325,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if path == "/api/admin/stats" and method == "GET":
                 return self._api_admin_stats(query)
 
+            if path == "/api/admin/low-stock" and method == "GET":
+                return self._api_admin_low_stock(query)
+
             if path == "/api/products":
                 if method == "GET":
                     return self._api_products_list(query)
@@ -1864,6 +1867,32 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             "top_products": top_products,
             "user_count": user_count,
         })
+
+    def _api_admin_low_stock(self, query):
+        """Products at or below a stock threshold, lowest stock first.
+
+        Admin-key auth, same as /api/admin/stats: ?key=<ADMIN_KEY> or
+        X-Admin-Key header. ?threshold= (default 5, 1-100). Returns
+        {threshold, count, items: [{id, name, price, category, stock,
+        image_url}]} — stock <= threshold, ordered by stock asc, then name.
+        """
+        self._require_admin_key(query)
+        raw = (query.get("threshold", [""])[0] or "").strip()
+        try:
+            threshold = int(raw) if raw else 5
+        except ValueError:
+            raise ApiError(400, "'threshold' must be an integer")
+        if not 1 <= threshold <= 100:
+            raise ApiError(400, "'threshold' must be between 1 and 100")
+        with _db_lock:
+            conn = get_db()
+            rows = conn.execute(
+                "SELECT id, name, price, category, stock, image_url"
+                " FROM products WHERE stock <= ? ORDER BY stock ASC, name ASC",
+                (threshold,)).fetchall()
+            conn.close()
+        self._ok({"threshold": threshold, "count": len(rows),
+                  "items": [row_to_dict(r) for r in rows]})
 
     # -- promo codes ---------------------------------------------------------
 

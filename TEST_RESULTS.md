@@ -241,3 +241,25 @@ right columns, the five pre-existing indexes are untouched, and health,
 product list (including a price-sorted list), register, cart, checkout
 and orders list still pass.
 **32 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-14 (IST): low-stock admin endpoint
+
+`GET /api/admin/low-stock?threshold=` (default 5, 1–100, admin-key auth
+like the other admin endpoints) returns `{threshold, count, items}` —
+products with `stock <= threshold`, lowest stock first.
+`ShopEaseAPI.adminLowStock()` wraps it, and the admin dashboard's Low
+stock panel now calls the endpoint (with a threshold input + Refresh
+button) instead of paging the whole catalogue and filtering in the
+browser; a failed fetch shows an inline note and the rest of the
+dashboard still loads. README documents the endpoint.
+
+Tested 2026-11-14 on a scratch DB from this commit's `backend/app.py`
+(port 8152, seeded 70 products with five pinned stocks 0/2/5/6/100):
+no key → 403, wrong key → 403, `?key=` query auth works; default
+returns exactly the products with stock ≤ 5, sorted ascending, stock 6
+excluded; `?threshold=1` matches the DB count; 0/101/non-integer → 400;
+health, products list and admin stats still pass.
+**34 checks, all passing.**
