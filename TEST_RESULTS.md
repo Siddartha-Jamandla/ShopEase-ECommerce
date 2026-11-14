@@ -219,3 +219,25 @@ an unknown order; the page's own renderOrderTimeline() was executed in
 Node for placed/delivered/cancelled payloads (step order, reached/current
 classes, dates); orders list and cancel still pass.
 **30 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-14 (IST): DB performance indexes
+
+`backend/schema.sql` gains three indexes that were missing live
+(`idx_products_category`, `idx_cart_user`, `idx_orders_user`,
+`idx_reviews_product` and `idx_wishlist_user` already existed):
+`idx_products_price` on `products(price)`, `idx_products_stock` on
+`products(stock)` and `idx_orders_created_at` on `orders(created_at)`.
+`init_db()` re-runs `schema.sql` on every startup, so the indexes are
+also created on databases built from the older schema — no separate
+migration step is needed. README documents the full index list.
+
+Tested 2026-11-14 on a scratch DB (port 8151): a database seeded from
+the OLD schema had none of the three indexes; after starting the app
+with the new `schema.sql` all three appear in `sqlite_master` on the
+right columns, the five pre-existing indexes are untouched, and health,
+product list (including a price-sorted list), register, cart, checkout
+and orders list still pass.
+**32 checks, all passing.**

@@ -189,7 +189,10 @@ order_status_history(id, order_id → orders, status, changed_at)
 
 - `password_hash` = `salt$sha256(salt + password)` (hashlib, per-user salt)
 - `order_items.price` snapshots the unit price at checkout
-- Foreign keys with `ON DELETE CASCADE`; indexes on category, cart user, order user
+- Foreign keys with `ON DELETE CASCADE`; indexes on products (category,
+  price, stock), cart user, orders (user, created_at), order items, reviews,
+  wishlist, promo codes and addresses — `schema.sql` is re-applied on every
+  startup, so `CREATE INDEX IF NOT EXISTS` also upgrades existing databases
 
 Seed data: `python3 backend/seed.py` upserts the 70-product catalog
 (men, women, shoes, accessories, electronics, appliances, home, beauty,
