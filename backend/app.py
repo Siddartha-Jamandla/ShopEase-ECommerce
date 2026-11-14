@@ -332,6 +332,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_products_create()
                 raise ApiError(405, "Method not allowed")
 
+            if path == "/api/products/suggest" and method == "GET":
+                return self._api_products_suggest(query)
+
             m = re.fullmatch(r"/api/products/(\d+)/reviews", path)
             if m:
                 product_id = int(m.group(1))
@@ -599,6 +602,44 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         self._ok({"items": [row_to_dict(r) for r in rows], "page": page,
                   "per_page": per_page, "total": total,
                   "total_pages": total_pages})
+
+    def _api_products_suggest(self, query):
+        """Search suggestions for the header autocomplete.
+
+        GET /api/products/suggest?q=<text>&limit=<1-8, default 5>
+        returns a plain array of {id, name, price, image_url,
+        category, stock}, ranked name-prefix first, then
+        name-contains, then description-contains, in-stock
+        before out-of-stock, then by name. An empty query
+        returns [] (the frontend only calls with typed text).
+        """
+        q = (query.get("q", [""])[0] or "").strip()
+        if not q:
+            return self._ok([])
+        limit_raw = (query.get("limit", [""])[0] or "").strip()
+        try:
+            limit = int(limit_raw) if limit_raw else 5
+        except ValueError:
+            raise ApiError(400, "'limit' must be an integer")
+        if not 1 <= limit <= 8:
+            raise ApiError(400, "'limit' must be between 1 and 8")
+        prefix, contains = q + "%", "%" + q + "%"
+        with _db_lock:
+            conn = get_db()
+            rows = conn.execute(
+                """SELECT id, name, price, image_url, category, stock
+                   FROM products
+                   WHERE name LIKE ? COLLATE NOCASE
+                      OR description LIKE ? COLLATE NOCASE
+                   ORDER BY CASE
+                       WHEN name LIKE ? COLLATE NOCASE THEN 0
+                       WHEN name LIKE ? COLLATE NOCASE THEN 1
+                       ELSE 2 END,
+                       (stock <= 0), name COLLATE NOCASE ASC
+                   LIMIT ?""",
+                (contains, contains, prefix, contains, limit)).fetchall()
+            conn.close()
+        self._ok([row_to_dict(r) for r in rows])
 
     def _api_product_get(self, product_id):
         with _db_lock:

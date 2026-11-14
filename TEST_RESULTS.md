@@ -156,3 +156,23 @@ one `design-system.css` link placed right after the `style.css` link,
 says "70 hand-picked" in the meta description, og:description (and, on
 index.html, the body copy), and has no remaining "62 hand-picked".
 **20 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-13 (IST): search suggestions
+
+`GET /api/products/suggest` returns up to 8 `{id, name, price, image_url,
+category, stock}` matches ranked name-prefix → name-contains →
+description, in-stock first; `ShopEaseAPI.suggestProducts()` wraps it and
+`js/search.js` shows a debounced (200 ms) dropdown under the header search
+box (click a suggestion to open the product; Escape / click-outside closes;
+offline, plain search still works).
+
+Tested 2026-11-13 on a scratch DB from this commit's `backend/app.py`
+(port 8141, seeded 70 products): suggest returns ranked matches
+(name-prefix first, case-insensitive, `[]` for empty/missing/no-match
+queries, `limit` 1–8 ok with 400s for 0/9/non-integer), in-stock matches
+rank before out-of-stock ones at the same relevance, and health, products
+list/get/search, register, cart add, checkout and order get still pass.
+**35 checks, all passing.**

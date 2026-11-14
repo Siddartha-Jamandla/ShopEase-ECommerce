@@ -93,6 +93,13 @@ const ShopEaseAPI = {
     }
   },
 
+  /** Search suggestions for the header autocomplete: up to `limit`
+   *  {id, name, price, image_url, category, stock}, name-prefix first. */
+  async suggestProducts(q, limit = 5) {
+    const qs = new URLSearchParams({ q, limit }).toString();
+    return this._request("GET", "/api/products/suggest?" + qs);
+  },
+
   async getProduct(id) {
     try {
       return await this._request("GET", "/api/products/" + id);
