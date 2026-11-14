@@ -196,3 +196,26 @@ excludes self, defaults to 4, `limit` 1–8 ok with 400s for 0/9/non-integer,
 404 for an unknown product; in-stock beats a higher rating, in-stock items
 rank by rating desc; health, products list/get still pass.
 **29 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-13 (IST): order-tracking timeline on My Orders
+
+My Orders now shows a per-order stage timeline (placed → shipped →
+delivered, or placed → cancelled) under each order header, fetched from
+the existing `GET /api/orders/:id/timeline` via a new
+`ShopEaseAPI.getOrderTimeline()` helper; reached stages are green, the
+last reached stage is the current one, cancelled shows red, and each
+reached stage shows its timestamp. Backend orders only — localStorage
+orders keep no timeline and their placeholder stays hidden; a failed
+fetch hides that order's timeline instead of breaking the page.
+
+Tested 2026-11-13 on a scratch DB from the live `backend/app.py` (port
+8143, seeded 70 products): timeline stages arrive in order with correct
+reached flags for a fresh order and after cancelling (placed →
+cancelled), 401 unauthenticated, 403 for another user's order, 404 for
+an unknown order; the page's own renderOrderTimeline() was executed in
+Node for placed/delivered/cancelled payloads (step order, reached/current
+classes, dates); orders list and cancel still pass.
+**30 checks, all passing.**

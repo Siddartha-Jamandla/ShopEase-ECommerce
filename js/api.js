@@ -301,6 +301,14 @@ const ShopEaseAPI = {
     return this._request("GET", "/api/orders/" + id);
   },
 
+  /** Status timeline for one of your orders
+   *  (GET /api/orders/:id/timeline — stages placed → shipped →
+   *  delivered, or placed → cancelled, with reached flags). */
+  async getOrderTimeline(id) {
+    if (!this.isLoggedIn) throw new Error("Please log in to view orders");
+    return this._request("GET", "/api/orders/" + id + "/timeline");
+  },
+
   /** Cancel one of your own still-placed orders
    *  (POST /api/orders/:id/cancel — restores stock server-side).
    *  409 when it already shipped / was delivered / was cancelled. */

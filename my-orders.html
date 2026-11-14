@@ -171,6 +171,100 @@
             padding: 24px;
         }
 
+        /* Order Status Timeline */
+
+        .order-timeline {
+            display: flex;
+            align-items: flex-start;
+            padding: 18px 24px 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .order-timeline:empty {
+            display: none;
+        }
+
+        .order-timeline-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding-top: 26px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .order-timeline-step::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            border: 2px solid #e2e8f0;
+        }
+
+        .order-timeline-step::after {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: calc(-50% + 10px);
+            right: calc(50% + 10px);
+            height: 2px;
+            background: #e2e8f0;
+        }
+
+        .order-timeline-step:first-child::after {
+            display: none;
+        }
+
+        .order-timeline-step.reached {
+            color: #15803d;
+        }
+
+        .order-timeline-step.reached::before {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .order-timeline-step.reached::after {
+            background: #22c55e;
+        }
+
+        .order-timeline-step.current {
+            color: #0f172a;
+        }
+
+        .order-timeline-step.current::before {
+            background: #fff;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 4px #dcfce7;
+        }
+
+        .order-timeline-step.cancelled {
+            color: #b91c1c;
+        }
+
+        .order-timeline-step.cancelled::before {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .order-timeline-step.cancelled::after {
+            background: #ef4444;
+        }
+
+        .order-timeline-date {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #64748b;
+        }
+
         .order-products {
             display: flex;
             flex-direction: column;
@@ -1157,6 +1251,15 @@
                     .map(createOrderCard)
                     .join("");
 
+
+            /* Backend orders get their live stage timeline. */
+
+            if (backendOrders) {
+
+                loadOrderTimelines(sortedOrders);
+
+            }
+
         }
 
 
@@ -1361,6 +1464,15 @@
                     </div>
 
 
+                    <!-- Order Status Timeline -->
+
+                    <div
+                        class="order-timeline"
+                        data-timeline-for="${order.id || ""}"
+                    >
+                    </div>
+
+
                     <!-- Products -->
 
                     <div class="order-card-body">
@@ -1542,6 +1654,138 @@
             `;
 
         }
+
+
+        /* =========================================
+           ORDER STATUS TIMELINE
+        ========================================== */
+
+        /* Per-order stage timeline from GET /api/orders/:id/timeline
+           (placed -> shipped -> delivered, or placed -> cancelled).
+           Backend orders only — localStorage orders have no timeline,
+           so their placeholder stays empty (and hidden). */
+        async function loadOrderTimelines(orders) {
+
+            if (
+                typeof ShopEaseAPI === "undefined" ||
+                !ShopEaseAPI.isLoggedIn ||
+                typeof ShopEaseAPI.getOrderTimeline !== "function"
+            ) {
+
+                return;
+
+            }
+
+
+            orders.forEach(function (order) {
+
+                const box = document.querySelector(
+                    '[data-timeline-for="' + order.id + '"]'
+                );
+
+                if (!box) {
+
+                    return;
+
+                }
+
+
+                ShopEaseAPI.getOrderTimeline(order.id)
+                    .then(function (timeline) {
+
+                        box.innerHTML =
+                            renderOrderTimeline(timeline);
+
+                    })
+                    .catch(function () {
+
+                        // No timeline for this order (404 / expired
+                        // session): leave the placeholder hidden.
+
+                        box.remove();
+
+                    });
+
+            });
+
+        }
+
+
+        /* Stages in order; the last reached stage is the current one. */
+        function renderOrderTimeline(timeline) {
+
+            const stages =
+                (timeline && Array.isArray(timeline.stages))
+                    ? timeline.stages
+                    : [];
+
+            if (!stages.length) {
+
+                return "";
+
+            }
+
+
+            let lastReached = -1;
+
+            stages.forEach(function (stage, index) {
+
+                if (stage.reached) {
+
+                    lastReached = index;
+
+                }
+
+            });
+
+
+            return stages.map(function (stage, index) {
+
+                const label =
+                    String(stage.status || "")
+                        .charAt(0).toUpperCase() +
+                    String(stage.status || "").slice(1);
+
+                const classes = ["order-timeline-step"];
+
+                if (stage.reached) {
+
+                    classes.push("reached");
+
+                }
+
+                if (index === lastReached) {
+
+                    classes.push("current");
+
+                }
+
+                if (stage.status === "cancelled") {
+
+                    classes.push("cancelled");
+
+                }
+
+                const when =
+                    stage.at
+                        ? formatOrderDate(stage.at)
+                        : "";
+
+                return (
+                    '<div class="' + classes.join(" ") + '">' +
+                    label +
+                    (when
+                        ? '<span class="order-timeline-date">' +
+                            when +
+                            "</span>"
+                        : "") +
+                    "</div>"
+                );
+
+            }).join("");
+
+        }
+
 
 
         /* =========================================
