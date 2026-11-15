@@ -147,3 +147,30 @@ CREATE TABLE IF NOT EXISTS addresses (
 );
 
 CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
+
+-- Marketing subscriptions are intentionally minimal: the storefront only
+-- collects a verified-looking email address and never exposes this list.
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    email      TEXT    NOT NULL UNIQUE,
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscribers(email);
+
+-- Customer support requests submitted from contact.html.  Keeping these in
+-- the store database makes the public form useful even without a third-party
+-- email provider; staff can retrieve them directly from SQLite or a future
+-- admin inbox.
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    name       TEXT    NOT NULL,
+    email      TEXT    NOT NULL,
+    subject    TEXT    NOT NULL,
+    message    TEXT    NOT NULL,
+    status     TEXT    NOT NULL DEFAULT 'new',
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status, created_at DESC);
+

@@ -78,6 +78,18 @@ const ShopEaseAPI = {
     }
   },
 
+  // ---------------------------------------------------------- communications
+  /** Save a newsletter subscription. The address is validated again by the
+   * server; a repeated subscription is safely treated as a success. */
+  async subscribeNewsletter(email) {
+    return this._request("POST", "/api/newsletter/subscribe", { email });
+  },
+
+  /** Send a customer-support message to the store inbox. */
+  async sendContactMessage(message) {
+    return this._request("POST", "/api/contact", message);
+  },
+
   // ---------------------------------------------------------- products
   async getProducts(params = {}) {
     const qs = new URLSearchParams(params).toString();
@@ -804,3 +816,4 @@ const ShopEaseAuth = {
 };
 
 document.addEventListener("DOMContentLoaded", () => ShopEaseAuth.refreshNav());
+

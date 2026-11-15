@@ -700,31 +700,43 @@
     </div>
 
 
+    <script src="js/api.js"></script>
     <script src="js/products.js"></script>
     <script src="js/main.js"></script>
 
 
     <script>
 
-        document
-            .getElementById("contactForm")
-            .addEventListener(
-                "submit",
-                function (event) {
-
-                    event.preventDefault();
-
-                    showToast(
-                        "Your message has been submitted successfully."
-                    );
-
-                    this.reset();
-
+        document.getElementById("contactForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const button = this.querySelector('button[type="submit"]');
+            const original = button ? button.innerHTML : "";
+            if (button) {
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+            }
+            try {
+                await ShopEaseAPI.sendContactMessage({
+                    name: document.getElementById("contactName").value.trim(),
+                    email: document.getElementById("contactEmail").value.trim(),
+                    subject: document.getElementById("contactSubject").value.trim(),
+                    message: document.getElementById("contactMessage").value.trim()
+                });
+                this.reset();
+                showToast("Message received — our team will reply shortly.");
+            } catch (error) {
+                showToast(error.message || "We couldn't send your message. Please try again.");
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.innerHTML = original;
                 }
-            );
+            }
+        });
 
     </script>
 
 </body>
 
 </html>
+

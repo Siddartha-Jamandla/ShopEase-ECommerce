@@ -311,6 +311,12 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     pass
                 return self._ok(info)
 
+            if path == "/api/newsletter/subscribe" and method == "POST":
+                return self._api_newsletter_subscribe()
+
+            if path == "/api/contact" and method == "POST":
+                return self._api_contact_create()
+
             if path == "/api/errors" and method == "GET":
                 # admin-only: needs ?key=ADMIN_KEY or Authorization header
                 key = query.get("key", [""])[0] or self.headers.get("X-Admin-Key", "")
@@ -2137,6 +2143,48 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             conn.close()
         self._ok({"deleted": True, "id": address_id})
 
+    # -- customer communications --------------------------------------------
+
+    def _api_newsletter_subscribe(self):
+        """Store a newsletter subscriber. Re-submitting an address is safe
+        and returns the same successful response, so the form remains friendly
+        after a refresh or intermittent connection."""
+        email = str(self._read_json().get("email", "")).strip().lower()
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(email) > 254:
+            raise ApiError(400, "Please enter a valid email address")
+        with _db_lock:
+            conn = get_db()
+            conn.execute("INSERT OR IGNORE INTO newsletter_subscribers (email) VALUES (?)",
+                         (email,))
+            conn.commit()
+            conn.close()
+        self._ok({"subscribed": True, "email": email}, status=201)
+
+    def _api_contact_create(self):
+        """Persist a validated customer-support request from contact.html."""
+        body = self._read_json()
+        name = str(body.get("name", "")).strip()
+        email = str(body.get("email", "")).strip().lower()
+        subject = str(body.get("subject", "")).strip()
+        message = str(body.get("message", "")).strip()
+        if not 2 <= len(name) <= 100:
+            raise ApiError(400, "Name must be between 2 and 100 characters")
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(email) > 254:
+            raise ApiError(400, "Please enter a valid email address")
+        if not 3 <= len(subject) <= 160:
+            raise ApiError(400, "Subject must be between 3 and 160 characters")
+        if not 10 <= len(message) <= 5000:
+            raise ApiError(400, "Message must be between 10 and 5000 characters")
+        with _db_lock:
+            conn = get_db()
+            cur = conn.execute(
+                "INSERT INTO contact_messages (name, email, subject, message)"
+                " VALUES (?, ?, ?, ?)", (name, email, subject, message))
+            conn.commit()
+            message_id = cur.lastrowid
+            conn.close()
+        self._ok({"submitted": True, "id": message_id}, status=201)
+
     def _resolve_checkout_address(self, conn, user_id, body):
         """Resolve an optional checkout `address_id` to a shipping dict.
 
@@ -2236,3 +2284,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

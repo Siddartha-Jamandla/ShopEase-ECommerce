@@ -1089,15 +1089,33 @@ function setupNewsletter() {
     }
 
 
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
 
         event.preventDefault();
+        const email = document.getElementById("newsletterEmail");
+        const button = form.querySelector('button[type="submit"]');
+        if (!email || !email.value.trim()) return;
 
-        showToast(
-            "Thank you for subscribing!"
-        );
-
-        form.reset();
+        const originalLabel = button ? button.textContent : "";
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Subscribing…";
+        }
+        try {
+            if (typeof ShopEaseAPI === "undefined") {
+                throw new Error("Newsletter service is unavailable");
+            }
+            await ShopEaseAPI.subscribeNewsletter(email.value.trim());
+            form.reset();
+            showToast("You're on the list — watch your inbox for offers.");
+        } catch (error) {
+            showToast(error.message || "We couldn't save your subscription. Please try again.");
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalLabel;
+            }
+        }
 
     });
 
@@ -1249,3 +1267,4 @@ function setupCategoryCounts() {
         el.textContent = products.filter(p => p.category === cat).length;
     });
 }
+
