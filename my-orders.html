@@ -97,6 +97,29 @@
             font-weight: 600;
         }
 
+        .orders-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .orders-filter select {
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
         /* Order Card */
 
         .orders-list {
@@ -794,6 +817,23 @@
                     0 orders
                 </div>
 
+
+                <div class="orders-filter">
+
+                    <label for="orderStatusFilter">
+                        Status:
+                    </label>
+
+                    <select id="orderStatusFilter">
+                        <option value="">All statuses</option>
+                        <option value="placed">Placed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+
+                </div>
+
             </div>
 
 
@@ -1048,6 +1088,20 @@
             "DOMContentLoaded",
             function () {
 
+                const statusFilter =
+                    document.getElementById(
+                        "orderStatusFilter"
+                    );
+
+                if (statusFilter) {
+
+                    statusFilter.addEventListener(
+                        "change",
+                        loadOrders
+                    );
+
+                }
+
                 loadOrders();
 
             }
@@ -1076,6 +1130,39 @@
                 return [];
 
             }
+
+        }
+
+
+        /* Status key used by the filter. Backend orders already carry
+           placed/shipped/delivered/cancelled; device-only orders were
+           saved without a status and the page shows them as
+           "Confirmed", so a missing/"Confirmed" status counts as
+           "placed" here. */
+        function orderStatusKey(order) {
+
+            const raw =
+                String(
+                    (order && order.status) || "Confirmed"
+                )
+                    .toLowerCase()
+                    .trim();
+
+            return raw === "confirmed" ? "placed" : raw;
+
+        }
+
+
+        function orderStatusLabel(status) {
+
+            const labels = {
+                placed: "Placed",
+                shipped: "Shipped",
+                delivered: "Delivered",
+                cancelled: "Cancelled"
+            };
+
+            return labels[status] || "All statuses";
 
         }
 
@@ -1125,6 +1212,35 @@
         }
 
 
+        /* Filter the list on this page by the selected status.
+           Signed-in orders are already filtered server-side
+           (GET /api/orders?status=); this keeps the device-only
+           (localStorage) list filtered the same way. */
+        function filterOrdersByStatus(orders) {
+
+            const statusFilter =
+                document.getElementById(
+                    "orderStatusFilter"
+                );
+
+            const activeStatus =
+                statusFilter
+                    ? statusFilter.value
+                    : "";
+
+            if (!activeStatus) {
+                return orders;
+            }
+
+            return (orders || []).filter(
+                function (order) {
+                    return orderStatusKey(order) === activeStatus;
+                }
+            );
+
+        }
+
+
         /* =========================================
            LOAD ORDERS
         ========================================== */
@@ -1142,8 +1258,22 @@
 
                 try {
 
+                    const statusFilter =
+                        document.getElementById(
+                            "orderStatusFilter"
+                        );
+
+                    const activeStatus =
+                        statusFilter
+                            ? statusFilter.value
+                            : "";
+
                     const data =
-                        await ShopEaseAPI.getOrders();
+                        await ShopEaseAPI.getOrders(
+                            activeStatus
+                                ? { status: activeStatus }
+                                : {}
+                        );
 
                     const rows =
                         Array.isArray(data) ? data : (data.items || []);
@@ -1179,7 +1309,9 @@
 
 
             const orders =
-                backendOrders || getOrders();
+                filterOrdersByStatus(
+                    backendOrders || getOrders()
+                );
 
 
             const ordersList =
@@ -1227,7 +1359,48 @@
                 ordersList.innerHTML = "";
 
                 if (emptyOrders) {
+
+                    const statusFilter =
+                        document.getElementById(
+                            "orderStatusFilter"
+                        );
+
+                    const activeStatus =
+                        statusFilter
+                            ? statusFilter.value
+                            : "";
+
+                    const heading =
+                        emptyOrders.querySelector("h2");
+
+                    const message =
+                        emptyOrders.querySelector("p");
+
+                    if (activeStatus && heading && message) {
+
+                        heading.textContent =
+                            "No " +
+                            orderStatusLabel(activeStatus) +
+                            " orders";
+
+                        message.textContent =
+                            "You have no " +
+                            orderStatusLabel(activeStatus).toLowerCase() +
+                            " orders yet. Try another status.";
+
+                    } else if (heading && message) {
+
+                        heading.textContent = "No Orders Yet";
+
+                        message.textContent =
+                            "You haven't placed any orders yet. " +
+                            "Start shopping and your orders will " +
+                            "appear here.";
+
+                    }
+
                     emptyOrders.style.display = "block";
+
                 }
 
                 return;

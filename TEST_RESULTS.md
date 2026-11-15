@@ -291,3 +291,25 @@ excludes the `?id=` product; both pages pass `node --check` and serve
 200 with the strip from the live backend on a scratch DB (port 8153),
 health and products list still pass.
 **42 checks, all passing.**
+
+
+---
+
+## Daily upgrade — 2026-11-15 (IST): My Orders status filter
+
+`my-orders.html` gains a Status filter (All statuses / Placed /
+Shipped / Delivered / Cancelled) in the page header. Signed in, the
+selection is passed to `ShopEaseAPI.getOrders({status})` so the live
+backend filters (`GET /api/orders?status=`); signed out, the same
+filter runs client-side over the device-only orders, where a missing
+or "Confirmed" status counts as "placed". The empty state names the
+selected status when a filter yields nothing, and the order count
+reflects the filtered list.
+
+Tested locally (test_shopease_2026-11-15_item1.py, port 8161, scratch
+DB, live `backend/app.py`): 19 checks, all passing — select options,
+normalizer mappings (missing/"Confirmed" -> placed), diff discipline,
+plus a live register -> cart -> checkout flow proving
+`?status=placed` returns the order, `?status=delivered` returns none,
+an invalid status is a 400, and plain `/api/orders` still returns the
+array.
