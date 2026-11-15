@@ -1045,6 +1045,34 @@ function formatPrice(price) {
    PRODUCT CARD
 ========================================================= */
 
+/* Low-stock badge for product cards. "Only N left" when
+   0 < stock <= 5, "Out of stock" at 0. Returns "" when stock is
+   unknown — the offline fallback products carry no stock, so they
+   never show a wrong badge. */
+function stockBadgeHtml(product) {
+
+    const stock =
+        product && product.stock != null
+            ? Number(product.stock)
+            : null;
+
+    if (stock == null || isNaN(stock)) {
+        return "";
+    }
+
+    if (stock <= 0) {
+        return '<span class="low-stock-badge out-of-stock-badge">Out of stock</span>';
+    }
+
+    if (stock <= 5) {
+        return '<span class="low-stock-badge">Only ' + stock + ' left</span>';
+    }
+
+    return "";
+
+}
+
+
 function createProductCard(product) {
 
     const discount = getDiscountPercentage(product);
@@ -1151,6 +1179,8 @@ function createProductCard(product) {
                     }
 
                 </div>
+
+                ${stockBadgeHtml(product)}
 
 
                 <button

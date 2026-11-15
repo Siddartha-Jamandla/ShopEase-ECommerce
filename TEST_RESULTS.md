@@ -313,3 +313,31 @@ plus a live register -> cart -> checkout flow proving
 `?status=placed` returns the order, `?status=delivered` returns none,
 an invalid status is a 400, and plain `/api/orders` still returns the
 array.
+
+
+---
+
+## Daily upgrade — 2026-11-15 (IST): Low-stock badges
+
+`stockBadgeHtml(product)` in `js/products.js` renders "Only N left"
+(0 < stock ≤ 5) or "Out of stock" (stock 0) and nothing when stock is
+unknown, so the offline fallback catalog never shows a wrong badge.
+The badge appears under the price on shop-grid cards
+(`createProductCard`) and the `filters.js` fallback card, and as a
+stock line under the price on product-details.html
+(`renderProductDetails` in `js/main.js`); styles live in
+`css/components.css` (`.low-stock-badge`, `.out-of-stock-badge`,
+`.product-stock-line`). Seed data: four products now have genuinely
+low stock (cargo pants 3, running shoes 2, noise buds 4, yoga mat 0)
+— previously all 70 were 44–159, so the badge could never appear on a
+fresh database. Existing live databases are untouched (seed.py only
+runs on fresh setup).
+
+Tested locally (test_shopease_2026-11-15_item2.py, port 8162, scratch
+DB, live `backend/app.py`): 24 checks, all passing — the real
+`stockBadgeHtml` executed in Node over the boundary cases (1–5 low,
+0 out, 6+ and unknown hidden), diff discipline (additive everywhere
+except the 4 intended seed stock changes), plus a live flow: the API
+reports the seeded low stocks (3/2/4/0), checkout decrements the
+low-stock product 3 -> 2, and the out-of-stock product still lists
+with stock 0.

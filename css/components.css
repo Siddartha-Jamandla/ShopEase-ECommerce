@@ -176,6 +176,42 @@
     z-index: 2;
 }
 
+/* Low-stock badge on product cards ("Only N left" / "Out of stock").
+   Shown under the price; hidden when stock is unknown. */
+.low-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 999px;
+    padding: 4px 10px;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.out-of-stock-badge {
+    background: rgba(220, 38, 38, 0.10);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.30);
+}
+
+/* Stock line under the price on product-details.html. */
+.product-stock-line {
+    margin: 10px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.product-stock-line.low {
+    color: #b45309;
+}
+
+.product-stock-line.out {
+    color: #b91c1c;
+}
+
 
 /* =====================================================
    PRODUCT WISHLIST

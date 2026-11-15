@@ -324,6 +324,37 @@ function renderProductDetails(product) {
     }
 
 
+    const stock = document.getElementById("productStock");
+
+    if (stock) {
+
+        const stockCount =
+            product && product.stock != null
+                ? Number(product.stock)
+                : null;
+
+        if (stockCount == null || isNaN(stockCount) || stockCount > 5) {
+
+            stock.style.display = "none";
+
+        } else if (stockCount <= 0) {
+
+            stock.textContent = "Out of stock";
+            stock.className = "product-stock-line out";
+            stock.style.display = "block";
+
+        } else {
+
+            stock.textContent =
+                "Only " + stockCount + " left in stock — order soon";
+            stock.className = "product-stock-line low";
+            stock.style.display = "block";
+
+        }
+
+    }
+
+
     if (description) {
         description.textContent = product.description;
     }

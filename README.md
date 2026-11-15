@@ -252,6 +252,7 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   `products.js` also loads `compare.js`, so the button works on
   shop, categories, home, product details, checkout, profile and
   my-orders — not just product details.
+- Low-stock badges: product cards (shop grid via `createProductCard`, plus the `filters.js` fallback card) and the product-details page show "Only N left" when 0 < stock ≤ 5 and "Out of stock" at 0; nothing is shown when stock is unknown (offline fallback data carries no stock). Seed data now has four genuinely low-stock products so the badge is visible on a fresh database (cargo pants 3, running shoes 2, noise buds 4, yoga mat 0).
 - Recently viewed products (`js/recently-viewed.js`): every
   product-details visit is recorded in localStorage (max 8, deduped,
   most recent first) and a "Recently viewed" strip renders from that

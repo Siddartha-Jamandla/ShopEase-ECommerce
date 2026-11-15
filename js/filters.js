@@ -1148,6 +1148,12 @@ function createFallbackShopCard(product) {
 
                 </div>
 
+                ${
+                    typeof stockBadgeHtml === "function"
+                        ? stockBadgeHtml(product)
+                        : ""
+                }
+
             </div>
 
         </article>
