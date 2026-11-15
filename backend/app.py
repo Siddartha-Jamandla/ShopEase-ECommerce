@@ -580,6 +580,20 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             raise ApiError(400, "'page' must be >= 1")
         if not 1 <= per_page <= 100:
             raise ApiError(400, "'per_page' must be between 1 and 100")
+        min_price_raw = (query.get("min_price", [""])[0] or "").strip()
+        max_price_raw = (query.get("max_price", [""])[0] or "").strip()
+        try:
+            min_price = float(min_price_raw) if min_price_raw else None
+            max_price = float(max_price_raw) if max_price_raw else None
+        except ValueError:
+            raise ApiError(400, "'min_price' and 'max_price' must be numbers")
+        if min_price is not None and min_price < 0:
+            raise ApiError(400, "'min_price' must be >= 0")
+        if max_price is not None and max_price < 0:
+            raise ApiError(400, "'max_price' must be >= 0")
+        if (min_price is not None and max_price is not None
+                and min_price > max_price):
+            raise ApiError(400, "'min_price' must not exceed 'max_price'")
 
         sql = "SELECT * FROM products"
         clauses, params = [], []
@@ -589,6 +603,12 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
         if search:
             clauses.append("(name LIKE ? OR description LIKE ?)")
             params += [f"%{search}%", f"%{search}%"]
+        if min_price is not None:
+            clauses.append("price >= ?")
+            params.append(min_price)
+        if max_price is not None:
+            clauses.append("price <= ?")
+            params.append(max_price)
         where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
         sql += where + " ORDER BY " + (self._PRODUCT_SORTS[sort] if sort else "id")
 

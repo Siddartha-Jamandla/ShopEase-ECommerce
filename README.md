@@ -82,7 +82,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | Method | Endpoint              | Auth | Description |
 |--------|-----------------------|------|-------------|
 | GET    | `/api/health`         | –    | Liveness check → `{status:"ok", time}` |
-| GET    | `/api/products`       | –    | List products. Filters: `?category=`, `?q=` (alias `?search=`). Sort: `?sort=newest\|price_asc\|price_desc\|name_asc\|name_desc\|rating_asc\|rating_desc` (unrated products sort last). Pagination: `?page=&per_page=` (1–100, default 20) → `{items, page, per_page, total, total_pages}`; plain array otherwise |
+| GET    | `/api/products`       | –    | List products. Filters: `?category=`, `?q=` (alias `?search=`), `?min_price=` / `?max_price=` (numbers ≥ 0, min ≤ max, else 400). Sort: `?sort=newest\|price_asc\|price_desc\|name_asc\|name_desc\|rating_asc\|rating_desc` (unrated products sort last). Pagination: `?page=&per_page=` (1–100, default 20) → `{items, page, per_page, total, total_pages}`; plain array otherwise |
 | GET    | `/api/products/:id`   | –    | Single product (404 if missing); includes `average_rating` and `review_count` |
 | GET    | `/api/products/suggest` | –    | Search suggestions for the header autocomplete: `?q=` (empty query → `[]`), `?limit=` (1–8, default 5) → `[{id, name, price, image_url, category, stock}]`, name-prefix first, then name-contains, then description; in-stock first |
 | GET    | `/api/products/:id/related` | – | Related products: same category, excludes the product itself, in-stock first, then rating desc, then name; `?limit=` (1–8, default 4); 404 if the product is missing |
@@ -252,6 +252,7 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   `products.js` also loads `compare.js`, so the button works on
   shop, categories, home, product details, checkout, profile and
   my-orders — not just product details.
+- Price-range filter that works: the shop page's maximum-price slider was unwired (`filters.js` looked for an id `maxPrice` that never existed), so every shop view silently capped at ₹5000 and hid the 4 products above that price. The slider is now wired with its top end set from the catalog, a minimum-price input was added, and `GET /api/products` accepts `?min_price=` / `?max_price=`.
 - Low-stock badges: product cards (shop grid via `createProductCard`, plus the `filters.js` fallback card) and the product-details page show "Only N left" when 0 < stock ≤ 5 and "Out of stock" at 0; nothing is shown when stock is unknown (offline fallback data carries no stock). Seed data now has four genuinely low-stock products so the badge is visible on a fresh database (cargo pants 3, running shoes 2, noise buds 4, yoga mat 0).
 - Recently viewed products (`js/recently-viewed.js`): every
   product-details visit is recorded in localStorage (max 8, deduped,

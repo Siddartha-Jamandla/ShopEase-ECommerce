@@ -341,3 +341,27 @@ except the 4 intended seed stock changes), plus a live flow: the API
 reports the seeded low stocks (3/2/4/0), checkout decrements the
 low-stock product 3 -> 2, and the out-of-stock product still lists
 with stock 0.
+
+
+---
+
+## Daily upgrade — 2026-11-15 (IST): Price-range filter that works
+
+Bug: the shop page's maximum-price slider did nothing — `js/filters.js`
+looked for an element id `maxPrice` that `shop.html` never had, so
+`applyShopFilters()` always fell back to a hard ₹5000 cap and the 4
+products priced above ₹5000 were silently hidden from the shop grid.
+Fixed by wiring the real `#priceFilter` slider (its top end is set
+from the catalog max on load, so nothing is hidden by default) and
+adding a minimum-price input (`#minPrice`); the ₹ labels update live
+and both reset in "Clear filters". `GET /api/products` also gained
+`?min_price=` / `?max_price=` (numbers ≥ 0, min ≤ max, else 400).
+
+Tested locally (test_shopease_2026-11-15_item3.py, port 8163, scratch
+DB, snapshot `backend/app.py`): 20 checks, all passing — the real
+`js/filters.js` executed in a Node VM against a stub DOM (slider top
+end becomes the ₹70,000 catalog max, the ₹69,999 product is visible
+again, min/max filtering and Clear-filters reset all work), plus live
+API checks: range 1000–2000 returns only in-range products, min > max
+/ negative / non-numeric are 400s, and the range composes with
+category + sort.

@@ -120,20 +120,115 @@ function setupShopFilters() {
 
 
     /*
-       Maximum price
+       Price range: the maximum-price slider and the minimum-price
+       input. (The slider used to be unwired — this file looked for
+       an element id "maxPrice" that shop.html never had — so the
+       shop silently capped every view at ₹5000 and hid the 4
+       products priced above that. The slider is now wired, and its
+       top end is set from the live catalog so nothing is hidden by
+       default.)
     */
 
-    const maxPrice =
+    const priceSlider =
         document.getElementById(
-            "maxPrice"
+            "priceFilter"
+        );
+
+    const minPriceInput =
+        document.getElementById(
+            "minPrice"
+        );
+
+    const priceValue =
+        document.getElementById(
+            "priceValue"
+        );
+
+    const minPriceLabel =
+        document.getElementById(
+            "minPriceLabel"
         );
 
 
-    if (maxPrice) {
+    if (
+        priceSlider &&
+        typeof products !== "undefined" &&
+        Array.isArray(products) &&
+        products.length
+    ) {
 
-        maxPrice.addEventListener(
+        const catalogMax =
+            Math.max.apply(
+                null,
+                products.map(
+                    function (product) {
+                        return Number(product.price || 0);
+                    }
+                )
+            );
+
+        const sliderMax =
+            Math.max(
+                5000,
+                Math.ceil(catalogMax / 500) * 500
+            );
+
+        priceSlider.max = sliderMax;
+        priceSlider.value = sliderMax;
+
+        if (priceValue) {
+
+            priceValue.textContent =
+                "₹" + sliderMax.toLocaleString("en-IN");
+
+        }
+
+    }
+
+
+    if (priceSlider) {
+
+        priceSlider.addEventListener(
             "input",
-            applyShopFilters
+            function () {
+
+                if (priceValue) {
+
+                    priceValue.textContent =
+                        "₹" +
+                        Number(
+                            priceSlider.value || 0
+                        ).toLocaleString("en-IN");
+
+                }
+
+                applyShopFilters();
+
+            }
+        );
+
+    }
+
+
+    if (minPriceInput) {
+
+        minPriceInput.addEventListener(
+            "input",
+            function () {
+
+                if (minPriceLabel) {
+
+                    minPriceLabel.textContent =
+                        "₹" +
+                        Number(
+                            minPriceInput.value || 0
+                        ).toLocaleString("en-IN");
+
+                }
+
+                applyShopFilters();
+
+            }
         );
 
     }
@@ -290,21 +385,37 @@ function applyShopFilters() {
 
 
     /* =====================================================
-       MAXIMUM PRICE
+       PRICE RANGE
     ===================================================== */
 
     const maxPriceElement =
         document.getElementById(
-            "maxPrice"
+            "priceFilter"
         );
 
 
     const maxPrice =
         maxPriceElement
             ? Number(
-                maxPriceElement.value || 5000
+                maxPriceElement.value ||
+                maxPriceElement.max ||
+                5000
             )
             : 5000;
+
+
+    const minPriceElement =
+        document.getElementById(
+            "minPrice"
+        );
+
+
+    const minPrice =
+        minPriceElement
+            ? Number(
+                minPriceElement.value || 0
+            )
+            : 0;
 
 
     /* =====================================================
@@ -424,6 +535,9 @@ function applyShopFilters() {
                 ----------------------------------------- */
 
                 const matchesPrice =
+                    Number(
+                        product.price || 0
+                    ) >= minPrice &&
                     Number(
                         product.price || 0
                     ) <= maxPrice;
@@ -818,19 +932,55 @@ function clearAllFilters() {
 
 
     /*
-       Reset price.
+       Reset price range.
     */
 
-    const maxPrice =
+    const priceSlider =
         document.getElementById(
-            "maxPrice"
+            "priceFilter"
+        );
+
+    const minPriceInput =
+        document.getElementById(
+            "minPrice"
+        );
+
+    const priceValue =
+        document.getElementById(
+            "priceValue"
+        );
+
+    const minPriceLabel =
+        document.getElementById(
+            "minPriceLabel"
         );
 
 
-    if (maxPrice) {
+    if (priceSlider) {
 
-        maxPrice.value =
-            maxPrice.max || 5000;
+        priceSlider.value =
+            priceSlider.max || 5000;
+
+        if (priceValue) {
+
+            priceValue.textContent =
+                "₹" +
+                Number(
+                    priceSlider.value || 0
+                ).toLocaleString("en-IN");
+
+        }
+
+    }
+
+
+    if (minPriceInput) {
+
+        minPriceInput.value = 0;
+
+        if (minPriceLabel) {
+            minPriceLabel.textContent = "₹0";
+        }
 
     }
 
