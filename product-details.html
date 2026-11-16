@@ -523,6 +523,48 @@
                     >
                         Buy Now
                     </button>
+                    <!-- NOTIFY ME WHEN BACK IN STOCK
+                         Shown only for out-of-stock products
+                         (js/main.js toggles #stockNotifyBox). -->
+
+                    <div
+                        class="stock-notify-box"
+                        id="stockNotifyBox"
+                        style="display: none;"
+                    >
+
+                        <p class="stock-notify-title">
+                            <i class="fa-regular fa-bell"></i>
+                            Out of stock — get notified when it's back
+                        </p>
+
+                        <form
+                            class="stock-notify-form"
+                            id="stockNotifyForm"
+                        >
+
+                            <input
+                                type="email"
+                                id="stockNotifyEmail"
+                                placeholder="Your email address"
+                                aria-label="Email address for back-in-stock notification"
+                                required
+                            >
+
+                            <button type="submit" id="stockNotifyButton">
+                                Notify me
+                            </button>
+
+                        </form>
+
+                        <p
+                            class="stock-notify-message"
+                            id="stockNotifyMessage"
+                            role="status"
+                            style="display: none;"
+                        ></p>
+
+                    </div>
 
 
                     <!-- DELIVERY -->

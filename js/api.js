@@ -90,6 +90,15 @@ const ShopEaseAPI = {
     return this._request("POST", "/api/contact", message);
   },
 
+  /** Register an email for a back-in-stock alert on an out-of-stock
+   *  product. No login needed. Returns {subscribed, already_registered,
+   *  product_id, email}; 400 when the email is invalid or the product
+   *  is in stock, 404 when the product does not exist. Re-registering
+   *  the same email+product succeeds and reports already_registered. */
+  async notifyWhenBackInStock(productId, email) {
+    return this._request("POST", "/api/products/" + productId + "/notify-me", { email });
+  },
+
   // ---------------------------------------------------------- products
   async getProducts(params = {}) {
     const qs = new URLSearchParams(params).toString();

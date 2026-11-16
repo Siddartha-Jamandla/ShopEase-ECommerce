@@ -384,6 +384,187 @@ function renderProductDetails(product) {
 
     updateProductWishlistButton();
 
+    setupStockNotify(product);
+
+}
+/* =========================================
+   NOTIFY ME WHEN BACK IN STOCK
+========================================= */
+
+// localStorage remembers which products this browser already asked to be
+// notified about, so the "already registered" state survives a reload
+// even though the alert list itself is never exposed by the API.
+const STOCK_NOTIFY_KEY = "shopease_stock_alerts";
+
+function getStockNotifyIds() {
+
+    try {
+
+        const ids =
+            JSON.parse(
+                localStorage.getItem(STOCK_NOTIFY_KEY)
+            ) || [];
+
+        return [...new Set(ids.map(Number).filter(id => !Number.isNaN(id)))];
+
+    } catch (e) {
+
+        return [];
+
+    }
+
+}
+
+function markStockNotified(productId) {
+
+    const ids = getStockNotifyIds();
+
+    if (!ids.includes(Number(productId))) {
+        ids.push(Number(productId));
+    }
+
+    try {
+        localStorage.setItem(STOCK_NOTIFY_KEY, JSON.stringify(ids));
+    } catch (e) {
+        /* storage unavailable - the server still reports
+           already_registered on the next attempt */
+    }
+
+}
+
+function setupStockNotify(product) {
+
+    const box =
+        document.getElementById("stockNotifyBox");
+
+    const form =
+        document.getElementById("stockNotifyForm");
+
+    const message =
+        document.getElementById("stockNotifyMessage");
+
+    if (!box || !form || !message) {
+        return;
+    }
+
+    const addCartButton =
+        document.querySelector(".purchase-row .add-cart-button");
+
+    const buyNowButton =
+        document.querySelector(".buy-now-button");
+
+    const stock =
+        product && product.stock != null
+            ? Number(product.stock)
+            : null;
+
+    const outOfStock =
+        stock != null && !isNaN(stock) && stock <= 0;
+
+    // In stock (or stock unknown, e.g. offline fallback data): no
+    // notify box, and the purchase buttons stay as they were.
+    if (!outOfStock) {
+
+        box.style.display = "none";
+
+        if (addCartButton) {
+            addCartButton.style.display = "";
+        }
+
+        if (buyNowButton) {
+            buyNowButton.style.display = "";
+        }
+
+        return;
+    }
+
+    // Out of stock: hide the buttons that would sell a product with
+    // no stock, and show the notify-me form instead.
+    if (addCartButton) {
+        addCartButton.style.display = "none";
+    }
+
+    if (buyNowButton) {
+        buyNowButton.style.display = "none";
+    }
+
+    box.style.display = "block";
+
+    const emailInput =
+        document.getElementById("stockNotifyEmail");
+
+    const button =
+        document.getElementById("stockNotifyButton");
+
+    // Already registered from this browser: show that state, no form.
+    if (getStockNotifyIds().includes(Number(product.id))) {
+
+        form.style.display = "none";
+
+        message.textContent =
+            "You're on the list \u2014 we'll email you as soon as it's back in stock.";
+
+        message.style.display = "block";
+
+        return;
+    }
+
+    form.style.display = "";
+
+    message.style.display = "none";
+
+    form.onsubmit = async event => {
+
+        event.preventDefault();
+
+        const email = (emailInput.value || "").trim();
+
+        if (!email) {
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Saving\u2026";
+
+        try {
+
+            if (
+                typeof ShopEaseAPI === "undefined" ||
+                typeof ShopEaseAPI.notifyWhenBackInStock !== "function"
+            ) {
+                throw new Error("Notification service is unavailable");
+            }
+
+            const result =
+                await ShopEaseAPI.notifyWhenBackInStock(product.id, email);
+
+            markStockNotified(product.id);
+
+            form.style.display = "none";
+
+            message.textContent =
+                result && result.already_registered
+                    ? "You're already on the list \u2014 we'll email you as soon as it's back in stock."
+                    : "You're on the list \u2014 we'll email you as soon as it's back in stock.";
+
+            message.style.display = "block";
+
+        } catch (err) {
+
+            showToast(
+                err.message ||
+                "We couldn't save your notification. Please try again."
+            );
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Notify me";
+
+        }
+
+    };
+
 }
 
 

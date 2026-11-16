@@ -361,6 +361,12 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
                     return self._api_review_delete(product_id)
                 raise ApiError(405, "Method not allowed")
 
+            m = re.fullmatch(r"/api/products/(\d+)/notify-me", path)
+            if m:
+                if method == "POST":
+                    return self._api_stock_notify(int(m.group(1)))
+                raise ApiError(405, "Method not allowed")
+
             m = re.fullmatch(r"/api/products/(\d+)", path)
             if m:
                 if method == "GET":
@@ -2159,6 +2165,43 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             conn.commit()
             conn.close()
         self._ok({"subscribed": True, "email": email}, status=201)
+
+    def _api_stock_notify(self, product_id):
+        """Register an email for a back-in-stock alert on one product.
+
+        POST /api/products/:id/notify-me {"email": "..."} — no login
+        needed (the alert is keyed by email, not by account).
+        404 for an unknown product; 400 for a missing/invalid email, and
+        400 when the product is in stock (there is nothing to wait for).
+        Re-registering the same email+product is duplicate-safe: the
+        UNIQUE(product_id, email) constraint plus INSERT OR IGNORE keeps
+        a single row and the response reports already_registered=true.
+        The alert list is never listed by any endpoint.
+        """
+        body = self._read_json()
+        email = str(body.get("email", "") or "").strip().lower()
+        if not email:
+            raise ApiError(400, "Field 'email' is required")
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or len(email) > 254:
+            raise ApiError(400, "Please enter a valid email address")
+        with _db_lock:
+            conn = get_db()
+            product = conn.execute(
+                "SELECT id, stock FROM products WHERE id = ?",
+                (product_id,)).fetchone()
+            if product is None:
+                conn.close()
+                raise ApiError(404, "Product not found")
+            if product["stock"] is not None and int(product["stock"]) > 0:
+                conn.close()
+                raise ApiError(400, "Product is in stock — no notification needed")
+            cur = conn.execute(
+                "INSERT OR IGNORE INTO stock_alerts (product_id, email)"
+                " VALUES (?, ?)", (product_id, email))
+            conn.commit()
+            conn.close()
+        self._ok({"subscribed": True, "already_registered": cur.rowcount == 0,
+                  "product_id": product_id, "email": email})
 
     def _api_contact_create(self):
         """Persist a validated customer-support request from contact.html."""

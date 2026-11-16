@@ -174,3 +174,20 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 
 CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status, created_at DESC);
 
+-- Back-in-stock alerts: a shopper leaves an email for an out-of-stock
+-- product and is notified when it is restocked. One row per
+-- (product, email) — re-registering the same pair is a no-op (the API
+-- uses INSERT OR IGNORE and reports already_registered). The list is
+-- never exposed by any public endpoint; staff read it from SQLite or a
+-- future admin view.
+CREATE TABLE IF NOT EXISTS stock_alerts (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    email      TEXT    NOT NULL,
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (product_id, email)
+);
+
+CREATE INDEX IF NOT EXISTS idx_stock_alerts_product ON stock_alerts(product_id);
+CREATE INDEX IF NOT EXISTS idx_stock_alerts_email ON stock_alerts(email);
+

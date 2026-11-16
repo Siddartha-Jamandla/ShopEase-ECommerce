@@ -86,6 +86,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | GET    | `/api/products/:id`   | –    | Single product (404 if missing); includes `average_rating` and `review_count` |
 | GET    | `/api/products/suggest` | –    | Search suggestions for the header autocomplete: `?q=` (empty query → `[]`), `?limit=` (1–8, default 5) → `[{id, name, price, image_url, category, stock}]`, name-prefix first, then name-contains, then description; in-stock first |
 | GET    | `/api/products/:id/related` | – | Related products: same category, excludes the product itself, in-stock first, then rating desc, then name; `?limit=` (1–8, default 4); 404 if the product is missing |
+| POST   | `/api/products/:id/notify-me` | – | Back-in-stock alert: `{email}` (no login needed) → `{subscribed, already_registered, product_id, email}`. 404 if the product is missing; 400 for a missing/invalid email, and 400 when the product is in stock (there is nothing to wait for). Re-registering the same email+product returns 200 without a duplicate row. The alert list is never exposed by any endpoint |
 | GET    | `/api/products/:id/reviews` | – | Reviews for a product (paginated, newest first) → `{items, page, per_page, total, total_pages, average_rating}`; each item has `user_name` |
 | POST   | `/api/products/:id/reviews` | user | Add a review: `{rating}` (int 1–5, required), `{title?, comment?}`; 409 if you already reviewed (use PUT) |
 | PUT    | `/api/products/:id/reviews` | user | Update your own review (404 if you haven't reviewed) |
@@ -187,6 +188,7 @@ cart_items(id, user_id → users, product_id → products, quantity, UNIQUE(user
 orders(id, user_id → users, total, status, shipping_name, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_phone, created_at, updated_at)
 order_items(id, order_id → orders, product_id → products, quantity, price)
 order_status_history(id, order_id → orders, status, changed_at)
+stock_alerts(id, product_id → products, email, created_at, UNIQUE(product_id, email))
 ```
 
 - `password_hash` = `salt$sha256(salt + password)` (hashlib, per-user salt)
@@ -254,6 +256,7 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   my-orders — not just product details.
 - Price-range filter that works: the shop page's maximum-price slider was unwired (`filters.js` looked for an id `maxPrice` that never existed), so every shop view silently capped at ₹5000 and hid the 4 products above that price. The slider is now wired with its top end set from the catalog, a minimum-price input was added, and `GET /api/products` accepts `?min_price=` / `?max_price=`.
 - Low-stock badges: product cards (shop grid via `createProductCard`, plus the `filters.js` fallback card) and the product-details page show "Only N left" when 0 < stock ≤ 5 and "Out of stock" at 0; nothing is shown when stock is unknown (offline fallback data carries no stock). Seed data now has four genuinely low-stock products so the badge is visible on a fresh database (cargo pants 3, running shoes 2, noise buds 4, yoga mat 0).
+- Notify me when back in stock: on `product-details.html`, an out-of-stock product (stock 0) hides the Add to Cart / Buy Now buttons and shows a "Notify me" email form instead (`POST /api/products/:id/notify-me`, no login needed). After subscribing — or if this browser already subscribed — the page shows "You're on the list — we'll email you as soon as it's back in stock." Alerts live in the `stock_alerts` table (one row per product+email, `UNIQUE (product_id, email)`), and the list is never exposed by any endpoint.
 - Recently viewed products (`js/recently-viewed.js`): every
   product-details visit is recorded in localStorage (max 8, deduped,
   most recent first) and a "Recently viewed" strip renders from that
