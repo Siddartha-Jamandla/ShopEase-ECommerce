@@ -279,6 +279,75 @@
     text-decoration: underline;
 }
 
+.cart-save-later {
+    border: 0;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cart-save-later:hover {
+    color: #f59e0b;
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   SAVED FOR LATER
+========================================================= */
+
+.saved-for-later {
+    border-top: 1px solid #e5e7eb;
+}
+
+.saved-for-later-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.saved-for-later-header h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 750;
+}
+
+.saved-for-later-header p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.saved-item {
+    background: #f8fafc;
+}
+
+.saved-move-to-cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #f59e0b;
+    color: #111827;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.saved-move-to-cart:hover {
+    background: #d97706;
+    color: #ffffff;
+}
+
 
 /* =========================================================
    SUMMARY

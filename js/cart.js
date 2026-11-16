@@ -76,6 +76,49 @@ function saveCartItems(cart) {
 
 
 /* =========================================================
+   GET SAVED FOR LATER
+   Same persistence model as the cart itself: localStorage,
+   so it works for guests and signed-in users alike and
+   survives reloads. Saved items keep their quantity and
+   selected options (size / color), which the wishlist
+   (product ids only) cannot hold.
+========================================================= */
+
+function getSavedForLaterItems() {
+
+    try {
+
+        const saved = JSON.parse(
+            localStorage.getItem("savedForLater")
+        );
+
+        return Array.isArray(saved) ? saved : [];
+
+    } catch (error) {
+
+        console.error("Unable to read saved items:", error);
+
+        return [];
+
+    }
+}
+
+
+/* =========================================================
+   SAVE SAVED FOR LATER
+========================================================= */
+
+function saveSavedForLaterItems(saved) {
+
+    localStorage.setItem(
+        "savedForLater",
+        JSON.stringify(saved)
+    );
+
+}
+
+
+/* =========================================================
    FIND PRODUCT
 ========================================================= */
 
@@ -111,6 +154,12 @@ function renderCart() {
     if (!container) {
         return;
     }
+
+
+    /* Saved for later is independent of the cart contents,
+       so it renders even when the cart is empty. */
+
+    renderSavedForLater();
 
 
     let cart = getCartItems();
@@ -337,6 +386,23 @@ function renderCart() {
 
                     <button
                         type="button"
+                        class="cart-save-later"
+                        onclick="
+                            saveCartItemForLater(
+                                ${product.id}
+                            )
+                        "
+                    >
+
+                        <i class="fa-regular fa-bookmark"></i>
+
+                        Save for later
+
+                    </button>
+
+
+                    <button
+                        type="button"
                         class="cart-remove"
                         onclick="
                             removeCartItem(
@@ -539,6 +605,468 @@ function removeCartItem(productId) {
         );
 
     }
+
+}
+
+
+/* =========================================================
+   SAVE FOR LATER
+   Move a cart item to the saved list. The item keeps its
+   quantity and selected options. Saving an item that is
+   already saved just removes it from the cart (no duplicate
+   saved entries).
+========================================================= */
+
+function saveCartItemForLater(productId) {
+
+    const product =
+        findProduct(productId);
+
+
+    const cart =
+        getCartItems();
+
+
+    const item =
+        cart.find(function (cartItem) {
+
+            return Number(cartItem.id) ===
+                Number(productId);
+
+        });
+
+
+    if (!item) {
+        return;
+    }
+
+
+    const saved =
+        getSavedForLaterItems();
+
+
+    const alreadySaved =
+        saved.some(function (savedItem) {
+
+            return Number(savedItem.id) ===
+                Number(productId);
+
+        });
+
+
+    if (!alreadySaved) {
+
+        saved.push({
+            id: item.id,
+            quantity: Math.max(
+                1,
+                Number(item.quantity || 1)
+            ),
+            size: item.size,
+            color: item.color,
+        });
+
+        saveSavedForLaterItems(saved);
+
+    }
+
+
+    removeCartItem(productId);
+
+
+    if (typeof showToast === "function") {
+
+        showToast(
+            product
+                ? `${product.name} saved for later.`
+                : "Product saved for later."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MOVE SAVED ITEM TO CART
+   Restores a saved item to the cart with its saved
+   quantity and options. If the product is already in the
+   cart, the quantities merge (capped at 10, the cart max).
+========================================================= */
+
+function moveSavedItemToCart(productId) {
+
+    const product =
+        findProduct(productId);
+
+
+    const saved =
+        getSavedForLaterItems();
+
+
+    const savedItem =
+        saved.find(function (item) {
+
+            return Number(item.id) ===
+                Number(productId);
+
+        });
+
+
+    if (!savedItem) {
+        return;
+    }
+
+
+    saveSavedForLaterItems(
+        saved.filter(function (item) {
+
+            return Number(item.id) !==
+                Number(productId);
+
+        })
+    );
+
+
+    const cart =
+        getCartItems();
+
+
+    const existingItem =
+        cart.find(function (cartItem) {
+
+            return Number(cartItem.id) ===
+                Number(productId);
+
+        });
+
+
+    if (existingItem) {
+
+        existingItem.quantity =
+            Math.min(
+                10,
+                Math.max(1, Number(existingItem.quantity || 1)) +
+                Math.max(1, Number(savedItem.quantity || 1))
+            );
+
+    } else {
+
+        cart.push({
+            id: savedItem.id,
+            quantity: Math.min(
+                10,
+                Math.max(1, Number(savedItem.quantity || 1))
+            ),
+            size: savedItem.size,
+            color: savedItem.color,
+        });
+
+    }
+
+
+    saveCartItems(cart);
+
+    renderCart();
+
+
+    if (typeof showToast === "function") {
+
+        showToast(
+            product
+                ? `${product.name} moved back to cart.`
+                : "Product moved back to cart."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REMOVE SAVED ITEM
+   Deletes a saved item permanently (it does not go back
+   to the cart).
+========================================================= */
+
+function removeSavedItem(productId) {
+
+    const product =
+        findProduct(productId);
+
+
+    const saved =
+        getSavedForLaterItems();
+
+
+    const itemExists =
+        saved.some(function (item) {
+
+            return Number(item.id) ===
+                Number(productId);
+
+        });
+
+
+    if (!itemExists) {
+        return;
+    }
+
+
+    saveSavedForLaterItems(
+        saved.filter(function (item) {
+
+            return Number(item.id) !==
+                Number(productId);
+
+        })
+    );
+
+
+    renderCart();
+
+
+    if (typeof showToast === "function") {
+
+        showToast(
+            product
+                ? `${product.name} removed from saved items.`
+                : "Product removed from saved items."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER SAVED FOR LATER
+========================================================= */
+
+function renderSavedForLater() {
+
+    const section =
+        document.getElementById("savedForLaterSection");
+
+    const container =
+        document.getElementById("savedForLaterItems");
+
+    const countElement =
+        document.getElementById("savedForLaterCount");
+
+
+    if (!section || !container) {
+        return;
+    }
+
+
+    let saved = getSavedForLaterItems();
+
+
+    /* -----------------------------------------------------
+       Remove invalid products
+    ----------------------------------------------------- */
+
+    saved = saved.filter(function (item) {
+
+        /* findProduct returns undefined (not null) for an
+           unknown id, so test for both. */
+
+        return findProduct(item.id) != null;
+
+    });
+
+
+    saveSavedForLaterItems(saved);
+
+
+    if (saved.length === 0) {
+
+        section.style.display = "none";
+
+        container.innerHTML = "";
+
+        return;
+    }
+
+
+    section.style.display = "block";
+
+
+    if (countElement) {
+
+        countElement.textContent =
+            `${saved.length} ${
+                saved.length === 1
+                    ? "item"
+                    : "items"
+            }`;
+
+    }
+
+
+    container.innerHTML = saved.map(function (item) {
+
+        const product =
+            findProduct(item.id);
+
+        const quantity =
+            Math.max(
+                1,
+                Number(item.quantity || 1)
+            );
+
+
+        return `
+            <article
+                class="cart-item saved-item"
+                data-product-id="${product.id}"
+            >
+
+                <!-- Product Image -->
+                <div class="cart-item-image">
+
+                    <img
+                        src="${getProductImage(product)}"
+                        alt="${product.name}"
+                        onerror="
+                            this.style.display='none';
+                            this.nextElementSibling.style.display='flex';
+                        "
+                    >
+
+                    <div
+                        class="cart-item-image-fallback"
+                        style="display:none;"
+                    >
+                        <i class="fa-solid ${product.icon}"></i>
+                    </div>
+
+                </div>
+
+
+                <!-- Product Details -->
+                <div class="cart-item-details">
+
+                    <div>
+
+                        <span class="cart-item-category">
+                            ${product.category}
+                        </span>
+
+                        <h3 class="cart-item-name">
+
+                            <a
+                                href="product-details.html?id=${product.id}"
+                            >
+                                ${product.name}
+                            </a>
+
+                        </h3>
+
+                        <div class="cart-item-brand">
+                            ${product.brand}
+                        </div>
+
+
+                        <!-- Selected Options -->
+                        <div class="cart-item-options">
+
+                            ${
+                                item.size
+                                    ? `
+                                        <span class="cart-option">
+                                            Size: ${item.size}
+                                        </span>
+                                      `
+                                    : ""
+                            }
+
+                            ${
+                                item.color
+                                    ? `
+                                        <span class="cart-option">
+                                            Color: ${item.color}
+                                        </span>
+                                      `
+                                    : ""
+                            }
+
+                            <span class="cart-option">
+                                Qty: ${quantity}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Price -->
+                    <div class="cart-item-price">
+
+                        <span class="cart-current-price">
+                            ${formatCurrency(product.price)}
+                        </span>
+
+                        ${
+                            product.oldPrice
+                                ? `
+                                    <span class="cart-old-price">
+                                        ${formatCurrency(
+                                            product.oldPrice
+                                        )}
+                                    </span>
+                                  `
+                                : ""
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <!-- Move to Cart / Remove -->
+                <div class="cart-item-actions">
+
+                    <button
+                        type="button"
+                        class="saved-move-to-cart"
+                        onclick="
+                            moveSavedItemToCart(
+                                ${product.id}
+                            )
+                        "
+                    >
+
+                        <i class="fa-solid fa-cart-shopping"></i>
+
+                        Move to cart
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="cart-remove"
+                        onclick="
+                            removeSavedItem(
+                                ${product.id}
+                            )
+                        "
+                    >
+
+                        <i class="fa-regular fa-trash-can"></i>
+
+                        Remove
+
+                    </button>
+
+                </div>
+
+            </article>
+        `;
+
+    }).join("");
 
 }
 
