@@ -120,6 +120,46 @@
             cursor: pointer;
         }
 
+        .orders-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .orders-search:focus-within {
+            border-color: #f59e0b;
+        }
+
+        .orders-search input {
+            width: 210px;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .orders-search-clear {
+            display: none;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 0 2px;
+        }
+
+        .orders-search-clear:hover {
+            color: #0f172a;
+        }
+
         /* Order Card */
 
         .orders-list {
@@ -818,6 +858,32 @@
                 </div>
 
 
+                <div class="orders-search">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="search"
+                        id="orderSearchInput"
+                        placeholder="Search by order no. or product…"
+                        aria-label="Search orders by order number or product name"
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        class="orders-search-clear"
+                        id="orderSearchClear"
+                        aria-label="Clear search"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+                </div>
+
+
                 <div class="orders-filter">
 
                     <label for="orderStatusFilter">
@@ -1102,6 +1168,43 @@
 
                 }
 
+                const searchInput =
+                    document.getElementById(
+                        "orderSearchInput"
+                    );
+
+                if (searchInput) {
+
+                    /* Search filters the orders already loaded on
+                       this page (no refetch): GET /api/orders has
+                       no search param, so signed-in and signed-out
+                       orders alike are matched client-side. */
+                    searchInput.addEventListener(
+                        "input",
+                        renderLoadedOrders
+                    );
+
+                }
+
+                const searchClear =
+                    document.getElementById(
+                        "orderSearchClear"
+                    );
+
+                if (searchClear && searchInput) {
+
+                    searchClear.addEventListener(
+                        "click",
+                        function () {
+
+                            searchInput.value = "";
+                            renderLoadedOrders();
+
+                        }
+                    );
+
+                }
+
                 loadOrders();
 
             }
@@ -1241,6 +1344,116 @@
         }
 
 
+        /* Current search text, trimmed. */
+        function getOrderSearchQuery() {
+
+            const searchInput =
+                document.getElementById(
+                    "orderSearchInput"
+                );
+
+            return searchInput
+                ? searchInput.value.trim()
+                : "";
+
+        }
+
+
+        /* Product names for one order, from the catalog (the same
+           `products` list createOrderCard renders from). Backend
+           orders carry product ids in their items; a missing
+           catalog entry simply contributes no name. */
+        function orderProductNames(order) {
+
+            const items =
+                Array.isArray(order && order.items)
+                    ? order.items
+                    : [];
+
+            return items.map(function (item) {
+
+                if (item && item.name) {
+                    return String(item.name);
+                }
+
+                if (typeof products !== "undefined") {
+
+                    const product =
+                        products.find(
+                            function (p) {
+
+                                return p.id ===
+                                    Number(item.id);
+
+                            }
+                        );
+
+                    if (product) {
+                        return String(product.name);
+                    }
+
+                }
+
+                return "";
+
+            });
+
+        }
+
+
+        /* One order matches the search when the query appears in its
+           order number ("#123" and "123" both match order 123) or
+           in any of its product names. Case-insensitive. */
+        function orderMatchesSearch(order, query) {
+
+            const needle =
+                String(query || "")
+                    .toLowerCase()
+                    .trim()
+                    .replace(/^#/, "");
+
+            if (!needle) {
+                return true;
+            }
+
+            if (
+                String(order && order.id || "")
+                    .toLowerCase()
+                    .includes(needle)
+            ) {
+                return true;
+            }
+
+            return orderProductNames(order).some(
+                function (name) {
+                    return name
+                        .toLowerCase()
+                        .includes(needle);
+                }
+            );
+
+        }
+
+
+        /* Filter the list on this page by the search box. Composes
+           with the status filter: callers apply both. */
+        function filterOrdersBySearch(orders) {
+
+            const query = getOrderSearchQuery();
+
+            if (!query) {
+                return orders;
+            }
+
+            return (orders || []).filter(
+                function (order) {
+                    return orderMatchesSearch(order, query);
+                }
+            );
+
+        }
+
+
         /* =========================================
            LOAD ORDERS
         ========================================== */
@@ -1308,9 +1521,36 @@
             }
 
 
+            renderLoadedOrders();
+
+        }
+
+
+        /* Render the orders already loaded on this page
+           (backendOrders when signed in, device-only orders
+           otherwise), applying the status filter AND the search
+           box together. Called after a fetch and on every search
+           keystroke, so typing never refetches from the server. */
+        function renderLoadedOrders() {
+
+            const searchClear =
+                document.getElementById(
+                    "orderSearchClear"
+                );
+
+            if (searchClear) {
+
+                searchClear.style.display =
+                    getOrderSearchQuery() ? "block" : "none";
+
+            }
+
+
             const orders =
-                filterOrdersByStatus(
-                    backendOrders || getOrders()
+                filterOrdersBySearch(
+                    filterOrdersByStatus(
+                        backendOrders || getOrders()
+                    )
                 );
 
 
@@ -1376,7 +1616,28 @@
                     const message =
                         emptyOrders.querySelector("p");
 
-                    if (activeStatus && heading && message) {
+                    const searchQuery = getOrderSearchQuery();
+
+                    if (searchQuery && heading && message) {
+
+                        heading.textContent =
+                            "No orders matching \"" +
+                            searchQuery +
+                            "\"";
+
+                        message.textContent =
+                            "No orders" +
+                            (
+                                activeStatus
+                                    ? " with status " +
+                                        orderStatusLabel(activeStatus).toLowerCase()
+                                    : ""
+                            ) +
+                            " match \"" +
+                            searchQuery +
+                            "\". Try a different order number or product name.";
+
+                    } else if (activeStatus && heading && message) {
 
                         heading.textContent =
                             "No " +
