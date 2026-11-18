@@ -7,13 +7,17 @@
  *
  * API_BASE detection:
  *   - local dev (backend running): http://localhost:8000
- *   - deployed / same origin:      '' (relative URLs)
+ *   - GitHub Pages:                 PythonAnywhere backend
+ *   - PythonAnywhere:               '' (relative URLs)
  */
 
-// Base URL: localhost:8000 in dev, same-origin when deployed.
+// Base URL: local, GitHub Pages backend, or same-origin.
 const API_BASE = (() => {
   const h = window.location.hostname;
   if (h === "localhost" || h === "127.0.0.1") return "http://localhost:8000";
+  if (h === "siddartha-jamandla.github.io") {
+    return "https://siddarthashopease.pythonanywhere.com";
+  }
   return "";
 })();
 

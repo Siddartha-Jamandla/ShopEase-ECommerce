@@ -82,8 +82,12 @@ is loaded) toggles them.
 
 - Page served from `http://localhost:8000/` (via `python3 backend/app.py`) →
   API calls go to `http://localhost:8000/api/...`.
-- Page on any other host (e.g. GitHub Pages) → relative `/api/...` URLs;
-  when those fail, `ShopEaseAPI` silently uses the `localStorage` fallback.
+- GitHub Pages (`siddartha-jamandla.github.io`) → API calls go to the
+  PythonAnywhere backend at `https://siddarthashopease.pythonanywhere.com/api/...`.
+- Page served by PythonAnywhere → relative `/api/...` URLs stay on the same
+  origin.
+- Other hosts use relative `/api/...` URLs; if the backend is unreachable,
+  `ShopEaseAPI` silently uses the `localStorage` fallback.
 
 ## What was deliberately NOT changed
 
