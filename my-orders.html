@@ -2051,6 +2051,19 @@
                             </button>
 
 
+                            <button
+                                type="button"
+                                class="order-action-button"
+                                onclick="buyAgain('${order.id}')"
+                            >
+
+                                <i class="fa-solid fa-rotate-right"></i>
+
+                                Buy Again
+
+                            </button>
+
+
                             ${order._backend && order.status === "placed"
                                 ? `
                             <button
@@ -2358,6 +2371,169 @@
 
             window.location.href =
                 "order-success.html";
+
+        }
+
+
+        /* =========================================
+           BUY AGAIN
+        ========================================== */
+
+        function buyAgain(orderId) {
+
+            const orders =
+                backendOrders || getOrders();
+
+
+            const order =
+                orders.find(function (item) {
+
+                    return String(item.id) ===
+                        String(orderId);
+
+                });
+
+
+            if (!order) {
+
+                showOrderToast(
+                    "Order not found."
+                );
+
+                return;
+
+            }
+
+
+            const items =
+                Array.isArray(order.items)
+                    ? order.items
+                    : [];
+
+
+            if (items.length === 0) {
+
+                showOrderToast(
+                    "This order has no items to buy again."
+                );
+
+                return;
+
+            }
+
+
+            /* Re-add every item that is still buyable. Items that no
+               longer exist, or are out of stock, are skipped and counted
+               so the shopper is told what was left out. Quantities are
+               clamped to the stock on hand. */
+            let cart =
+                JSON.parse(
+                    localStorage.getItem("cart")
+                ) || [];
+
+            let added = 0;
+            let skipped = 0;
+
+            items.forEach(function (item) {
+
+                const productId =
+                    Number(item.id != null ? item.id : item.product_id);
+
+                const product =
+                    products.find(function (p) {
+                        return Number(p.id) === productId;
+                    });
+
+                if (!product) {
+                    skipped += 1;
+                    return;
+                }
+
+                const stock = Number(product.stock);
+                const inStock =
+                    Number.isNaN(stock) || stock > 0;
+
+                if (!inStock) {
+                    skipped += 1;
+                    return;
+                }
+
+                let quantity =
+                    Number(item.quantity || 1);
+
+                if (!Number.isNaN(stock)) {
+                    quantity = Math.min(quantity, stock);
+                }
+
+                const existing =
+                    cart.find(function (entry) {
+                        return Number(entry.id) === productId;
+                    });
+
+                if (existing) {
+
+                    const merged =
+                        (Number(existing.quantity) || 0) + quantity;
+
+                    existing.quantity =
+                        Number.isNaN(stock)
+                            ? merged
+                            : Math.min(merged, stock);
+
+                } else {
+
+                    cart.push({
+                        id: productId,
+                        quantity: quantity,
+                        size: "M",
+                        color: "Black"
+                    });
+
+                }
+
+                added += 1;
+
+            });
+
+
+            if (added === 0) {
+
+                showOrderToast(
+                    "Nothing to buy again - every item in this order " +
+                    "is out of stock or no longer available."
+                );
+
+                return;
+
+            }
+
+
+            localStorage.setItem(
+                "cart",
+                JSON.stringify(cart)
+            );
+
+
+            if (typeof updateCartCount === "function") {
+                updateCartCount();
+            }
+
+
+            showOrderToast(
+                "Added " + added +
+                (added === 1 ? " item" : " items") +
+                " to your cart" +
+                (skipped > 0
+                    ? " (" + skipped + " unavailable skipped)"
+                    : "") +
+                "."
+            );
+
+
+            /* Give the toast a moment to be read, then open the cart. */
+            setTimeout(function () {
+                window.location.href = "cart.html";
+            }, 900);
 
         }
 

@@ -248,6 +248,10 @@ backend, add one script tag per page as described in **[INTEGRATION.md](INTEGRAT
   (with the persisted shipping snapshot, promo code and discount per order)
   — device-only localStorage orders are the offline fallback. Placed orders
   get a Cancel button (`POST /api/orders/:id/cancel`, stock restored).
+  Every order card also has a Buy Again button: it re-adds the
+  order's still-buyable items to the cart (skips missing / out-of-stock
+  items, clamps quantities to stock on hand, merges with the existing
+  cart), toasts what was added or skipped, then opens `cart.html`.
   A Status filter (All / Placed / Shipped / Delivered / Cancelled) filters signed-in orders server-side via `GET /api/orders?status=` and device-only orders client-side the same way.
 - Product cards carry a Compare button (`js/products.js` →
   `CompareTool.toggle`, `js/compare.js`): every page that loads

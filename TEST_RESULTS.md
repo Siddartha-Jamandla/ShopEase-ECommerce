@@ -365,3 +365,35 @@ again, min/max filtering and Clear-filters reset all work), plus live
 API checks: range 1000–2000 returns only in-range products, min > max
 / negative / non-numeric are 400s, and the range composes with
 category + sort.
+
+## Daily upgrade — 2026-11-18 (IST)
+
+### 3. Buy Again from My Orders (frontend)
+
+`my-orders.html`: a "Buy Again" button on each order card and a
+`buyAgain()` that re-adds the order's still-buyable items to the cart
+(skips missing / out-of-stock items, clamps quantities to stock on hand,
+merges with the existing cart), toasts what was added/skipped, then opens
+`cart.html`. Unknown stock (offline fallback catalog) means buyable,
+unclamped.
+
+Rebase note: the 2026-11-17 staging was built on a pre-13-Nov base, so
+only the button and the function were transplanted onto the live head
+(`db0b6a75`) — the live order-search + status-filter CSS/JS, status
+timeline, Cancel button and saved-address handling are untouched. One
+adaptation: the staged lookup used `getOrders()` (device-only orders),
+but live orders can also come from the backend, so the rebased lookup
+follows the live pattern used by `viewOrder`/`printOrder`:
+`backendOrders || getOrders()` (backend items are normalised so `id` is
+the product id, which `buyAgain()` already accepts).
+
+Test: `test_shopease_2026-11-18_item3.js` — Node VM harness, real live
+`js/products.js` + the rebased `my-orders.html` inline script, stub
+DOM/localStorage. **8/8 scenarios passed**, including: 6 local orders
+render with a Buy Again button calling `buyAgain('501')`; all in stock
+→ both items in the cart + redirect to `cart.html`; merge with an
+existing cart (1 → 3); out-of-stock item skipped with a "1 unavailable
+skipped" toast; all out of stock / unknown product → nothing added, no
+redirect; quantity clamped to stock on hand (99 wanted, 5 in stock → 5);
+empty order and unknown order id toast correctly; unknown stock means
+buyable, unclamped.
