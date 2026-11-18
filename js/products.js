@@ -5,6 +5,17 @@
    the API is unreachable.
 ========================================================= */
 
+function getShopEaseApiBase(hostname) {
+    const host = hostname || window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+        return "http://localhost:8000";
+    }
+    if (host === "siddartha-jamandla.github.io") {
+        return "https://siddarthashopease.pythonanywhere.com";
+    }
+    return "";
+}
+
 const productsFallback = [
 
     // =====================================================
@@ -969,7 +980,7 @@ window.productsReady = (async function loadLiveCatalog() {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 6000);
         try {
-            const res = await fetch("/api/products?per_page=100", {
+            const res = await fetch(getShopEaseApiBase() + "/api/products?per_page=100", {
                 signal: controller.signal
             });
             if (!res.ok) throw new Error("API status " + res.status);

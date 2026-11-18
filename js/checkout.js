@@ -695,11 +695,7 @@ function loadSavedAddresses() {
     }
 
 
-    const apiBase =
-        (window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1")
-            ? "http://localhost:8000"
-            : "";
+    const apiBase = getShopEaseApiBase();
 
 
     fetch(apiBase + "/api/addresses", {
@@ -943,11 +939,7 @@ async function placeOrder() {
 
         try {
 
-            const apiBase =
-                (window.location.hostname === "localhost" ||
-                    window.location.hostname === "127.0.0.1")
-                    ? "http://localhost:8000"
-                    : "";
+            const apiBase = getShopEaseApiBase();
 
 
             const checkoutBody = { shipping, items };
