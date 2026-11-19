@@ -330,7 +330,7 @@ function updateCheckoutDisplay(
    COUPON
 ========================================= */
 
-function applyCoupon() {
+async function applyCoupon() {
 
     const input =
         document.getElementById(
@@ -367,24 +367,101 @@ function applyCoupon() {
     }
 
 
-    /* No hardcoded demo codes: promo codes live on the server (an admin
-       creates them at /api/admin/promo-codes). The code is remembered
-       here and validated by POST /api/checkout when the order is placed
-       — an unknown, expired or fully-used code, or a subtotal below its
-       minimum, is rejected there and the order is not placed. Any local
-       preview discount is cleared so the summary never shows money the
-       server has not confirmed. */
-    checkoutPromoCode = coupon;
+    /* Coupons are validated against the backend (POST
+       /api/promo-codes/validate): the server checks the code, its
+       expiry, its usage limit and the minimum order - validating never
+       consumes a use; only a completed checkout does. Signed in only:
+       the backend checkout that applies the code needs an account. */
 
-    checkoutDiscountValue = 0;
+    const token =
+        localStorage.getItem("shopease_token");
 
-    calculateCheckoutTotal();
+
+    if (!token) {
+
+        message.textContent =
+            "Sign in to use a coupon code.";
+
+        message.className =
+            "coupon-message coupon-error";
+
+        return;
+
+    }
+
+
+    const apiBase = getShopEaseApiBase();
+
+
+    let res;
+    let payload;
+
+    try {
+
+        res = await fetch(apiBase + "/api/promo-codes/validate", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+
+            body: JSON.stringify({
+                code: coupon,
+                subtotal: checkoutSubtotalValue
+            })
+
+        });
+
+        payload = await res.json();
+
+    } catch (e) {
+
+        message.textContent =
+            "Could not check the coupon code right now - please try again.";
+
+        message.className =
+            "coupon-message coupon-error";
+
+        return;
+
+    }
+
+
+    if (!res.ok || payload.ok === false) {
+
+        message.textContent =
+            (payload && payload.error) ||
+                "Invalid coupon code.";
+
+        message.className =
+            "coupon-message coupon-error";
+
+        return;
+
+    }
+
+
+    checkoutDiscountValue =
+        Number(payload.data.discount_amount) || 0;
+
+    checkoutPromoCode =
+        payload.data.code;
+
 
     message.textContent =
-        "Code " + coupon + " saved — it will be verified when you place the order.";
+        "Coupon applied! You saved " +
+        "₹" + checkoutDiscountValue.toLocaleString("en-IN") +
+        " (" + payload.data.discount_percent + "% off).";
 
     message.className =
         "coupon-message coupon-success";
+
+
+    input.disabled = true;
+
+    calculateCheckoutTotal();
 
 }
 

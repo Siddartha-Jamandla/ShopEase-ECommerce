@@ -305,6 +305,18 @@ PRODUCTS = [
 ]
 
 
+# Seeded promo codes, so the checkout coupon box works out of the box.
+# (code, discount_percent, min_order_amount_inr, expires_at, max_uses)
+# expires_at uses the same end-of-day ISO format the admin API stores.
+PROMO_CODES = [
+    ("WELCOME10", 10, 0, "2027-03-31T23:59:59Z", None),
+    ("FESTIVE15", 15, 999, "2027-01-31T23:59:59Z", None),
+    ("MEGA20", 20, 1999, "2027-02-28T23:59:59Z", None),
+]
+
+
+
+
 def main():
     fresh = not os.path.exists(DB_PATH)
     conn = sqlite3.connect(DB_PATH)
@@ -337,10 +349,25 @@ def main():
                 old_price=excluded.old_price, rating=excluded.rating,
                 reviews_count=excluded.reviews_count, badge=excluded.badge
         """, prod)
+    # Promo codes: upsert the offer, but never reset the uses counter on
+    # re-seed — a code that shoppers already used keeps its count.
+    for promo in PROMO_CODES:
+        cur.execute("""
+            INSERT INTO promo_codes
+                (code, discount_percent, min_order_amount, expires_at, max_uses)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(code) DO UPDATE SET
+                discount_percent=excluded.discount_percent,
+                min_order_amount=excluded.min_order_amount,
+                expires_at=excluded.expires_at,
+                max_uses=excluded.max_uses
+        """, promo)
     conn.commit()
     n = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+    p = conn.execute("SELECT COUNT(*) FROM promo_codes").fetchone()[0]
     conn.close()
     print(f"[seed] upserted {len(PRODUCTS)} products (total in db: {n})")
+    print(f"[seed] upserted {len(PROMO_CODES)} promo codes (total in db: {p})")
 
 
 if __name__ == "__main__":

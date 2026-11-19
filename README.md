@@ -116,6 +116,7 @@ Auth: send `Authorization: Bearer <token>` (token returned by register/login).
 | POST   | `/api/admin/promo-codes` | admin key (`?key=` or `X-Admin-Key`) | Create a promo code: `{code}` (3–30 chars, letters/digits/hyphen/underscore, stored upper-case), `{discount_percent}` (1–90), `{min_order_amount?}` (₹ subtotal, default 0), `{expires_at?}` (`YYYY-MM-DD` = end of that day, or full ISO timestamp; null = never expires), `{max_uses?}` (null = unlimited). 400 bad fields, 409 when the code already exists |
 | GET    | `/api/admin/promo-codes` | admin key (`?key=` or `X-Admin-Key`) | List all promo codes, newest first (each with `uses` so far) |
 | DELETE | `/api/admin/promo-codes/:id` | admin key (`?key=` or `X-Admin-Key`) | Deactivate (delete) a promo code by id. 404 if missing; deleted codes can no longer be used at checkout |
+| POST   | `/api/promo-codes/validate` | user | Check a promo code against a cart subtotal *without* using it up: `{code, subtotal}` → `{code, discount_percent, min_order_amount, subtotal, discount_amount}`. 400 when the code is unknown, expired, fully used, or the subtotal is below its minimum. Validating never increments `uses` — only a completed checkout does, so shoppers can check a code freely before ordering |
 | GET    | `/api/admin/orders/:id` | admin key (`?key=` or `X-Admin-Key`) | One order in full: items (with product name/image), customer `{id, name, email}`, shipping snapshot, totals and status timeline. 404 if missing |
 | GET    | `/api/admin/customers` | admin key (`?key=` or `X-Admin-Key`) | Every customer with `order_count`, `total_spent` (non-cancelled orders) and `last_order_at`, highest spend first. Filter: `?q=` (name/email). Pagination: `?page=&per_page=` (capped at 50) |
 | GET    | `/api/admin/revenue` | admin key (`?key=` or `X-Admin-Key`) | Revenue breakdown: `by_day` (each of the last N days, zero-filled), `by_category`, plus `today` and `week` totals. `?days=` (default 30, 1–90). Non-cancelled orders only |
@@ -201,7 +202,10 @@ stock_alerts(id, product_id → products, email, created_at, UNIQUE(product_id, 
 Seed data: `python3 backend/seed.py` upserts the 70-product catalog
 (men, women, shoes, accessories, electronics, appliances, home, beauty,
 fitness — INR prices, real local photos). Safe to re-run: products are
-matched by id and updated in place.
+matched by id and updated in place. It also seeds three promo codes
+(`WELCOME10` 10% off any order, `FESTIVE15` 15% off orders ₹999+,
+`MEGA20` 20% off orders ₹1,999+); re-seeding refreshes the offer but
+never resets a code's `uses` count.
 
 ---
 

@@ -368,6 +368,46 @@ category + sort.
 
 ## Daily upgrade — 2026-11-18 (IST)
 
+### 1. Coupon validation wired end-to-end (backend + checkout)
+
+`POST /api/promo-codes/validate` (new, auth required) checks a code against
+a cart subtotal without consuming a use; `js/checkout.js` Apply now calls
+it for a pre-check before the order is placed (the checkout page already
+sent `promo_code` to `POST /api/checkout`, which validates server-side —
+now shoppers see the confirmed discount, or the exact rejection reason,
+up front instead of only at order time). `backend/seed.py` seeds
+`WELCOME10` (10%, no minimum), `FESTIVE15` (15%, min ₹999) and `MEGA20`
+(20%, min ₹1,999); re-seeding refreshes the offer but never resets `uses`.
+
+Test: `test_shopease_2026-11-18_item1.py` — rebased backend on port 8131,
+fresh DB seeded (70 products, 3 promo codes). **39/39 passed**, including:
+validate returns 200 + discount 89.9 for `WELCOME10` on ₹899 and does not
+consume a use; case-insensitive codes; `FESTIVE15` 400 below ₹999 and 225
+off on ₹1,500; `MEGA20` 399.8 off on ₹1,999; unknown/missing code and
+non-numeric subtotal → 400; no auth → 401; expired code → 400; `max_uses=1`
+code validates, then a checkout consumes its one use and it stops
+validating; checkout with `WELCOME10` → 201, order stores `promo_code` +
+`discount_amount` 89.9, total 809.1, product 1 stock 47 → 46; checkout with
+a bad code → 400 and no order; checkout without a promo still works;
+products/search/reviews/orders/admin promo-codes endpoints still healthy;
+re-seed keeps `WELCOME10` uses at 1.
+
+Rebase note: the 2026-11-17 staging was built on a pre-13-Nov base, so
+this item was re-transplanted onto the live head (`85ac5560`, 2026-11-19) — the checkout Apply pre-check now uses the live `getShopEaseApiBase()` helper instead of the old inline localhost pattern, so validation reaches the PythonAnywhere backend from GitHub Pages too. Only the
+validate route + method, the promo-code seed data, the checkout Apply
+pre-check, the coupon-hint paragraph and its style, and the README /
+TEST_RESULTS entries were carried over. Live features that a wholesale
+push would have reverted are preserved: notify-me endpoint + `stock_alerts`
+table, product suggest / related endpoints, admin low-stock endpoint,
+price-range filter, order search + status filter, saved addresses, and
+`compare.js`. (The staged copy's footer "Contact Us" column is not on
+live — verified against the live file — so it was not carried over.)
+
+JS pre-check: `test_shopease_2026-11-19_item1_js.js` — Node VM harness, real live `getShopEaseApiBase()` from `js/products.js` + the rebased `applyCoupon()` — **8/8 passed**: on `siddartha-jamandla.github.io` the validate call goes to `https://siddarthashopease.pythonanywhere.com/api/promo-codes/validate`; on localhost to `http://localhost:8000`; no token shows "Sign in to use a coupon code." with no fetch; a rejected code shows the server error and stores nothing. Backend re-run on the 2026-11-19 tree: `test_shopease_2026-11-19_item1.py` **39/39 passed**.
+Deploy note: the live site needs one `python3 backend/seed.py` run (or a
+fresh deploy) before `WELCOME10` / `FESTIVE15` / `MEGA20` exist in the
+production database.
+
 ### 3. Buy Again from My Orders (frontend)
 
 `my-orders.html`: a "Buy Again" button on each order card and a

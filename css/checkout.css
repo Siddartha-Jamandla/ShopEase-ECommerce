@@ -331,6 +331,12 @@
     color: #dc3545;
 }
 
+.coupon-hint {
+    font-size: 12px;
+    color: #6b7280;
+    margin: -8px 0 15px;
+}
+
 
 /* =========================================
    SUMMARY ROWS

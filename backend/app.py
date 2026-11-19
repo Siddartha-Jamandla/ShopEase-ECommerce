@@ -411,6 +411,9 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             if path == "/api/checkout" and method == "POST":
                 return self._api_checkout()
 
+            if path == "/api/promo-codes/validate" and method == "POST":
+                return self._api_promo_validate()
+
             if path == "/api/wishlist":
                 if method == "GET":
                     return self._api_wishlist_list()
@@ -2013,6 +2016,45 @@ class ShopEaseHandler(BaseHTTPRequestHandler):
             rows = get_db().execute(
                 "SELECT * FROM promo_codes ORDER BY id DESC").fetchall()
         self._ok([row_to_dict(r) for r in rows])
+
+    def _api_promo_validate(self):
+        """Validate a promo code against a cart subtotal WITHOUT consuming
+        a use: only a completed checkout increments `uses` (see
+        _apply_promo_code), so merely checking a code never burns it.
+        401 when not signed in; 400 when the code is unknown, expired,
+        fully used, or the subtotal is below its minimum."""
+        self._require_auth()
+        body = self._read_json()
+        code = body.get("code")
+        if not isinstance(code, str) or not code.strip():
+            raise ApiError(400, "Field 'code' is required")
+        try:
+            subtotal = float(body.get("subtotal", 0))
+        except (TypeError, ValueError):
+            raise ApiError(400, "Field 'subtotal' must be a number")
+        if subtotal < 0:
+            raise ApiError(400, "Field 'subtotal' must be >= 0")
+        with _db_lock:
+            conn = get_db()
+            row = conn.execute("SELECT * FROM promo_codes WHERE code = ?",
+                               (code.strip().upper(),)).fetchone()
+            conn.close()
+        if row is None:
+            raise ApiError(400, f"Promo code '{code}' is not valid")
+        if row["expires_at"] and row["expires_at"] < utcnow():
+            raise ApiError(400, f"Promo code '{row['code']}' has expired")
+        if row["max_uses"] is not None and row["uses"] >= row["max_uses"]:
+            raise ApiError(400,
+                           f"Promo code '{row['code']}' has reached its usage limit")
+        if subtotal < row["min_order_amount"]:
+            raise ApiError(400, "Promo code requires a minimum order of "
+                                f"₹{row['min_order_amount']:g}")
+        discount = round(subtotal * row["discount_percent"] / 100, 2)
+        self._ok({"code": row["code"],
+                  "discount_percent": row["discount_percent"],
+                  "min_order_amount": row["min_order_amount"],
+                  "subtotal": round(subtotal, 2),
+                  "discount_amount": discount})
 
     def _apply_promo_code(self, conn, code, subtotal):
         """Validate a promo code against an order subtotal and return
