@@ -408,6 +408,37 @@ Deploy note: the live site needs one `python3 backend/seed.py` run (or a
 fresh deploy) before `WELCOME10` / `FESTIVE15` / `MEGA20` exist in the
 production database.
 
+### 2. Recently viewed strip on the home page
+
+`index.html` now renders the live "Recently viewed" strip (the same
+section markup shop.html uses: `section.related-products` +
+`#recentlyViewedGrid`, filled by the existing `js/recently-viewed.js`
+from localStorage, hidden when the list is empty), placed after Featured
+Products and before the promo banner, with the script included after
+`js/main.js` in the same order as shop.html. The strip's
+`.related-products` styles were copied verbatim from live
+`css/product.css` into `css/style.css` — index.html never loaded
+product.css, and neither does shop.html, so the strip was unstyled on
+every page that renders it; it is now styled everywhere. No backend
+change; no new API — the live `RecentlyViewed` object
+(`record`/`render`, max 8, deduped, most recent first) is reused as-is.
+
+Note: the 2026-11-17 staging for this item was a conflicting duplicate
+implementation (its own storage key, its own render function and a Clear
+button) — it was not pushed. Only the home-page strip, using the live
+implementation, is in this item.
+
+Test: `test_shopease_2026-11-18_item2.js` — Node VM harness, real live
+`js/products.js` + `js/recently-viewed.js`, stub DOM/localStorage.
+**16/16 passed**, including: one `#recently-viewed-section` with shop
+markup and the live grid id; script after `main.js`; strip after Featured
+Products and before the promo banner; `.related-products` rules in
+`style.css`; empty list hides the section and leaves the grid empty;
+seeded 3 products render as cards most-recent-first with INR prices;
+`record()` moves a re-viewed product to the front without duplicating
+and caps the list at 8; corrupt stored value hides the section; the
+product in `?id=` is excluded from the strip.
+
 ### 3. Buy Again from My Orders (frontend)
 
 `my-orders.html`: a "Buy Again" button on each order card and a

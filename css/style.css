@@ -1020,3 +1020,26 @@ img {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
+
+/* =========================================
+   RELATED PRODUCTS
+========================================= */
+
+.related-products {
+    padding: 70px 0;
+    background: #f8f9fb;
+}
+
+.related-products-header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.related-products-header h2 {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.related-products-header p {
+    color: #777;
+}
